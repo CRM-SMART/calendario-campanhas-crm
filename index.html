@@ -21,6 +21,7 @@ input:focus,select:focus{border-color:#aaa}
 .sync-dot.ok{background:#1D9E75}
 .sync-dot.error{background:#E24B4A}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-bottom:.75rem;padding:10px 14px;background:#f0f0ee;border-radius:10px;border:1px solid #e0e0dc}
 .filter-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
 .filter-bar label{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
@@ -45,7 +46,8 @@ input:focus,select:focus{border-color:#aaa}
 .day-num{font-size:12px;font-weight:500;color:#888;margin-bottom:3px;flex-shrink:0}
 .day-cell.today .day-num{color:#1D9E75;font-weight:700}
 .events-area{flex:1;overflow:hidden}
-.event-chip{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;display:flex;align-items:center;gap:3px;overflow:hidden;transition:opacity .15s}
+.event-chip{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;display:flex;align-items:center;gap:3px;overflow:hidden;transition:opacity .15s;cursor:pointer}
+.event-chip:hover{filter:brightness(.96)}
 .event-chip.dimmed{opacity:.12}
 .chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .chip-meta{font-size:9px;opacity:.6;white-space:nowrap;flex-shrink:0;display:flex;gap:3px;align-items:center}
@@ -53,7 +55,8 @@ input:focus,select:focus{border-color:#aaa}
 .chip-del{display:none;flex-shrink:0;font-size:9px;cursor:pointer;opacity:.7;margin-left:2px;line-height:1}
 .event-chip:hover .chip-del{display:inline}
 .campaigns-area{flex-shrink:0;margin-top:3px;display:flex;flex-direction:column;gap:2px}
-.camp-bar{font-size:9px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;cursor:default;position:relative;min-height:15px;line-height:15px;color:#fff}
+.camp-bar{font-size:9px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;cursor:pointer;position:relative;min-height:15px;line-height:15px;color:#fff}
+.camp-bar:hover{filter:brightness(.92)}
 .camp-bar .bar-del{display:none;position:absolute;right:3px;top:0;font-size:9px;cursor:pointer;opacity:.9;line-height:15px}
 .camp-bar:hover .bar-del{display:inline}
 .camp-bar.start{border-radius:6px 0 0 6px}
@@ -83,14 +86,17 @@ input:focus,select:focus{border-color:#aaa}
 .dot-sm{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .theme-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
 .theme-tag{font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid transparent;font-weight:500}
-.camp-list-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0ee}
+.camp-list-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0ee;cursor:pointer}
+.camp-list-row:hover{background:#fafafa}
 .sep{width:1px;background:#ddd;align-self:stretch;flex-shrink:0}
 .aud-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .aud-pill{font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .1s}
-.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(249,249,247,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:12px}
+.time-selects{display:flex;gap:6px}
+.time-selects select{flex:1}
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(249,249,247,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:12px}
 .loading-overlay p{font-size:14px;color:#888}
 .spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#1D9E75;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.edit-badge{font-size:10px;color:#888;margin-bottom:8px;padding:4px 8px;background:#f5f5f3;border-radius:6px;display:inline-block}
 </style>
 </head>
 <body>
@@ -136,6 +142,7 @@ input:focus,select:focus{border-color:#aaa}
   <div id="cal-grid" class="cal-grid"></div>
 </div>
 
+<!-- MODAL DISPARO -->
 <div id="modal-bg" class="modal-bg" style="display:none">
   <div class="modal">
     <div class="tab-row">
@@ -144,13 +151,21 @@ input:focus,select:focus{border-color:#aaa}
       <div class="tab" id="tab-channels" onclick="switchTab('channels')">Canais</div>
       <div class="tab" id="tab-audiences" onclick="switchTab('audiences')">Públicos</div>
     </div>
+
     <div id="pane-event">
       <h3 id="modal-title">Adicionar disparo</h3>
+      <div id="edit-badge" class="edit-badge" style="display:none">✏️ Editando disparo existente</div>
       <label>Tema</label>
       <div id="theme-suggestions" class="theme-tags"></div>
       <input id="ev-name" type="text" placeholder="Ex: Promoção, Alerta, Feriado..."/>
       <label>Horário</label>
-      <input id="ev-time" type="time" value="09:00"/>
+      <div class="time-selects">
+        <select id="ev-hour"></select>
+        <select id="ev-min">
+          <option value="00">:00</option>
+          <option value="30">:30</option>
+        </select>
+      </div>
       <label>Canal</label>
       <select id="ev-channel"></select>
       <label>Público</label>
@@ -162,8 +177,10 @@ input:focus,select:focus{border-color:#aaa}
         <button id="modal-save">Salvar</button>
       </div>
     </div>
+
     <div id="pane-campaign" style="display:none">
-      <h3>Campanha / Período</h3>
+      <h3 id="camp-pane-title">Campanha / Período</h3>
+      <div id="edit-camp-badge" class="edit-badge" style="display:none">✏️ Editando campanha existente</div>
       <div id="camp-list" style="margin-bottom:12px"></div>
       <label>Nome da campanha</label>
       <input id="camp-name" type="text" placeholder="Ex: Black Friday, Verão 2026..."/>
@@ -178,6 +195,7 @@ input:focus,select:focus{border-color:#aaa}
         <button id="camp-add">Adicionar campanha</button>
       </div>
     </div>
+
     <div id="pane-channels" style="display:none">
       <h3>Gerenciar canais</h3>
       <div id="channel-list" style="margin-bottom:12px"></div>
@@ -190,6 +208,7 @@ input:focus,select:focus{border-color:#aaa}
         <button id="ch-add">Adicionar</button>
       </div>
     </div>
+
     <div id="pane-audiences" style="display:none">
       <h3>Gerenciar públicos</h3>
       <div id="audience-list" style="margin-bottom:12px"></div>
@@ -205,7 +224,6 @@ input:focus,select:focus{border-color:#aaa}
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -218,7 +236,6 @@ const firebaseConfig = {
   messagingSenderId: "1069676978590",
   appId: "1:1069676978590:web:c9a99be01b991df9f0b68f"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -261,12 +278,25 @@ const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ago
 let today=new Date();
 let cur={y:today.getFullYear(),m:today.getMonth()};
 let events={},channels=[],campaigns=[],audiences=[];
-let openCell=null,selColor='purple',selChColor='teal',selCampColor='coral',selAudColor='sky';
+let openCell=null;
+let selColor='purple',selChColor='teal',selCampColor='coral',selAudColor='sky';
 let selAudienceId='aud_todos';
 let filterCh=new Set(),filterTh=new Set(),filterAud=new Set();
 let isSaving=false;
+// edit state
+let editEvKey=null, editEvIdx=null;
+let editCampId=null;
 
-// Sync status
+// populate hour select 00-23
+const hourSel=document.getElementById('ev-hour');
+for(let h=0;h<24;h++){
+  const o=document.createElement('option');
+  o.value=String(h).padStart(2,'0');
+  o.textContent=String(h).padStart(2,'0')+'h';
+  hourSel.appendChild(o);
+}
+hourSel.value='09';
+
 function setSyncStatus(s){
   const dot=document.getElementById('sync-dot');
   const lbl=document.getElementById('sync-label');
@@ -276,9 +306,8 @@ function setSyncStatus(s){
   else{dot.className='sync-dot';lbl.textContent='Conectando...';}
 }
 
-// Firebase refs
-const calRef = doc(db,'calendario','data');
-const cfgRef = doc(db,'calendario','config');
+const calRef=doc(db,'calendario','data');
+const cfgRef=doc(db,'calendario','config');
 
 async function loadFromFirebase(){
   try{
@@ -295,30 +324,21 @@ async function loadFromFirebase(){
       await saveConfig();
     }
     setSyncStatus('ok');
-  }catch(e){
-    console.error(e);
-    setSyncStatus('error');
-  }
+  }catch(e){console.error(e);setSyncStatus('error');}
   document.getElementById('loading-overlay').style.display='none';
   renderCal();
 }
 
-// Real-time listener
 function startListener(){
   onSnapshot(calRef,(snap)=>{
-    if(snap.exists()&&!isSaving){
-      events=snap.data().events||{};
-      renderCal();
-      setSyncStatus('ok');
-    }
+    if(snap.exists()&&!isSaving){events=snap.data().events||{};renderCal();setSyncStatus('ok');}
   });
   onSnapshot(cfgRef,(snap)=>{
     if(snap.exists()&&!isSaving){
       channels=snap.data().channels||DEFAULT_CHANNELS;
       campaigns=snap.data().campaigns||[];
       audiences=snap.data().audiences||DEFAULT_AUDIENCES;
-      renderCal();
-      setSyncStatus('ok');
+      renderCal();setSyncStatus('ok');
     }
   });
 }
@@ -385,6 +405,7 @@ function isActive(ev){
 }
 
 function renderFilterBar(){
+  // canal
   const fc=document.getElementById('filter-channels');fc.innerHTML='';
   const ac=document.createElement('div');ac.className='fchip'+(filterCh.size===0?' active-all':'');ac.textContent='Todos';
   ac.addEventListener('click',()=>{filterCh.clear();renderFilterBar();renderCal();});fc.appendChild(ac);
@@ -396,6 +417,7 @@ function renderFilterBar(){
     chip.addEventListener('click',()=>{isOn?filterCh.delete(ch.id):filterCh.add(ch.id);renderFilterBar();renderCal();});
     fc.appendChild(chip);
   });
+  // público
   const fa=document.getElementById('filter-audiences');fa.innerHTML='';
   const aa=document.createElement('div');aa.className='fchip'+(filterAud.size===0?' active-all':'');aa.textContent='Todos';
   aa.addEventListener('click',()=>{filterAud.clear();renderFilterBar();renderCal();});fa.appendChild(aa);
@@ -407,6 +429,7 @@ function renderFilterBar(){
     chip.addEventListener('click',()=>{isOn?filterAud.delete(aud.id):filterAud.add(aud.id);renderFilterBar();renderCal();});
     fa.appendChild(chip);
   });
+  // tema
   const ft=document.getElementById('filter-themes');ft.innerHTML='';
   const themes=allThemes();
   if(!themes.length){ft.innerHTML='<span style="font-size:11px;color:#aaa">Nenhum tema ainda</span>';}
@@ -432,26 +455,49 @@ function renderFilterBar(){
 
 function renderCampList(){
   const el=document.getElementById('camp-list');el.innerHTML='';
-  if(!campaigns.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhuma campanha.</div>';return;}
+  if(!campaigns.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhuma campanha. Adicione abaixo.</div>';return;}
   campaigns.forEach(cp=>{
     const c=gc(cp.color);const row=document.createElement('div');row.className='camp-list-row';
-    row.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${c.dot};flex-shrink:0"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${cp.name}</span><span style="font-size:11px;color:#aaa;margin-right:8px">${cp.start} → ${cp.end}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px">✕</button>`;
-    row.querySelector('button').addEventListener('click',()=>{campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCampList();renderCal();});
+    row.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${c.dot};flex-shrink:0"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${cp.name}</span><span style="font-size:11px;color:#aaa;margin-right:4px">${cp.start}→${cp.end}</span><span style="font-size:11px;color:#888;margin-right:6px;cursor:pointer" title="Editar">✏️</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px" title="Remover">✕</button>`;
+    row.querySelector('span[title="Editar"]').addEventListener('click',e=>{e.stopPropagation();startEditCamp(cp.id);});
+    row.querySelector('button').addEventListener('click',e=>{e.stopPropagation();campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCampList();renderCal();});
     el.appendChild(row);
   });
 }
+
+function startEditCamp(id){
+  const cp=campaigns.find(x=>x.id===id);if(!cp)return;
+  editCampId=id;
+  document.getElementById('camp-name').value=cp.name;
+  document.getElementById('camp-start').value=cp.start;
+  document.getElementById('camp-end').value=cp.end;
+  selCampColor=cp.color;
+  buildGrid('camp-color-grid',selCampColor,id=>{selCampColor=id;});
+  document.getElementById('edit-camp-badge').style.display='inline-block';
+  document.getElementById('camp-add').textContent='Salvar alterações';
+}
+
 document.getElementById('camp-add').addEventListener('click',()=>{
   const name=document.getElementById('camp-name').value.trim();
   const start=document.getElementById('camp-start').value;
   const end=document.getElementById('camp-end').value;
   if(!name||!start||!end||start>end)return;
-  campaigns.push({id:'cp_'+Date.now(),name,start,end,color:selCampColor});
+  if(editCampId){
+    const idx=campaigns.findIndex(x=>x.id===editCampId);
+    if(idx>-1) campaigns[idx]={...campaigns[idx],name,start,end,color:selCampColor};
+    editCampId=null;
+    document.getElementById('edit-camp-badge').style.display='none';
+    document.getElementById('camp-add').textContent='Adicionar campanha';
+  } else {
+    campaigns.push({id:'cp_'+Date.now(),name,start,end,color:selCampColor});
+  }
   document.getElementById('camp-name').value='';
   saveConfig();renderCampList();renderCal();
 });
 
 function renderChList(){
   const el=document.getElementById('channel-list');el.innerHTML='';
+  if(!channels.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhum canal.</div>';return;}
   channels.forEach(ch=>{
     const c=gc(ch.color);const row=document.createElement('div');row.className='list-row';
     row.innerHTML=`<div class="dot-sm" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${ch.name}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px">✕</button>`;
@@ -489,9 +535,9 @@ function switchTab(t){
     const tid=p==='event'?'tab-event':('tab-'+p);
     const el=document.getElementById(tid);if(el) el.className='tab'+(p===t?' active':'');
   });
-  if(t==='campaign')renderCampList();
-  if(t==='channels')renderChList();
-  if(t==='audiences')renderAudList();
+  if(t==='campaign'){renderCampList();}
+  if(t==='channels'){renderChList();}
+  if(t==='audiences'){renderAudList();}
 }
 
 function usedThemes(){const t={};Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)t[e.name]=e.color}));return t;}
@@ -510,7 +556,6 @@ function renderLegend(){
 function dkey(y,m,d){return y+'-'+(m+1)+'-'+d}
 function dateFromKey(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
 function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
-
 function campsForDay(k){
   const d=dateFromKey(k);
   return campaigns.filter(cp=>{const s=parseDate(cp.start),e=parseDate(cp.end);return d>=s&&d<=e;});
@@ -544,10 +589,16 @@ function renderCal(){
         const aud=audiences.find(x=>x.id===ev.audienceId);
         const dimmed=(filterCh.size>0||filterTh.size>0||filterAud.size>0)&&!isActive(ev);
         const chip=document.createElement('div');chip.className='event-chip'+(dimmed?' dimmed':'');
-        chip.dataset.k=k;chip.dataset.idx=i;chip.style.background=c.bg;chip.style.color=c.text;
+        chip.style.background=c.bg;chip.style.color=c.text;
         const audDot=aud?`<span class="chip-aud-dot" style="background:${gc(aud.color).dot}" title="${aud.name}"></span>`:'';
         const chName=ch?`<span>${ch.name}</span>`:'';
-        chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del">✕</span>`;
+        chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del" title="Remover">✕</span>`;
+        // editar ao clicar no chip (não no ✕)
+        chip.addEventListener('click',e=>{
+          if(e.target.classList.contains('chip-del')) return;
+          e.stopPropagation();
+          openEditEvent(k,i);
+        });
         chip.querySelector('.chip-del').addEventListener('click',e=>{
           e.stopPropagation();
           events[k].splice(i,1);
@@ -573,6 +624,14 @@ function renderCal(){
         const bar=document.createElement('div');bar.className=cls;bar.style.background=c.dot;
         const showText=isStart||isMonStart;
         bar.innerHTML=showText?`${cp.name}<span class="bar-del" data-id="${cp.id}">✕</span>`:`<span class="bar-del" data-id="${cp.id}">✕</span>`;
+        // editar campanha clicando na barra
+        bar.addEventListener('click',e=>{
+          if(e.target.classList.contains('bar-del')) return;
+          e.stopPropagation();
+          openModal(k,null);
+          switchTab('campaign');
+          setTimeout(()=>startEditCamp(cp.id),50);
+        });
         bar.querySelector('.bar-del').addEventListener('click',e=>{e.stopPropagation();campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCal();});
         campArea.appendChild(bar);
       });
@@ -588,11 +647,17 @@ function renderCal(){
 }
 
 function openModal(k,d){
-  openCell=k;switchTab('event');
-  document.getElementById('modal-title').textContent='Disparo — dia '+d;
-  document.getElementById('ev-name').value='';document.getElementById('ev-time').value='09:00';
+  openCell=k;
+  editEvKey=null;editEvIdx=null;
+  document.getElementById('edit-badge').style.display='none';
+  document.getElementById('modal-save').textContent='Salvar';
+  if(d) document.getElementById('modal-title').textContent='Disparo — dia '+d;
+  document.getElementById('ev-name').value='';
+  document.getElementById('ev-hour').value='09';
+  document.getElementById('ev-min').value='00';
   selColor='purple';selAudienceId='aud_todos';
   refreshChSel();refreshAudPills();
+  buildGrid('color-grid',selColor,id=>{selColor=id;});
   const sug=document.getElementById('theme-suggestions');sug.innerHTML='';
   Object.entries(usedThemes()).forEach(([name,color])=>{
     const c=gc(color);const tag=document.createElement('div');tag.className='theme-tag';tag.textContent=name;
@@ -600,19 +665,58 @@ function openModal(k,d){
     tag.addEventListener('click',()=>{document.getElementById('ev-name').value=name;selColor=color;buildGrid('color-grid',selColor,id=>{selColor=id;});});
     sug.appendChild(tag);
   });
+  switchTab('event');
+  document.getElementById('modal-bg').style.display='flex';
+  setTimeout(()=>document.getElementById('ev-name').focus(),50);
+}
+
+function openEditEvent(k,i){
+  const ev=events[k][i];if(!ev)return;
+  editEvKey=k;editEvIdx=i;
+  openCell=k;
+  const [h,m]=(ev.time||'09:00').split(':');
+  document.getElementById('ev-hour').value=h||'09';
+  document.getElementById('ev-min').value=(m==='30'?'30':'00');
+  document.getElementById('ev-name').value=ev.name||'';
+  selColor=ev.color||'purple';
+  selAudienceId=ev.audienceId||'aud_todos';
+  refreshChSel();
+  document.getElementById('ev-channel').value=ev.channelId||'';
+  updChColor();
+  buildGrid('color-grid',selColor,id=>{selColor=id;});
+  refreshAudPills();
+  document.getElementById('edit-badge').style.display='inline-block';
+  document.getElementById('modal-title').textContent='Editar disparo';
+  document.getElementById('modal-save').textContent='Salvar alterações';
+  const sug=document.getElementById('theme-suggestions');sug.innerHTML='';
+  Object.entries(usedThemes()).forEach(([name,color])=>{
+    const c=gc(color);const tag=document.createElement('div');tag.className='theme-tag';tag.textContent=name;
+    tag.style.background=c.bg;tag.style.color=c.text;tag.style.borderColor=c.dot;
+    tag.addEventListener('click',()=>{document.getElementById('ev-name').value=name;selColor=color;buildGrid('color-grid',selColor,id=>{selColor=id;});});
+    sug.appendChild(tag);
+  });
+  switchTab('event');
   document.getElementById('modal-bg').style.display='flex';
   setTimeout(()=>document.getElementById('ev-name').focus(),50);
 }
 
 document.getElementById('modal-save').addEventListener('click',()=>{
   const name=document.getElementById('ev-name').value.trim();
-  const time=document.getElementById('ev-time').value;
+  const h=document.getElementById('ev-hour').value;
+  const m=document.getElementById('ev-min').value;
+  const time=h+':'+m;
   const channelId=document.getElementById('ev-channel').value||null;
   const audienceId=selAudienceId||null;
   if(!name)return;
-  if(!events[openCell])events[openCell]=[];
-  events[openCell].push({name,time,color:selColor,channelId,audienceId});
-  events[openCell].sort((a,b)=>a.time.localeCompare(b.time));
+  if(editEvKey!==null&&editEvIdx!==null){
+    // update existing
+    events[editEvKey][editEvIdx]={name,time,color:selColor,channelId,audienceId};
+    events[editEvKey].sort((a,b)=>a.time.localeCompare(b.time));
+  } else {
+    if(!events[openCell])events[openCell]=[];
+    events[openCell].push({name,time,color:selColor,channelId,audienceId});
+    events[openCell].sort((a,b)=>a.time.localeCompare(b.time));
+  }
   saveEvents();renderCal();renderFilterBar();
   document.getElementById('modal-bg').style.display='none';
 });
@@ -633,10 +737,8 @@ const pad=n=>String(n).padStart(2,'0');
 document.getElementById('camp-start').value=`${cur.y}-${pad(cur.m+1)}-01`;
 document.getElementById('camp-end').value=`${cur.y}-${pad(cur.m+1)}-${new Date(cur.y,cur.m+1,0).getDate()}`;
 
-// Init
 await loadFromFirebase();
 startListener();
-
 </script>
 </body>
 </html>
