@@ -18,14 +18,14 @@ input:focus,select:focus{border-color:#aaa}
 .nav-btn:hover{background:#f0f0ee}
 
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-bottom:.75rem;padding:10px 14px;background:#f0f0ee;border-radius:10px;border:1px solid #e0e0dc}
-.filter-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
-.filter-bar label{font-size:11px;color:#888;font-weight:500}
+.filter-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
+.filter-bar label{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
 .filter-chips{display:flex;flex-wrap:wrap;gap:4px}
 .fchip{font-size:11px;padding:3px 10px;border-radius:10px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#555;transition:all .1s;white-space:nowrap}
 .fchip:hover{border-color:#bbb}
 .fchip.active-all{background:#1a1a1a;color:#fff;border-color:transparent}
 .fchip.active{border-color:transparent}
-.filter-divider{width:1px;background:#ddd;align-self:stretch;flex-shrink:0}
+.filter-divider{width:1px;background:#ddd;align-self:stretch;flex-shrink:0;margin:0 2px}
 .active-filters-row{font-size:11px;color:#aaa;margin-bottom:6px;min-height:14px}
 
 .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.75rem;align-items:center}
@@ -45,9 +45,10 @@ input:focus,select:focus{border-color:#aaa}
 .day-cell.today .day-num{color:#1D9E75;font-weight:700}
 .events-area{flex:1;overflow:hidden}
 .event-chip{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;display:flex;align-items:center;gap:3px;overflow:hidden;transition:opacity .15s}
-.event-chip.dimmed{opacity:.15}
+.event-chip.dimmed{opacity:.12}
 .chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
-.chip-ch{font-size:9px;opacity:.65;white-space:nowrap;flex-shrink:0}
+.chip-meta{font-size:9px;opacity:.6;white-space:nowrap;flex-shrink:0;display:flex;gap:3px;align-items:center}
+.chip-aud-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
 .chip-del{display:none;flex-shrink:0;font-size:9px;cursor:pointer;opacity:.7;margin-left:2px;line-height:1}
 .event-chip:hover .chip-del{display:inline}
 .campaigns-area{flex-shrink:0;margin-top:3px;display:flex;flex-direction:column;gap:2px}
@@ -62,9 +63,8 @@ input:focus,select:focus{border-color:#aaa}
 .day-cell:hover .add-btn{opacity:1}
 .add-btn:hover{color:#888}
 
-/* MODAL */
 .modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100}
-.modal{background:#fff;border-radius:14px;border:1px solid #e0e0dc;padding:1.25rem;width:350px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal{background:#fff;border-radius:14px;border:1px solid #e0e0dc;padding:1.25rem;width:360px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
 .modal h3{font-size:15px;font-weight:600;margin-bottom:1rem;color:#1a1a1a}
 .modal label{font-size:12px;color:#888;display:block;margin-bottom:4px;margin-top:10px;font-weight:500}
 .modal input,.modal select{width:100%}
@@ -72,20 +72,21 @@ input:focus,select:focus{border-color:#aaa}
 .modal-btns button{font-size:13px;padding:7px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a}
 .modal-btns button:last-child{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
 .modal-btns button:hover{opacity:.85}
-.tab-row{display:flex;gap:0;margin-bottom:14px;border-bottom:1px solid #eee}
-.tab{font-size:13px;padding:7px 12px;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500}
+.tab-row{display:flex;gap:0;margin-bottom:14px;border-bottom:1px solid #eee;overflow-x:auto}
+.tab{font-size:12px;padding:7px 10px;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;white-space:nowrap}
 .tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a}
 .color-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-bottom:2px}
 .color-swatch{width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:transform .1s}
 .color-swatch:hover{transform:scale(1.12)}
 .color-swatch.selected{border-color:#1a1a1a}
-.channel-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0ee}
-.channel-dot-sm{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.list-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0ee}
+.dot-sm{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .theme-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
 .theme-tag{font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid transparent;font-weight:500}
 .camp-list-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0ee}
-.camp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.sep{width:1px;height:30px;background:#eee;flex-shrink:0}
+.sep{width:1px;background:#ddd;align-self:stretch;flex-shrink:0}
+.aud-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.aud-pill{font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .1s}
 </style>
 </head>
 <body>
@@ -99,6 +100,11 @@ input:focus,select:focus{border-color:#aaa}
     <div class="filter-group">
       <label>Canal</label>
       <div id="filter-channels" class="filter-chips"></div>
+    </div>
+    <div class="sep"></div>
+    <div class="filter-group">
+      <label>Público</label>
+      <div id="filter-audiences" class="filter-chips"></div>
     </div>
     <div class="sep"></div>
     <div class="filter-group">
@@ -120,7 +126,10 @@ input:focus,select:focus{border-color:#aaa}
       <div class="tab active" id="tab-event" onclick="switchTab('event')">Disparo</div>
       <div class="tab" id="tab-campaign" onclick="switchTab('campaign')">Campanha</div>
       <div class="tab" id="tab-channels" onclick="switchTab('channels')">Canais</div>
+      <div class="tab" id="tab-audiences" onclick="switchTab('audiences')">Públicos</div>
     </div>
+
+    <!-- DISPARO -->
     <div id="pane-event">
       <h3 id="modal-title">Adicionar disparo</h3>
       <label>Tema</label>
@@ -130,6 +139,8 @@ input:focus,select:focus{border-color:#aaa}
       <input id="ev-time" type="time" value="09:00"/>
       <label>Canal</label>
       <select id="ev-channel"></select>
+      <label>Público</label>
+      <div id="ev-audience-pills" class="aud-pills" style="margin-bottom:4px"></div>
       <label>Cor <span id="color-hint" style="font-size:11px;color:#aaa"></span></label>
       <div id="color-grid" class="color-grid" style="margin-top:6px"></div>
       <div class="modal-btns">
@@ -137,6 +148,8 @@ input:focus,select:focus{border-color:#aaa}
         <button id="modal-save">Salvar</button>
       </div>
     </div>
+
+    <!-- CAMPANHA -->
     <div id="pane-campaign" style="display:none">
       <h3>Campanha / Período</h3>
       <div id="camp-list" style="margin-bottom:12px"></div>
@@ -153,6 +166,8 @@ input:focus,select:focus{border-color:#aaa}
         <button id="camp-add">Adicionar campanha</button>
       </div>
     </div>
+
+    <!-- CANAIS -->
     <div id="pane-channels" style="display:none">
       <h3>Gerenciar canais</h3>
       <div id="channel-list" style="margin-bottom:12px"></div>
@@ -163,6 +178,20 @@ input:focus,select:focus{border-color:#aaa}
       <div class="modal-btns">
         <button id="ch-cancel">Fechar</button>
         <button id="ch-add">Adicionar</button>
+      </div>
+    </div>
+
+    <!-- PÚBLICOS -->
+    <div id="pane-audiences" style="display:none">
+      <h3>Gerenciar públicos</h3>
+      <div id="audience-list" style="margin-bottom:12px"></div>
+      <label>Novo público</label>
+      <input id="new-aud-name" type="text" placeholder="Ex: VIP, Inativos 90d..."/>
+      <label>Cor do público</label>
+      <div id="aud-color-grid" class="color-grid" style="margin-top:6px;margin-bottom:12px"></div>
+      <div class="modal-btns">
+        <button id="aud-cancel">Fechar</button>
+        <button id="aud-add">Adicionar público</button>
       </div>
     </div>
   </div>
@@ -195,27 +224,44 @@ const DEFAULT_CHANNELS=[
   {id:'ch_email',name:'E-mail',color:'teal'},
   {id:'ch_whatsapp',name:'WhatsApp',color:'green'},
 ];
+const DEFAULT_AUDIENCES=[
+  {id:'aud_todos',name:'Todos',color:'gray'},
+  {id:'aud_ativos',name:'Ativos',color:'teal'},
+  {id:'aud_queda',name:'Em queda',color:'amber'},
+  {id:'aud_frios',name:'Frios',color:'blue'},
+];
+
 function gc(id){return PALETTE.find(c=>c.id===id)||PALETTE[0]}
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 let today=new Date();
 let cur={y:today.getFullYear(),m:today.getMonth()};
-let events={},channels=[],campaigns=[];
-let openCell=null,selColor='purple',selChColor='teal',selCampColor='coral';
-let filterCh=new Set(),filterTh=new Set();
+let events={},channels=[],campaigns=[],audiences=[];
+let openCell=null,selColor='purple',selChColor='teal',selCampColor='coral',selAudColor='sky';
+let selAudienceId='aud_todos';
+let filterCh=new Set(),filterTh=new Set(),filterAud=new Set();
 
 try{
   events=JSON.parse(localStorage.getItem('crm_cal_ev')||'{}');
   const sc=localStorage.getItem('crm_cal_ch');
   channels=sc?JSON.parse(sc):JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
   campaigns=JSON.parse(localStorage.getItem('crm_cal_camp')||'[]');
-}catch(e){events={};channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));campaigns=[];}
+  const sa=localStorage.getItem('crm_cal_aud');
+  audiences=sa?JSON.parse(sa):JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+}catch(e){
+  events={};
+  channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+  campaigns=[];
+  audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+}
 if(!channels.length) channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+if(!audiences.length) audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
 
 function saveAll(){
   try{
     localStorage.setItem('crm_cal_ev',JSON.stringify(events));
     localStorage.setItem('crm_cal_ch',JSON.stringify(channels));
     localStorage.setItem('crm_cal_camp',JSON.stringify(campaigns));
+    localStorage.setItem('crm_cal_aud',JSON.stringify(audiences));
   }catch(e){}
 }
 
@@ -225,7 +271,7 @@ function toKey(dt){return dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate(
 function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
 
 function buildGrid(cid,selId,cb){
-  const g=document.getElementById(cid);g.innerHTML='';
+  const g=document.getElementById(cid);if(!g)return;g.innerHTML='';
   PALETTE.forEach(c=>{
     const sw=document.createElement('div');sw.className='color-swatch'+(c.id===selId?' selected':'');
     sw.style.background=c.dot;sw.title=c.label;
@@ -235,6 +281,7 @@ function buildGrid(cid,selId,cb){
 }
 buildGrid('ch-color-grid',selChColor,id=>{selChColor=id;});
 buildGrid('camp-color-grid',selCampColor,id=>{selCampColor=id;});
+buildGrid('aud-color-grid',selAudColor,id=>{selAudColor=id;});
 
 function refreshChSel(){
   const sel=document.getElementById('ev-channel');const prev=sel.value;
@@ -251,17 +298,36 @@ function updChColor(){
 }
 document.getElementById('ev-channel').addEventListener('change',updChColor);
 
+function refreshAudPills(){
+  const container=document.getElementById('ev-audience-pills');
+  container.innerHTML='';
+  audiences.forEach(aud=>{
+    const c=gc(aud.color);
+    const isOn=selAudienceId===aud.id;
+    const pill=document.createElement('div');
+    pill.className='aud-pill';
+    pill.textContent=aud.name;
+    if(isOn){pill.style.background=c.bg;pill.style.color=c.text;pill.style.borderColor=c.dot;}
+    else{pill.style.background='#fff';pill.style.color='#555';pill.style.borderColor='#ddd';}
+    pill.addEventListener('click',()=>{selAudienceId=aud.id;refreshAudPills();});
+    container.appendChild(pill);
+  });
+}
+
 function allThemes(){const s=new Set();Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)s.add(e.name)}));return[...s].sort();}
+
 function isActive(ev){
   const co=filterCh.size===0||(ev.channelId&&filterCh.has(ev.channelId));
   const to=filterTh.size===0||filterTh.has(ev.name);
-  return co&&to;
+  const ao=filterAud.size===0||(ev.audienceId&&filterAud.has(ev.audienceId));
+  return co&&to&&ao;
 }
 
 function renderFilterBar(){
+  // Canal
   const fc=document.getElementById('filter-channels');fc.innerHTML='';
-  const a=document.createElement('div');a.className='fchip'+(filterCh.size===0?' active-all':'');a.textContent='Todos';
-  a.addEventListener('click',()=>{filterCh.clear();renderFilterBar();renderCal();});fc.appendChild(a);
+  const ac=document.createElement('div');ac.className='fchip'+(filterCh.size===0?' active-all':'');ac.textContent='Todos';
+  ac.addEventListener('click',()=>{filterCh.clear();renderFilterBar();renderCal();});fc.appendChild(ac);
   channels.forEach(ch=>{
     const c=gc(ch.color);const isOn=filterCh.has(ch.id);
     const chip=document.createElement('div');chip.className='fchip'+(isOn?' active':'');
@@ -270,6 +336,21 @@ function renderFilterBar(){
     chip.addEventListener('click',()=>{isOn?filterCh.delete(ch.id):filterCh.add(ch.id);renderFilterBar();renderCal();});
     fc.appendChild(chip);
   });
+
+  // Público
+  const fa=document.getElementById('filter-audiences');fa.innerHTML='';
+  const aa=document.createElement('div');aa.className='fchip'+(filterAud.size===0?' active-all':'');aa.textContent='Todos';
+  aa.addEventListener('click',()=>{filterAud.clear();renderFilterBar();renderCal();});fa.appendChild(aa);
+  audiences.forEach(aud=>{
+    const c=gc(aud.color);const isOn=filterAud.has(aud.id);
+    const chip=document.createElement('div');chip.className='fchip'+(isOn?' active':'');
+    if(isOn){chip.style.background=c.bg;chip.style.color=c.text;chip.style.borderColor=c.dot;}
+    chip.innerHTML=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${c.dot};margin-right:4px;vertical-align:middle"></span>${aud.name}`;
+    chip.addEventListener('click',()=>{isOn?filterAud.delete(aud.id):filterAud.add(aud.id);renderFilterBar();renderCal();});
+    fa.appendChild(chip);
+  });
+
+  // Tema
   const ft=document.getElementById('filter-themes');ft.innerHTML='';
   const themes=allThemes();
   if(!themes.length){ft.innerHTML='<span style="font-size:11px;color:#aaa">Nenhum tema ainda</span>';}
@@ -286,8 +367,10 @@ function renderFilterBar(){
       ft.appendChild(chip);
     });
   }
+
   const parts=[];
   if(filterCh.size>0) parts.push('Canal: '+[...filterCh].map(id=>channels.find(c=>c.id===id)?.name||id).join(', '));
+  if(filterAud.size>0) parts.push('Público: '+[...filterAud].map(id=>audiences.find(a=>a.id===id)?.name||id).join(', '));
   if(filterTh.size>0) parts.push('Tema: '+[...filterTh].join(', '));
   document.getElementById('active-filters-row').textContent=parts.length?'Filtros ativos — '+parts.join(' · '):'';
 }
@@ -297,7 +380,7 @@ function renderCampList(){
   if(!campaigns.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhuma campanha.</div>';return;}
   campaigns.forEach(cp=>{
     const c=gc(cp.color);const row=document.createElement('div');row.className='camp-list-row';
-    row.innerHTML=`<div class="camp-dot" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${cp.name}</span><span style="font-size:11px;color:#aaa;margin-right:8px">${cp.start} → ${cp.end}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px" data-id="${cp.id}">✕</button>`;
+    row.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${c.dot};flex-shrink:0"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${cp.name}</span><span style="font-size:11px;color:#aaa;margin-right:8px">${cp.start} → ${cp.end}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px">✕</button>`;
     row.querySelector('button').addEventListener('click',()=>{campaigns=campaigns.filter(x=>x.id!==cp.id);saveAll();renderCampList();renderCal();});
     el.appendChild(row);
   });
@@ -315,8 +398,8 @@ document.getElementById('camp-add').addEventListener('click',()=>{
 function renderChList(){
   const el=document.getElementById('channel-list');el.innerHTML='';
   channels.forEach(ch=>{
-    const c=gc(ch.color);const row=document.createElement('div');row.className='channel-row';
-    row.innerHTML=`<div class="channel-dot-sm" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${ch.name}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px">✕</button>`;
+    const c=gc(ch.color);const row=document.createElement('div');row.className='list-row';
+    row.innerHTML=`<div class="dot-sm" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${ch.name}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px">✕</button>`;
     row.querySelector('button').addEventListener('click',()=>{channels=channels.filter(x=>x.id!==ch.id);saveAll();renderChList();refreshChSel();renderCal();});
     el.appendChild(row);
   });
@@ -328,14 +411,33 @@ document.getElementById('ch-add').addEventListener('click',()=>{
   saveAll();renderChList();refreshChSel();renderFilterBar();renderCal();
 });
 
+function renderAudList(){
+  const el=document.getElementById('audience-list');el.innerHTML='';
+  if(!audiences.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhum público.</div>';return;}
+  audiences.forEach(aud=>{
+    const c=gc(aud.color);const row=document.createElement('div');row.className='list-row';
+    row.innerHTML=`<div class="dot-sm" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${aud.name}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px" ${aud.id==='aud_todos'?'disabled title="Público padrão"':''}>✕</button>`;
+    const btn=row.querySelector('button');
+    if(aud.id!=='aud_todos') btn.addEventListener('click',()=>{audiences=audiences.filter(x=>x.id!==aud.id);saveAll();renderAudList();refreshAudPills();renderFilterBar();renderCal();});
+    el.appendChild(row);
+  });
+}
+document.getElementById('aud-add').addEventListener('click',()=>{
+  const name=document.getElementById('new-aud-name').value.trim();if(!name)return;
+  audiences.push({id:'aud_'+Date.now(),name,color:selAudColor});
+  document.getElementById('new-aud-name').value='';
+  saveAll();renderAudList();refreshAudPills();renderFilterBar();renderCal();
+});
+
 function switchTab(t){
-  ['event','campaign','channels'].forEach(p=>{
+  ['event','campaign','channels','audiences'].forEach(p=>{
     document.getElementById('pane-'+p).style.display=p===t?'':'none';
     const tid=p==='event'?'tab-event':('tab-'+p);
-    document.getElementById(tid).className='tab'+(p===t?' active':'');
+    const el=document.getElementById(tid);if(el) el.className='tab'+(p===t?' active':'');
   });
   if(t==='campaign')renderCampList();
   if(t==='channels')renderChList();
+  if(t==='audiences')renderAudList();
 }
 
 function usedThemes(){const t={};Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)t[e.name]=e.color}));return t;}
@@ -343,8 +445,10 @@ function usedThemes(){const t={};Object.values(events).forEach(arr=>arr.forEach(
 function renderLegend(){
   const el=document.getElementById('legend');el.innerHTML='';
   channels.forEach(ch=>{const c=gc(ch.color);el.innerHTML+=`<div class="legend-item"><div class="ldot" style="background:${c.dot}"></div><span>${ch.name}</span></div>`;});
+  el.innerHTML+=`<span style="font-size:11px;color:#ccc;margin:0 6px">|</span>`;
+  audiences.forEach(aud=>{const c=gc(aud.color);el.innerHTML+=`<div class="legend-item"><div class="ldot" style="background:${c.dot};border:1px solid ${c.dot}44"></div><span style="font-style:italic">${aud.name}</span></div>`;});
   if(campaigns.length){
-    el.innerHTML+=`<span style="font-size:11px;color:#ccc;margin:0 4px">|</span>`;
+    el.innerHTML+=`<span style="font-size:11px;color:#ccc;margin:0 6px">|</span>`;
     campaigns.forEach(cp=>{const c=gc(cp.color);el.innerHTML+=`<div class="legend-item"><div class="ldot-sq" style="background:${c.dot}"></div><span>${cp.name}</span></div>`;});
   }
 }
@@ -377,11 +481,15 @@ function renderCal(){
     const evArea=document.createElement('div');evArea.className='events-area';
     if(isCur&&events[k]){
       events[k].forEach((ev,i)=>{
-        const c=gc(ev.color);const ch=channels.find(x=>x.id===ev.channelId);
-        const dimmed=(filterCh.size>0||filterTh.size>0)&&!isActive(ev);
+        const c=gc(ev.color);
+        const ch=channels.find(x=>x.id===ev.channelId);
+        const aud=audiences.find(x=>x.id===ev.audienceId);
+        const dimmed=(filterCh.size>0||filterTh.size>0||filterAud.size>0)&&!isActive(ev);
         const chip=document.createElement('div');chip.className='event-chip'+(dimmed?' dimmed':'');
         chip.dataset.k=k;chip.dataset.idx=i;chip.style.background=c.bg;chip.style.color=c.text;
-        chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span>${ch?`<span class="chip-ch">${ch.name}</span>`:''}<span class="chip-del">✕</span>`;
+        const audDot=aud?`<span class="chip-aud-dot" style="background:${gc(aud.color).dot}" title="${aud.name}"></span>`:'';
+        const chName=ch?`<span>${ch.name}</span>`:'';
+        chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del">✕</span>`;
         chip.querySelector('.chip-del').addEventListener('click',e=>{e.stopPropagation();events[k].splice(i,1);if(!events[k].length)delete events[k];saveAll();renderCal();renderFilterBar();});
         evArea.appendChild(chip);
       });
@@ -399,8 +507,7 @@ function renderCal(){
         else if(isStart||isMonStart) cls+=(isEnd||isMonEnd)?'solo':'start';
         else if(isEnd||isMonEnd) cls+='end';
         else cls+='middle';
-        const bar=document.createElement('div');bar.className=cls;
-        bar.style.background=c.dot;
+        const bar=document.createElement('div');bar.className=cls;bar.style.background=c.dot;
         const showText=isStart||isMonStart;
         bar.innerHTML=showText?`${cp.name}<span class="bar-del" data-id="${cp.id}">✕</span>`:`<span class="bar-del" data-id="${cp.id}">✕</span>`;
         bar.querySelector('.bar-del').addEventListener('click',e=>{e.stopPropagation();campaigns=campaigns.filter(x=>x.id!==cp.id);saveAll();renderCal();});
@@ -421,7 +528,8 @@ function openModal(k,d){
   openCell=k;switchTab('event');
   document.getElementById('modal-title').textContent='Disparo — dia '+d;
   document.getElementById('ev-name').value='';document.getElementById('ev-time').value='09:00';
-  selColor='purple';refreshChSel();
+  selColor='purple';selAudienceId='aud_todos';
+  refreshChSel();refreshAudPills();
   const sug=document.getElementById('theme-suggestions');sug.innerHTML='';
   Object.entries(usedThemes()).forEach(([name,color])=>{
     const c=gc(color);const tag=document.createElement('div');tag.className='theme-tag';tag.textContent=name;
@@ -437,19 +545,23 @@ document.getElementById('modal-save').addEventListener('click',()=>{
   const name=document.getElementById('ev-name').value.trim();
   const time=document.getElementById('ev-time').value;
   const channelId=document.getElementById('ev-channel').value||null;
+  const audienceId=selAudienceId||null;
   if(!name)return;
   if(!events[openCell])events[openCell]=[];
-  events[openCell].push({name,time,color:selColor,channelId});
+  events[openCell].push({name,time,color:selColor,channelId,audienceId});
   events[openCell].sort((a,b)=>a.time.localeCompare(b.time));
   saveAll();renderCal();renderFilterBar();
   document.getElementById('modal-bg').style.display='none';
 });
+
 document.getElementById('modal-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none'});
 document.getElementById('camp-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none'});
 document.getElementById('ch-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none'});
+document.getElementById('aud-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none'});
 document.getElementById('modal-bg').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('modal-bg').style.display='none'});
 document.getElementById('ev-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('modal-save').click()});
 document.getElementById('new-ch-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ch-add').click()});
+document.getElementById('new-aud-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('aud-add').click()});
 document.getElementById('camp-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('camp-add').click()});
 document.getElementById('prev').addEventListener('click',()=>{cur.m--;if(cur.m<0){cur.m=11;cur.y--}renderCal()});
 document.getElementById('next').addEventListener('click',()=>{cur.m++;if(cur.m>11){cur.m=0;cur.y++}renderCal()});
