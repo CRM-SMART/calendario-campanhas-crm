@@ -10,13 +10,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit;padding:6px 8px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#1a1a1a;outline:none}
 input:focus,select:focus{border-color:#aaa}
-
 .cal-wrap{max-width:1200px;margin:0 auto;padding:1rem 0}
 .nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
 .nav-row h2{font-size:16px;font-weight:600;color:#1a1a1a}
 .nav-btn{background:#fff;border:1px solid #ddd;border-radius:8px;padding:5px 12px;font-size:14px;color:#1a1a1a}
 .nav-btn:hover{background:#f0f0ee}
-
+.sync-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;transition:background .3s}
+.sync-dot.syncing{background:#f59e0b;animation:pulse 1s infinite}
+.sync-dot.ok{background:#1D9E75}
+.sync-dot.error{background:#E24B4A}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-bottom:.75rem;padding:10px 14px;background:#f0f0ee;border-radius:10px;border:1px solid #e0e0dc}
 .filter-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
 .filter-bar label{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
@@ -27,16 +31,13 @@ input:focus,select:focus{border-color:#aaa}
 .fchip.active{border-color:transparent}
 .filter-divider{width:1px;background:#ddd;align-self:stretch;flex-shrink:0;margin:0 2px}
 .active-filters-row{font-size:11px;color:#aaa;margin-bottom:6px;min-height:14px}
-
 .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.75rem;align-items:center}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#555}
 .ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .ldot-sq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-
 .cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
 .cal-header div{text-align:center;font-size:11px;font-weight:600;color:#888;padding:4px 0;letter-spacing:.05em}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-
 .day-cell{background:#fff;border:1px solid #e8e8e5;border-radius:8px;padding:6px 5px 4px;min-height:120px;cursor:pointer;transition:border-color .15s;position:relative;display:flex;flex-direction:column}
 .day-cell:hover{border-color:#ccc}
 .day-cell.today{border:2px solid #1D9E75}
@@ -62,7 +63,6 @@ input:focus,select:focus{border-color:#aaa}
 .add-btn{background:none;border:none;color:#bbb;font-size:16px;cursor:pointer;padding:0;line-height:1;position:absolute;top:4px;right:5px;opacity:0}
 .day-cell:hover .add-btn{opacity:1}
 .add-btn:hover{color:#888}
-
 .modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100}
 .modal{background:#fff;border-radius:14px;border:1px solid #e0e0dc;padding:1.25rem;width:360px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
 .modal h3{font-size:15px;font-weight:600;margin-bottom:1rem;color:#1a1a1a}
@@ -87,26 +87,42 @@ input:focus,select:focus{border-color:#aaa}
 .sep{width:1px;background:#ddd;align-self:stretch;flex-shrink:0}
 .aud-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .aud-pill{font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .1s}
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(249,249,247,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:12px}
+.loading-overlay p{font-size:14px;color:#888}
+.spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#1D9E75;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+
+<div id="loading-overlay" class="loading-overlay">
+  <div class="spinner"></div>
+  <p>Carregando calendário...</p>
+</div>
+
 <div class="cal-wrap">
   <div class="nav-row">
     <button class="nav-btn" id="prev">&#8249;</button>
     <h2 id="month-label"></h2>
     <button class="nav-btn" id="next">&#8250;</button>
   </div>
+  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:6px">
+    <div class="sync-indicator">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">Conectando...</span>
+    </div>
+  </div>
   <div class="filter-bar">
     <div class="filter-group">
       <label>Canal</label>
       <div id="filter-channels" class="filter-chips"></div>
     </div>
-    <div class="sep"></div>
+    <div class="filter-divider"></div>
     <div class="filter-group">
       <label>Público</label>
       <div id="filter-audiences" class="filter-chips"></div>
     </div>
-    <div class="sep"></div>
+    <div class="filter-divider"></div>
     <div class="filter-group">
       <label>Tema</label>
       <div id="filter-themes" class="filter-chips"></div>
@@ -128,8 +144,6 @@ input:focus,select:focus{border-color:#aaa}
       <div class="tab" id="tab-channels" onclick="switchTab('channels')">Canais</div>
       <div class="tab" id="tab-audiences" onclick="switchTab('audiences')">Públicos</div>
     </div>
-
-    <!-- DISPARO -->
     <div id="pane-event">
       <h3 id="modal-title">Adicionar disparo</h3>
       <label>Tema</label>
@@ -148,8 +162,6 @@ input:focus,select:focus{border-color:#aaa}
         <button id="modal-save">Salvar</button>
       </div>
     </div>
-
-    <!-- CAMPANHA -->
     <div id="pane-campaign" style="display:none">
       <h3>Campanha / Período</h3>
       <div id="camp-list" style="margin-bottom:12px"></div>
@@ -166,8 +178,6 @@ input:focus,select:focus{border-color:#aaa}
         <button id="camp-add">Adicionar campanha</button>
       </div>
     </div>
-
-    <!-- CANAIS -->
     <div id="pane-channels" style="display:none">
       <h3>Gerenciar canais</h3>
       <div id="channel-list" style="margin-bottom:12px"></div>
@@ -180,8 +190,6 @@ input:focus,select:focus{border-color:#aaa}
         <button id="ch-add">Adicionar</button>
       </div>
     </div>
-
-    <!-- PÚBLICOS -->
     <div id="pane-audiences" style="display:none">
       <h3>Gerenciar públicos</h3>
       <div id="audience-list" style="margin-bottom:12px"></div>
@@ -197,7 +205,23 @@ input:focus,select:focus{border-color:#aaa}
   </div>
 </div>
 
-<script>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC7xA8-P1kAhf_6ItweNk9lxV64lautOSo",
+  authDomain: "crm-calendario-f3b18.firebaseapp.com",
+  projectId: "crm-calendario-f3b18",
+  storageBucket: "crm-calendario-f3b18.firebasestorage.app",
+  messagingSenderId: "1069676978590",
+  appId: "1:1069676978590:web:c9a99be01b991df9f0b68f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const PALETTE=[
   {id:'purple',label:'Roxo',bg:'#EEEDFE',text:'#3C3489',dot:'#7F77DD'},
   {id:'teal',label:'Verde',bg:'#E1F5EE',text:'#0F6E56',dot:'#1D9E75'},
@@ -233,42 +257,84 @@ const DEFAULT_AUDIENCES=[
 
 function gc(id){return PALETTE.find(c=>c.id===id)||PALETTE[0]}
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
 let today=new Date();
 let cur={y:today.getFullYear(),m:today.getMonth()};
 let events={},channels=[],campaigns=[],audiences=[];
 let openCell=null,selColor='purple',selChColor='teal',selCampColor='coral',selAudColor='sky';
 let selAudienceId='aud_todos';
 let filterCh=new Set(),filterTh=new Set(),filterAud=new Set();
+let isSaving=false;
 
-try{
-  events=JSON.parse(localStorage.getItem('crm_cal_ev')||'{}');
-  const sc=localStorage.getItem('crm_cal_ch');
-  channels=sc?JSON.parse(sc):JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-  campaigns=JSON.parse(localStorage.getItem('crm_cal_camp')||'[]');
-  const sa=localStorage.getItem('crm_cal_aud');
-  audiences=sa?JSON.parse(sa):JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
-}catch(e){
-  events={};
-  channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-  campaigns=[];
-  audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+// Sync status
+function setSyncStatus(s){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  if(s==='ok'){dot.className='sync-dot ok';lbl.textContent='Sincronizado';}
+  else if(s==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Salvando...';}
+  else if(s==='error'){dot.className='sync-dot error';lbl.textContent='Erro de conexão';}
+  else{dot.className='sync-dot';lbl.textContent='Conectando...';}
 }
-if(!channels.length) channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-if(!audiences.length) audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
 
-function saveAll(){
+// Firebase refs
+const calRef = doc(db,'calendario','data');
+const cfgRef = doc(db,'calendario','config');
+
+async function loadFromFirebase(){
   try{
-    localStorage.setItem('crm_cal_ev',JSON.stringify(events));
-    localStorage.setItem('crm_cal_ch',JSON.stringify(channels));
-    localStorage.setItem('crm_cal_camp',JSON.stringify(campaigns));
-    localStorage.setItem('crm_cal_aud',JSON.stringify(audiences));
-  }catch(e){}
+    const [calSnap,cfgSnap]=await Promise.all([getDoc(calRef),getDoc(cfgRef)]);
+    if(calSnap.exists()) events=calSnap.data().events||{};
+    if(cfgSnap.exists()){
+      channels=cfgSnap.data().channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+      campaigns=cfgSnap.data().campaigns||[];
+      audiences=cfgSnap.data().audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+    } else {
+      channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+      audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+      campaigns=[];
+      await saveConfig();
+    }
+    setSyncStatus('ok');
+  }catch(e){
+    console.error(e);
+    setSyncStatus('error');
+  }
+  document.getElementById('loading-overlay').style.display='none';
+  renderCal();
 }
 
-function dkey(y,m,d){return y+'-'+(m+1)+'-'+d}
-function dateFromKey(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
-function toKey(dt){return dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()}
-function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+// Real-time listener
+function startListener(){
+  onSnapshot(calRef,(snap)=>{
+    if(snap.exists()&&!isSaving){
+      events=snap.data().events||{};
+      renderCal();
+      setSyncStatus('ok');
+    }
+  });
+  onSnapshot(cfgRef,(snap)=>{
+    if(snap.exists()&&!isSaving){
+      channels=snap.data().channels||DEFAULT_CHANNELS;
+      campaigns=snap.data().campaigns||[];
+      audiences=snap.data().audiences||DEFAULT_AUDIENCES;
+      renderCal();
+      setSyncStatus('ok');
+    }
+  });
+}
+
+async function saveEvents(){
+  isSaving=true;setSyncStatus('syncing');
+  try{await setDoc(calRef,{events});setSyncStatus('ok');}
+  catch(e){setSyncStatus('error');}
+  setTimeout(()=>{isSaving=false;},500);
+}
+async function saveConfig(){
+  isSaving=true;setSyncStatus('syncing');
+  try{await setDoc(cfgRef,{channels,campaigns,audiences});setSyncStatus('ok');}
+  catch(e){setSyncStatus('error');}
+  setTimeout(()=>{isSaving=false;},500);
+}
 
 function buildGrid(cid,selId,cb){
   const g=document.getElementById(cid);if(!g)return;g.innerHTML='';
@@ -299,14 +365,10 @@ function updChColor(){
 document.getElementById('ev-channel').addEventListener('change',updChColor);
 
 function refreshAudPills(){
-  const container=document.getElementById('ev-audience-pills');
-  container.innerHTML='';
+  const container=document.getElementById('ev-audience-pills');container.innerHTML='';
   audiences.forEach(aud=>{
-    const c=gc(aud.color);
-    const isOn=selAudienceId===aud.id;
-    const pill=document.createElement('div');
-    pill.className='aud-pill';
-    pill.textContent=aud.name;
+    const c=gc(aud.color);const isOn=selAudienceId===aud.id;
+    const pill=document.createElement('div');pill.className='aud-pill';pill.textContent=aud.name;
     if(isOn){pill.style.background=c.bg;pill.style.color=c.text;pill.style.borderColor=c.dot;}
     else{pill.style.background='#fff';pill.style.color='#555';pill.style.borderColor='#ddd';}
     pill.addEventListener('click',()=>{selAudienceId=aud.id;refreshAudPills();});
@@ -315,7 +377,6 @@ function refreshAudPills(){
 }
 
 function allThemes(){const s=new Set();Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)s.add(e.name)}));return[...s].sort();}
-
 function isActive(ev){
   const co=filterCh.size===0||(ev.channelId&&filterCh.has(ev.channelId));
   const to=filterTh.size===0||filterTh.has(ev.name);
@@ -324,7 +385,6 @@ function isActive(ev){
 }
 
 function renderFilterBar(){
-  // Canal
   const fc=document.getElementById('filter-channels');fc.innerHTML='';
   const ac=document.createElement('div');ac.className='fchip'+(filterCh.size===0?' active-all':'');ac.textContent='Todos';
   ac.addEventListener('click',()=>{filterCh.clear();renderFilterBar();renderCal();});fc.appendChild(ac);
@@ -336,8 +396,6 @@ function renderFilterBar(){
     chip.addEventListener('click',()=>{isOn?filterCh.delete(ch.id):filterCh.add(ch.id);renderFilterBar();renderCal();});
     fc.appendChild(chip);
   });
-
-  // Público
   const fa=document.getElementById('filter-audiences');fa.innerHTML='';
   const aa=document.createElement('div');aa.className='fchip'+(filterAud.size===0?' active-all':'');aa.textContent='Todos';
   aa.addEventListener('click',()=>{filterAud.clear();renderFilterBar();renderCal();});fa.appendChild(aa);
@@ -349,8 +407,6 @@ function renderFilterBar(){
     chip.addEventListener('click',()=>{isOn?filterAud.delete(aud.id):filterAud.add(aud.id);renderFilterBar();renderCal();});
     fa.appendChild(chip);
   });
-
-  // Tema
   const ft=document.getElementById('filter-themes');ft.innerHTML='';
   const themes=allThemes();
   if(!themes.length){ft.innerHTML='<span style="font-size:11px;color:#aaa">Nenhum tema ainda</span>';}
@@ -367,7 +423,6 @@ function renderFilterBar(){
       ft.appendChild(chip);
     });
   }
-
   const parts=[];
   if(filterCh.size>0) parts.push('Canal: '+[...filterCh].map(id=>channels.find(c=>c.id===id)?.name||id).join(', '));
   if(filterAud.size>0) parts.push('Público: '+[...filterAud].map(id=>audiences.find(a=>a.id===id)?.name||id).join(', '));
@@ -381,7 +436,7 @@ function renderCampList(){
   campaigns.forEach(cp=>{
     const c=gc(cp.color);const row=document.createElement('div');row.className='camp-list-row';
     row.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${c.dot};flex-shrink:0"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${cp.name}</span><span style="font-size:11px;color:#aaa;margin-right:8px">${cp.start} → ${cp.end}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px">✕</button>`;
-    row.querySelector('button').addEventListener('click',()=>{campaigns=campaigns.filter(x=>x.id!==cp.id);saveAll();renderCampList();renderCal();});
+    row.querySelector('button').addEventListener('click',()=>{campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCampList();renderCal();});
     el.appendChild(row);
   });
 }
@@ -392,7 +447,7 @@ document.getElementById('camp-add').addEventListener('click',()=>{
   if(!name||!start||!end||start>end)return;
   campaigns.push({id:'cp_'+Date.now(),name,start,end,color:selCampColor});
   document.getElementById('camp-name').value='';
-  saveAll();renderCampList();renderCal();
+  saveConfig();renderCampList();renderCal();
 });
 
 function renderChList(){
@@ -400,7 +455,7 @@ function renderChList(){
   channels.forEach(ch=>{
     const c=gc(ch.color);const row=document.createElement('div');row.className='list-row';
     row.innerHTML=`<div class="dot-sm" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${ch.name}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px">✕</button>`;
-    row.querySelector('button').addEventListener('click',()=>{channels=channels.filter(x=>x.id!==ch.id);saveAll();renderChList();refreshChSel();renderCal();});
+    row.querySelector('button').addEventListener('click',()=>{channels=channels.filter(x=>x.id!==ch.id);saveConfig();renderChList();refreshChSel();renderCal();});
     el.appendChild(row);
   });
 }
@@ -408,17 +463,16 @@ document.getElementById('ch-add').addEventListener('click',()=>{
   const name=document.getElementById('new-ch-name').value.trim();if(!name)return;
   channels.push({id:'ch_'+Date.now(),name,color:selChColor});
   document.getElementById('new-ch-name').value='';
-  saveAll();renderChList();refreshChSel();renderFilterBar();renderCal();
+  saveConfig();renderChList();refreshChSel();renderFilterBar();renderCal();
 });
 
 function renderAudList(){
   const el=document.getElementById('audience-list');el.innerHTML='';
-  if(!audiences.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhum público.</div>';return;}
   audiences.forEach(aud=>{
     const c=gc(aud.color);const row=document.createElement('div');row.className='list-row';
-    row.innerHTML=`<div class="dot-sm" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${aud.name}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px" ${aud.id==='aud_todos'?'disabled title="Público padrão"':''}>✕</button>`;
+    row.innerHTML=`<div class="dot-sm" style="background:${c.dot}"></div><span style="flex:1;font-size:13px;color:#1a1a1a">${aud.name}</span><button style="background:none;border:none;cursor:pointer;color:#bbb;font-size:13px" ${aud.id==='aud_todos'?'disabled style="opacity:.3;cursor:default"':''}>✕</button>`;
     const btn=row.querySelector('button');
-    if(aud.id!=='aud_todos') btn.addEventListener('click',()=>{audiences=audiences.filter(x=>x.id!==aud.id);saveAll();renderAudList();refreshAudPills();renderFilterBar();renderCal();});
+    if(aud.id!=='aud_todos') btn.addEventListener('click',()=>{audiences=audiences.filter(x=>x.id!==aud.id);saveConfig();renderAudList();refreshAudPills();renderFilterBar();renderCal();});
     el.appendChild(row);
   });
 }
@@ -426,7 +480,7 @@ document.getElementById('aud-add').addEventListener('click',()=>{
   const name=document.getElementById('new-aud-name').value.trim();if(!name)return;
   audiences.push({id:'aud_'+Date.now(),name,color:selAudColor});
   document.getElementById('new-aud-name').value='';
-  saveAll();renderAudList();refreshAudPills();renderFilterBar();renderCal();
+  saveConfig();renderAudList();refreshAudPills();renderFilterBar();renderCal();
 });
 
 function switchTab(t){
@@ -446,12 +500,16 @@ function renderLegend(){
   const el=document.getElementById('legend');el.innerHTML='';
   channels.forEach(ch=>{const c=gc(ch.color);el.innerHTML+=`<div class="legend-item"><div class="ldot" style="background:${c.dot}"></div><span>${ch.name}</span></div>`;});
   el.innerHTML+=`<span style="font-size:11px;color:#ccc;margin:0 6px">|</span>`;
-  audiences.forEach(aud=>{const c=gc(aud.color);el.innerHTML+=`<div class="legend-item"><div class="ldot" style="background:${c.dot};border:1px solid ${c.dot}44"></div><span style="font-style:italic">${aud.name}</span></div>`;});
+  audiences.forEach(aud=>{const c=gc(aud.color);el.innerHTML+=`<div class="legend-item"><div class="ldot" style="background:${c.dot}"></div><span style="font-style:italic">${aud.name}</span></div>`;});
   if(campaigns.length){
     el.innerHTML+=`<span style="font-size:11px;color:#ccc;margin:0 6px">|</span>`;
     campaigns.forEach(cp=>{const c=gc(cp.color);el.innerHTML+=`<div class="legend-item"><div class="ldot-sq" style="background:${c.dot}"></div><span>${cp.name}</span></div>`;});
   }
 }
+
+function dkey(y,m,d){return y+'-'+(m+1)+'-'+d}
+function dateFromKey(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
+function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
 
 function campsForDay(k){
   const d=dateFromKey(k);
@@ -490,7 +548,12 @@ function renderCal(){
         const audDot=aud?`<span class="chip-aud-dot" style="background:${gc(aud.color).dot}" title="${aud.name}"></span>`:'';
         const chName=ch?`<span>${ch.name}</span>`:'';
         chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del">✕</span>`;
-        chip.querySelector('.chip-del').addEventListener('click',e=>{e.stopPropagation();events[k].splice(i,1);if(!events[k].length)delete events[k];saveAll();renderCal();renderFilterBar();});
+        chip.querySelector('.chip-del').addEventListener('click',e=>{
+          e.stopPropagation();
+          events[k].splice(i,1);
+          if(!events[k].length)delete events[k];
+          saveEvents();renderCal();renderFilterBar();
+        });
         evArea.appendChild(chip);
       });
     }
@@ -510,7 +573,7 @@ function renderCal(){
         const bar=document.createElement('div');bar.className=cls;bar.style.background=c.dot;
         const showText=isStart||isMonStart;
         bar.innerHTML=showText?`${cp.name}<span class="bar-del" data-id="${cp.id}">✕</span>`:`<span class="bar-del" data-id="${cp.id}">✕</span>`;
-        bar.querySelector('.bar-del').addEventListener('click',e=>{e.stopPropagation();campaigns=campaigns.filter(x=>x.id!==cp.id);saveAll();renderCal();});
+        bar.querySelector('.bar-del').addEventListener('click',e=>{e.stopPropagation();campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCal();});
         campArea.appendChild(bar);
       });
       cell.appendChild(campArea);
@@ -550,7 +613,7 @@ document.getElementById('modal-save').addEventListener('click',()=>{
   if(!events[openCell])events[openCell]=[];
   events[openCell].push({name,time,color:selColor,channelId,audienceId});
   events[openCell].sort((a,b)=>a.time.localeCompare(b.time));
-  saveAll();renderCal();renderFilterBar();
+  saveEvents();renderCal();renderFilterBar();
   document.getElementById('modal-bg').style.display='none';
 });
 
@@ -570,7 +633,10 @@ const pad=n=>String(n).padStart(2,'0');
 document.getElementById('camp-start').value=`${cur.y}-${pad(cur.m+1)}-01`;
 document.getElementById('camp-end').value=`${cur.y}-${pad(cur.m+1)}-${new Date(cur.y,cur.m+1,0).getDate()}`;
 
-renderCal();
+// Init
+await loadFromFirebase();
+startListener();
+
 </script>
 </body>
 </html>
