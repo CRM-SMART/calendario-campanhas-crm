@@ -16,7 +16,6 @@ input:focus,select:focus{border-color:#aaa}
 .nav-row h2{font-size:16px;font-weight:600;color:#1a1a1a}
 .nav-btn{background:#fff;border:1px solid #ddd;border-radius:8px;padding:5px 14px;font-size:14px;color:#1a1a1a}
 .nav-btn:hover{background:#f0f0ee}
-
 .sync-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-bottom:6px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;transition:background .3s}
 .sync-dot.syncing{background:#f59e0b;animation:pulse 1s infinite}
@@ -35,52 +34,41 @@ input:focus,select:focus{border-color:#aaa}
 .fchip.active{border-color:transparent}
 .filter-divider{width:1px;background:#ddd;align-self:stretch;flex-shrink:0;margin:0 2px}
 .active-filters-row{font-size:11px;color:#aaa;margin-bottom:6px;min-height:14px}
-
 .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.75rem;align-items:center}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#555}
 .ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .ldot-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 
-/* CALENDAR GRID — cells grow with content */
+/* ── CALENDAR ── */
 .cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
 .cal-header div{text-align:center;font-size:11px;font-weight:600;color:#888;padding:4px 0;letter-spacing:.05em}
 
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;align-items:start}
+/* Each week row is its own sub-grid so all 7 cells share the same height */
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
 
+/* Cell: flex column, campaigns pinned to bottom */
 .day-cell{
   background:#fff;
   border:1px solid #e8e8e5;
   border-radius:8px;
   padding:6px 5px 5px;
-  min-height:80px;        /* minimum so empty cells look ok */
   cursor:pointer;
   transition:border-color .15s;
   position:relative;
   display:flex;
   flex-direction:column;
-  /* NO fixed height — grows with content */
+  min-height:110px;
 }
 .day-cell:hover{border-color:#ccc}
 .day-cell.today{border:2px solid #1D9E75}
 .day-cell.other-month{background:#f6f6f4;opacity:.45}
-
 .day-num{font-size:12px;font-weight:500;color:#888;margin-bottom:4px;flex-shrink:0}
 .day-cell.today .day-num{color:#1D9E75;font-weight:700}
 
-.events-area{display:flex;flex-direction:column;gap:2px}
+/* Events grow, push campaigns to bottom */
+.events-area{flex:1;display:flex;flex-direction:column;gap:2px}
 
-.event-chip{
-  font-size:10px;
-  padding:2px 5px;
-  border-radius:4px;
-  display:flex;
-  align-items:center;
-  gap:3px;
-  overflow:hidden;
-  transition:opacity .15s;
-  cursor:pointer;
-  flex-shrink:0;
-}
+.event-chip{font-size:10px;padding:2px 5px;border-radius:4px;display:flex;align-items:center;gap:3px;overflow:hidden;transition:opacity .15s;cursor:pointer;flex-shrink:0}
 .event-chip:hover{filter:brightness(.96)}
 .event-chip.dimmed{opacity:.12}
 .chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;font-weight:500}
@@ -89,13 +77,10 @@ input:focus,select:focus{border-color:#aaa}
 .chip-del{display:none;flex-shrink:0;font-size:9px;cursor:pointer;opacity:.7;margin-left:2px;line-height:1}
 .event-chip:hover .chip-del{display:inline}
 
-.campaigns-area{margin-top:4px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
-.camp-bar{
-  font-size:9px;padding:2px 5px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  font-weight:600;cursor:pointer;position:relative;
-  min-height:16px;line-height:16px;color:#fff;
-}
+/* Campaigns always at the bottom of each cell */
+.campaigns-area{flex-shrink:0;margin-top:5px;display:flex;flex-direction:column;gap:2px}
+
+.camp-bar{font-size:9px;padding:2px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;cursor:pointer;position:relative;min-height:16px;line-height:16px;color:#fff}
 .camp-bar:hover{filter:brightness(.9)}
 .camp-bar .bar-del{display:none;position:absolute;right:3px;top:0;font-size:9px;cursor:pointer;opacity:.9;line-height:16px}
 .camp-bar:hover .bar-del{display:inline}
@@ -103,6 +88,8 @@ input:focus,select:focus{border-color:#aaa}
 .camp-bar.end{border-radius:0 6px 6px 0}
 .camp-bar.solo{border-radius:6px}
 .camp-bar.middle{border-radius:0}
+/* Transparent placeholder so cells without campaign stay aligned */
+.camp-bar.placeholder{background:transparent !important;pointer-events:none;visibility:hidden}
 
 .add-btn{background:none;border:none;color:#bbb;font-size:15px;cursor:pointer;padding:0;line-height:1;position:absolute;top:5px;right:5px;opacity:0}
 .day-cell:hover .add-btn{opacity:1}
@@ -143,7 +130,6 @@ input:focus,select:focus{border-color:#aaa}
 </style>
 </head>
 <body>
-
 <div id="loading-overlay" class="loading-overlay">
   <div class="spinner"></div>
   <p>Carregando calendário...</p>
@@ -160,27 +146,18 @@ input:focus,select:focus{border-color:#aaa}
     <span id="sync-label">Conectando...</span>
   </div>
   <div class="filter-bar">
-    <div class="filter-group">
-      <label>Canal</label>
-      <div id="filter-channels" class="filter-chips"></div>
-    </div>
+    <div class="filter-group"><label>Canal</label><div id="filter-channels" class="filter-chips"></div></div>
     <div class="filter-divider"></div>
-    <div class="filter-group">
-      <label>Público</label>
-      <div id="filter-audiences" class="filter-chips"></div>
-    </div>
+    <div class="filter-group"><label>Público</label><div id="filter-audiences" class="filter-chips"></div></div>
     <div class="filter-divider"></div>
-    <div class="filter-group">
-      <label>Tema</label>
-      <div id="filter-themes" class="filter-chips"></div>
-    </div>
+    <div class="filter-group"><label>Tema</label><div id="filter-themes" class="filter-chips"></div></div>
   </div>
   <div class="active-filters-row" id="active-filters-row"></div>
   <div id="legend" class="legend"></div>
   <div class="cal-header">
     <div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div><div>DOM</div>
   </div>
-  <div id="cal-grid" class="cal-grid"></div>
+  <div id="cal-body"></div>
 </div>
 
 <div id="modal-bg" class="modal-bg" style="display:none">
@@ -191,7 +168,6 @@ input:focus,select:focus{border-color:#aaa}
       <div class="tab" id="tab-channels" data-tab="channels">Canais</div>
       <div class="tab" id="tab-audiences" data-tab="audiences">Públicos</div>
     </div>
-
     <div id="pane-event">
       <h3 id="modal-title">Adicionar disparo</h3>
       <div id="edit-badge" class="edit-badge" style="display:none">✏️ Editando disparo existente</div>
@@ -201,10 +177,7 @@ input:focus,select:focus{border-color:#aaa}
       <label>Horário</label>
       <div class="time-selects">
         <select id="ev-hour"></select>
-        <select id="ev-min">
-          <option value="00">:00</option>
-          <option value="30">:30</option>
-        </select>
+        <select id="ev-min"><option value="00">:00</option><option value="30">:30</option></select>
       </div>
       <label>Canal</label>
       <select id="ev-channel"></select>
@@ -217,17 +190,14 @@ input:focus,select:focus{border-color:#aaa}
         <button id="modal-save">Salvar</button>
       </div>
     </div>
-
     <div id="pane-campaign" style="display:none">
       <h3>Campanha / Período</h3>
       <div id="edit-camp-badge" class="edit-badge" style="display:none">✏️ Editando campanha existente</div>
       <div id="camp-list" style="margin-bottom:12px"></div>
       <label>Nome da campanha</label>
       <input id="camp-name" type="text" placeholder="Ex: Black Friday, Verão 2026..."/>
-      <label>Data início</label>
-      <input id="camp-start" type="date"/>
-      <label>Data fim</label>
-      <input id="camp-end" type="date"/>
+      <label>Data início</label><input id="camp-start" type="date"/>
+      <label>Data fim</label><input id="camp-end" type="date"/>
       <label>Cor</label>
       <div id="camp-color-grid" class="color-grid" style="margin-top:6px;margin-bottom:4px"></div>
       <div class="modal-btns">
@@ -235,7 +205,6 @@ input:focus,select:focus{border-color:#aaa}
         <button id="camp-add">Adicionar campanha</button>
       </div>
     </div>
-
     <div id="pane-channels" style="display:none">
       <h3>Gerenciar canais</h3>
       <div id="channel-list" style="margin-bottom:12px"></div>
@@ -243,12 +212,8 @@ input:focus,select:focus{border-color:#aaa}
       <input id="new-ch-name" type="text" placeholder="Nome do canal..."/>
       <label>Cor do canal</label>
       <div id="ch-color-grid" class="color-grid" style="margin-top:6px;margin-bottom:12px"></div>
-      <div class="modal-btns">
-        <button id="ch-cancel">Fechar</button>
-        <button id="ch-add">Adicionar</button>
-      </div>
+      <div class="modal-btns"><button id="ch-cancel">Fechar</button><button id="ch-add">Adicionar</button></div>
     </div>
-
     <div id="pane-audiences" style="display:none">
       <h3>Gerenciar públicos</h3>
       <div id="audience-list" style="margin-bottom:12px"></div>
@@ -256,10 +221,7 @@ input:focus,select:focus{border-color:#aaa}
       <input id="new-aud-name" type="text" placeholder="Ex: VIP, Inativos 90d..."/>
       <label>Cor do público</label>
       <div id="aud-color-grid" class="color-grid" style="margin-top:6px;margin-bottom:12px"></div>
-      <div class="modal-btns">
-        <button id="aud-cancel">Fechar</button>
-        <button id="aud-add">Adicionar público</button>
-      </div>
+      <div class="modal-btns"><button id="aud-cancel">Fechar</button><button id="aud-add">Adicionar público</button></div>
     </div>
   </div>
 </div>
@@ -268,115 +230,75 @@ input:focus,select:focus{border-color:#aaa}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC7xA8-P1kAhf_6ItweNk9lxV64lautOSo",
-  authDomain: "crm-calendario-f3b18.firebaseapp.com",
-  projectId: "crm-calendario-f3b18",
-  storageBucket: "crm-calendario-f3b18.firebasestorage.app",
-  messagingSenderId: "1069676978590",
-  appId: "1:1069676978590:web:c9a99be01b991df9f0b68f"
-};
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
+const firebaseConfig={apiKey:"AIzaSyC7xA8-P1kAhf_6ItweNk9lxV64lautOSo",authDomain:"crm-calendario-f3b18.firebaseapp.com",projectId:"crm-calendario-f3b18",storageBucket:"crm-calendario-f3b18.firebasestorage.app",messagingSenderId:"1069676978590",appId:"1:1069676978590:web:c9a99be01b991df9f0b68f"};
+const fbApp=initializeApp(firebaseConfig);
+const db=getFirestore(fbApp);
 
 const PALETTE=[
-  {id:'purple',label:'Roxo',bg:'#EEEDFE',text:'#3C3489',dot:'#7F77DD'},
-  {id:'teal',label:'Verde',bg:'#E1F5EE',text:'#0F6E56',dot:'#1D9E75'},
-  {id:'blue',label:'Azul',bg:'#E6F1FB',text:'#185FA5',dot:'#378ADD'},
-  {id:'amber',label:'Laranja',bg:'#FAEEDA',text:'#854F0B',dot:'#BA7517'},
-  {id:'coral',label:'Coral',bg:'#FAECE7',text:'#993C1D',dot:'#D85A30'},
-  {id:'pink',label:'Rosa',bg:'#FBEAF0',text:'#993556',dot:'#D4537E'},
-  {id:'green',label:'Verde',bg:'#EAF3DE',text:'#3B6D11',dot:'#639922'},
-  {id:'red',label:'Vermelho',bg:'#FCEBEB',text:'#A32D2D',dot:'#E24B4A'},
-  {id:'gray',label:'Cinza',bg:'#F1EFE8',text:'#5F5E5A',dot:'#888780'},
-  {id:'sky',label:'Céu',bg:'#E0F2FE',text:'#0C5A87',dot:'#38B2D8'},
-  {id:'lime',label:'Lima',bg:'#F0FBE4',text:'#3A6A0A',dot:'#7DC52E'},
-  {id:'violet',label:'Violeta',bg:'#F3EEFF',text:'#5B3AA8',dot:'#9B6EF3'},
-  {id:'rose',label:'Rosê',bg:'#FFF0F3',text:'#9A1B3D',dot:'#F472A0'},
-  {id:'gold',label:'Dourado',bg:'#FEF8E3',text:'#8A6500',dot:'#E6B800'},
-  {id:'indigo',label:'Índigo',bg:'#EEF0FF',text:'#2D3A9A',dot:'#6674E5'},
-  {id:'brown',label:'Marrom',bg:'#F5EDE6',text:'#6B3A20',dot:'#B06A3A'},
+  {id:'purple',bg:'#EEEDFE',text:'#3C3489',dot:'#7F77DD'},
+  {id:'teal',bg:'#E1F5EE',text:'#0F6E56',dot:'#1D9E75'},
+  {id:'blue',bg:'#E6F1FB',text:'#185FA5',dot:'#378ADD'},
+  {id:'amber',bg:'#FAEEDA',text:'#854F0B',dot:'#BA7517'},
+  {id:'coral',bg:'#FAECE7',text:'#993C1D',dot:'#D85A30'},
+  {id:'pink',bg:'#FBEAF0',text:'#993556',dot:'#D4537E'},
+  {id:'green',bg:'#EAF3DE',text:'#3B6D11',dot:'#639922'},
+  {id:'red',bg:'#FCEBEB',text:'#A32D2D',dot:'#E24B4A'},
+  {id:'gray',bg:'#F1EFE8',text:'#5F5E5A',dot:'#888780'},
+  {id:'sky',bg:'#E0F2FE',text:'#0C5A87',dot:'#38B2D8'},
+  {id:'lime',bg:'#F0FBE4',text:'#3A6A0A',dot:'#7DC52E'},
+  {id:'violet',bg:'#F3EEFF',text:'#5B3AA8',dot:'#9B6EF3'},
+  {id:'rose',bg:'#FFF0F3',text:'#9A1B3D',dot:'#F472A0'},
+  {id:'gold',bg:'#FEF8E3',text:'#8A6500',dot:'#E6B800'},
+  {id:'indigo',bg:'#EEF0FF',text:'#2D3A9A',dot:'#6674E5'},
+  {id:'brown',bg:'#F5EDE6',text:'#6B3A20',dot:'#B06A3A'},
 ];
-const DEFAULT_CHANNELS=[
-  {id:'ch_apppush',name:'App Push',color:'purple'},
-  {id:'ch_webpush',name:'Web Push',color:'blue'},
-  {id:'ch_firebase',name:'Firebase',color:'amber'},
-  {id:'ch_pushnews',name:'Pushnews',color:'coral'},
-  {id:'ch_email',name:'E-mail',color:'teal'},
-  {id:'ch_whatsapp',name:'WhatsApp',color:'green'},
-];
-const DEFAULT_AUDIENCES=[
-  {id:'aud_todos',name:'Todos',color:'gray'},
-  {id:'aud_ativos',name:'Ativos',color:'teal'},
-  {id:'aud_queda',name:'Em queda',color:'amber'},
-  {id:'aud_frios',name:'Frios',color:'blue'},
-];
-
-function gc(id){return PALETTE.find(c=>c.id===id)||PALETTE[0]}
+const DEFAULT_CHANNELS=[{id:'ch_apppush',name:'App Push',color:'purple'},{id:'ch_webpush',name:'Web Push',color:'blue'},{id:'ch_firebase',name:'Firebase',color:'amber'},{id:'ch_pushnews',name:'Pushnews',color:'coral'},{id:'ch_email',name:'E-mail',color:'teal'},{id:'ch_whatsapp',name:'WhatsApp',color:'green'}];
+const DEFAULT_AUDIENCES=[{id:'aud_todos',name:'Todos',color:'gray'},{id:'aud_ativos',name:'Ativos',color:'teal'},{id:'aud_queda',name:'Em queda',color:'amber'},{id:'aud_frios',name:'Frios',color:'blue'}];
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-let today=new Date();
-let cur={y:today.getFullYear(),m:today.getMonth()};
+function gc(id){return PALETTE.find(c=>c.id===id)||PALETTE[0]}
+
+let today=new Date(),cur={y:today.getFullYear(),m:today.getMonth()};
 let events={},channels=[],campaigns=[],audiences=[];
-let openCell=null;
-let selColor='purple',selChColor='teal',selCampColor='coral',selAudColor='sky';
+let openCell=null,selColor='purple',selChColor='teal',selCampColor='coral',selAudColor='sky';
 let selAudienceId='aud_todos';
 let filterCh=new Set(),filterTh=new Set(),filterAud=new Set();
-let isSaving=false;
-let editEvKey=null,editEvIdx=null,editCampId=null;
+let isSaving=false,editEvKey=null,editEvIdx=null,editCampId=null;
 
 // hours
 const hourSel=document.getElementById('ev-hour');
-for(let h=0;h<24;h++){
-  const o=document.createElement('option');
-  o.value=String(h).padStart(2,'0');
-  o.textContent=String(h).padStart(2,'0')+'h';
-  hourSel.appendChild(o);
-}
+for(let h=0;h<24;h++){const o=document.createElement('option');o.value=String(h).padStart(2,'0');o.textContent=String(h).padStart(2,'0')+'h';hourSel.appendChild(o);}
 hourSel.value='09';
 
 // tabs
-document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click',()=>switchTab(tab.dataset.tab));
-});
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 
 function switchTab(t){
   ['event','campaign','channels','audiences'].forEach(p=>{
     document.getElementById('pane-'+p).style.display=p===t?'':'none';
-    const el=document.getElementById('tab-'+p);
-    if(el) el.className='tab'+(p===t?' active':'');
+    const el=document.getElementById('tab-'+p);if(el)el.className='tab'+(p===t?' active':'');
   });
-  if(t==='campaign') renderCampList();
-  if(t==='channels') renderChList();
-  if(t==='audiences') renderAudList();
+  if(t==='campaign')renderCampList();
+  if(t==='channels')renderChList();
+  if(t==='audiences')renderAudList();
 }
 
 function setSyncStatus(s){
-  const dot=document.getElementById('sync-dot');
-  const lbl=document.getElementById('sync-label');
+  const dot=document.getElementById('sync-dot'),lbl=document.getElementById('sync-label');
   if(s==='ok'){dot.className='sync-dot ok';lbl.textContent='Sincronizado';}
   else if(s==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Salvando...';}
   else if(s==='error'){dot.className='sync-dot error';lbl.textContent='Erro de conexão';}
   else{dot.className='sync-dot';lbl.textContent='Conectando...';}
 }
 
-const calRef=doc(db,'calendario','data');
-const cfgRef=doc(db,'calendario','config');
+const calRef=doc(db,'calendario','data'),cfgRef=doc(db,'calendario','config');
 
 async function loadFromFirebase(){
   try{
-    const [calSnap,cfgSnap]=await Promise.all([getDoc(calRef),getDoc(cfgRef)]);
-    if(calSnap.exists()) events=calSnap.data().events||{};
-    if(cfgSnap.exists()){
-      channels=cfgSnap.data().channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-      campaigns=cfgSnap.data().campaigns||[];
-      audiences=cfgSnap.data().audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
-    } else {
-      channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-      audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
-      campaigns=[];
-      await saveConfig();
-    }
+    const[calSnap,cfgSnap]=await Promise.all([getDoc(calRef),getDoc(cfgRef)]);
+    if(calSnap.exists())events=calSnap.data().events||{};
+    if(cfgSnap.exists()){channels=cfgSnap.data().channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));campaigns=cfgSnap.data().campaigns||[];audiences=cfgSnap.data().audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));}
+    else{channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));campaigns=[];await saveConfig();}
     setSyncStatus('ok');
   }catch(e){console.error(e);setSyncStatus('error');}
   document.getElementById('loading-overlay').style.display='none';
@@ -384,60 +306,31 @@ async function loadFromFirebase(){
 }
 
 function startListener(){
-  onSnapshot(calRef,(snap)=>{
-    if(snap.exists()&&!isSaving){events=snap.data().events||{};renderCal();setSyncStatus('ok');}
-  });
-  onSnapshot(cfgRef,(snap)=>{
-    if(snap.exists()&&!isSaving){
-      channels=snap.data().channels||DEFAULT_CHANNELS;
-      campaigns=snap.data().campaigns||[];
-      audiences=snap.data().audiences||DEFAULT_AUDIENCES;
-      renderCal();setSyncStatus('ok');
-    }
-  });
+  onSnapshot(calRef,(snap)=>{if(snap.exists()&&!isSaving){events=snap.data().events||{};renderCal();setSyncStatus('ok');}});
+  onSnapshot(cfgRef,(snap)=>{if(snap.exists()&&!isSaving){channels=snap.data().channels||DEFAULT_CHANNELS;campaigns=snap.data().campaigns||[];audiences=snap.data().audiences||DEFAULT_AUDIENCES;renderCal();setSyncStatus('ok');}});
 }
 
-async function saveEvents(){
-  isSaving=true;setSyncStatus('syncing');
-  try{await setDoc(calRef,{events});setSyncStatus('ok');}
-  catch(e){setSyncStatus('error');}
-  setTimeout(()=>{isSaving=false;},500);
-}
-async function saveConfig(){
-  isSaving=true;setSyncStatus('syncing');
-  try{await setDoc(cfgRef,{channels,campaigns,audiences});setSyncStatus('ok');}
-  catch(e){setSyncStatus('error');}
-  setTimeout(()=>{isSaving=false;},500);
-}
+async function saveEvents(){isSaving=true;setSyncStatus('syncing');try{await setDoc(calRef,{events});setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
+async function saveConfig(){isSaving=true;setSyncStatus('syncing');try{await setDoc(cfgRef,{channels,campaigns,audiences});setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
 
 function buildGrid(cid,selId,cb){
   const g=document.getElementById(cid);if(!g)return;g.innerHTML='';
-  PALETTE.forEach(c=>{
-    const sw=document.createElement('div');
-    sw.className='color-swatch'+(c.id===selId?' selected':'');
-    sw.style.background=c.dot;sw.title=c.label;
-    sw.addEventListener('click',()=>{
-      g.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
-      sw.classList.add('selected');cb(c.id);
-    });
-    g.appendChild(sw);
-  });
+  PALETTE.forEach(c=>{const sw=document.createElement('div');sw.className='color-swatch'+(c.id===selId?' selected':'');sw.style.background=c.dot;sw.title=c.id;sw.addEventListener('click',()=>{g.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));sw.classList.add('selected');cb(c.id);});g.appendChild(sw);});
 }
 buildGrid('ch-color-grid',selChColor,id=>{selChColor=id;});
 buildGrid('camp-color-grid',selCampColor,id=>{selCampColor=id;});
 buildGrid('aud-color-grid',selAudColor,id=>{selAudColor=id;});
 
 function refreshChSel(){
-  const sel=document.getElementById('ev-channel');const prev=sel.value;
+  const sel=document.getElementById('ev-channel'),prev=sel.value;
   sel.innerHTML='<option value="">— Nenhum —</option>';
   channels.forEach(ch=>{const o=document.createElement('option');o.value=ch.id;o.textContent=ch.name;sel.appendChild(o);});
-  sel.value=channels.find(c=>c.id===prev)?prev:'';
-  updChColor();
+  sel.value=channels.find(c=>c.id===prev)?prev:'';updChColor();
 }
 function updChColor(){
   const ch=channels.find(c=>c.id===document.getElementById('ev-channel').value);
   document.getElementById('color-hint').textContent=ch?'(definida pelo canal)':'';
-  if(ch) selColor=ch.color;
+  if(ch)selColor=ch.color;
   buildGrid('color-grid',selColor,id=>{selColor=id;});
 }
 document.getElementById('ev-channel').addEventListener('change',updChColor);
@@ -445,7 +338,7 @@ document.getElementById('ev-channel').addEventListener('change',updChColor);
 function refreshAudPills(){
   const container=document.getElementById('ev-audience-pills');container.innerHTML='';
   audiences.forEach(aud=>{
-    const c=gc(aud.color);const isOn=selAudienceId===aud.id;
+    const c=gc(aud.color),isOn=selAudienceId===aud.id;
     const pill=document.createElement('div');pill.className='aud-pill';pill.textContent=aud.name;
     if(isOn){pill.style.background=c.bg;pill.style.color=c.text;pill.style.borderColor=c.dot;}
     else{pill.style.background='#fff';pill.style.color='#555';pill.style.borderColor='#ddd';}
@@ -454,11 +347,7 @@ function refreshAudPills(){
   });
 }
 
-function allThemes(){
-  const s=new Set();
-  Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)s.add(e.name)}));
-  return[...s].sort();
-}
+function allThemes(){const s=new Set();Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)s.add(e.name)}));return[...s].sort();}
 function isActive(ev){
   const co=filterCh.size===0||(ev.channelId&&filterCh.has(ev.channelId));
   const to=filterTh.size===0||filterTh.has(ev.name);
@@ -467,29 +356,22 @@ function isActive(ev){
 }
 
 function renderFilterBar(){
-  const fc=document.getElementById('filter-channels');fc.innerHTML='';
-  const ac=document.createElement('div');ac.className='fchip'+(filterCh.size===0?' active-all':'');ac.textContent='Todos';
-  ac.addEventListener('click',()=>{filterCh.clear();renderFilterBar();renderCal();});fc.appendChild(ac);
-  channels.forEach(ch=>{
-    const c=gc(ch.color);const isOn=filterCh.has(ch.id);
-    const chip=document.createElement('div');chip.className='fchip'+(isOn?' active':'');
-    if(isOn){chip.style.background=c.bg;chip.style.color=c.text;chip.style.borderColor=c.dot;}
-    chip.innerHTML=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${c.dot};margin-right:4px;vertical-align:middle"></span>${ch.name}`;
-    chip.addEventListener('click',()=>{isOn?filterCh.delete(ch.id):filterCh.add(ch.id);renderFilterBar();renderCal();});
-    fc.appendChild(chip);
-  });
-
-  const fa=document.getElementById('filter-audiences');fa.innerHTML='';
-  const aa=document.createElement('div');aa.className='fchip'+(filterAud.size===0?' active-all':'');aa.textContent='Todos';
-  aa.addEventListener('click',()=>{filterAud.clear();renderFilterBar();renderCal();});fa.appendChild(aa);
-  audiences.forEach(aud=>{
-    const c=gc(aud.color);const isOn=filterAud.has(aud.id);
-    const chip=document.createElement('div');chip.className='fchip'+(isOn?' active':'');
-    if(isOn){chip.style.background=c.bg;chip.style.color=c.text;chip.style.borderColor=c.dot;}
-    chip.innerHTML=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${c.dot};margin-right:4px;vertical-align:middle"></span>${aud.name}`;
-    chip.addEventListener('click',()=>{isOn?filterAud.delete(aud.id):filterAud.add(aud.id);renderFilterBar();renderCal();});
-    fa.appendChild(chip);
-  });
+  function makeChips(containerId,items,filterSet,getId,getLabel,getDot){
+    const fc=document.getElementById(containerId);fc.innerHTML='';
+    const ac=document.createElement('div');ac.className='fchip'+(filterSet.size===0?' active-all':'');ac.textContent='Todos';
+    ac.addEventListener('click',()=>{filterSet.clear();renderFilterBar();renderCal();});fc.appendChild(ac);
+    items.forEach(item=>{
+      const id=getId(item),label=getLabel(item),dot=getDot(item);
+      const c=gc(dot);const isOn=filterSet.has(id);
+      const chip=document.createElement('div');chip.className='fchip'+(isOn?' active':'');
+      if(isOn){chip.style.background=c.bg;chip.style.color=c.text;chip.style.borderColor=c.dot;}
+      chip.innerHTML=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${c.dot};margin-right:4px;vertical-align:middle"></span>${label}`;
+      chip.addEventListener('click',()=>{isOn?filterSet.delete(id):filterSet.add(id);renderFilterBar();renderCal();});
+      fc.appendChild(chip);
+    });
+  }
+  makeChips('filter-channels',channels,filterCh,ch=>ch.id,ch=>ch.name,ch=>ch.color);
+  makeChips('filter-audiences',audiences,filterAud,a=>a.id,a=>a.name,a=>a.color);
 
   const ft=document.getElementById('filter-themes');ft.innerHTML='';
   const themes=allThemes();
@@ -498,9 +380,8 @@ function renderFilterBar(){
     const at=document.createElement('div');at.className='fchip'+(filterTh.size===0?' active-all':'');at.textContent='Todos';
     at.addEventListener('click',()=>{filterTh.clear();renderFilterBar();renderCal();});ft.appendChild(at);
     themes.forEach(name=>{
-      let color='gray';
-      Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name===name)color=e.color;}));
-      const c=gc(color);const isOn=filterTh.has(name);
+      let color='gray';Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name===name)color=e.color;}));
+      const c=gc(color),isOn=filterTh.has(name);
       const chip=document.createElement('div');chip.className='fchip'+(isOn?' active':'');
       if(isOn){chip.style.background=c.bg;chip.style.color=c.text;chip.style.borderColor=c.dot;}
       chip.textContent=name;
@@ -509,9 +390,9 @@ function renderFilterBar(){
     });
   }
   const parts=[];
-  if(filterCh.size>0) parts.push('Canal: '+[...filterCh].map(id=>channels.find(c=>c.id===id)?.name||id).join(', '));
-  if(filterAud.size>0) parts.push('Público: '+[...filterAud].map(id=>audiences.find(a=>a.id===id)?.name||id).join(', '));
-  if(filterTh.size>0) parts.push('Tema: '+[...filterTh].join(', '));
+  if(filterCh.size>0)parts.push('Canal: '+[...filterCh].map(id=>channels.find(c=>c.id===id)?.name||id).join(', '));
+  if(filterAud.size>0)parts.push('Público: '+[...filterAud].map(id=>audiences.find(a=>a.id===id)?.name||id).join(', '));
+  if(filterTh.size>0)parts.push('Tema: '+[...filterTh].join(', '));
   document.getElementById('active-filters-row').textContent=parts.length?'Filtros ativos — '+parts.join(' · '):'';
 }
 
@@ -519,7 +400,7 @@ function renderCampList(){
   const el=document.getElementById('camp-list');el.innerHTML='';
   if(!campaigns.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhuma campanha. Adicione abaixo.</div>';return;}
   campaigns.forEach(cp=>{
-    const c=gc(cp.color);const row=document.createElement('div');row.className='camp-list-row';
+    const c=gc(cp.color),row=document.createElement('div');row.className='camp-list-row';
     const dot=document.createElement('div');dot.style.cssText=`width:10px;height:10px;border-radius:50%;background:${c.dot};flex-shrink:0`;
     const name=document.createElement('span');name.style.cssText='flex:1;font-size:13px;color:#1a1a1a';name.textContent=cp.name;
     const dates=document.createElement('span');dates.style.cssText='font-size:11px;color:#aaa';dates.textContent=`${cp.start}→${cp.end}`;
@@ -537,40 +418,32 @@ function startEditCamp(id){
   document.getElementById('camp-name').value=cp.name;
   document.getElementById('camp-start').value=cp.start;
   document.getElementById('camp-end').value=cp.end;
-  selCampColor=cp.color;
-  buildGrid('camp-color-grid',selCampColor,id=>{selCampColor=id;});
+  selCampColor=cp.color;buildGrid('camp-color-grid',selCampColor,id=>{selCampColor=id;});
   document.getElementById('edit-camp-badge').style.display='inline-block';
   document.getElementById('camp-add').textContent='Salvar alterações';
 }
 document.getElementById('camp-add').addEventListener('click',()=>{
   const name=document.getElementById('camp-name').value.trim();
-  const start=document.getElementById('camp-start').value;
-  const end=document.getElementById('camp-end').value;
+  const start=document.getElementById('camp-start').value,end=document.getElementById('camp-end').value;
   if(!name||!start||!end||start>end)return;
   if(editCampId){
     const idx=campaigns.findIndex(x=>x.id===editCampId);
-    if(idx>-1) campaigns[idx]={...campaigns[idx],name,start,end,color:selCampColor};
-    editCampId=null;
-    document.getElementById('edit-camp-badge').style.display='none';
-    document.getElementById('camp-add').textContent='Adicionar campanha';
-  } else {
-    campaigns.push({id:'cp_'+Date.now(),name,start,end,color:selCampColor});
-  }
+    if(idx>-1)campaigns[idx]={...campaigns[idx],name,start,end,color:selCampColor};
+    editCampId=null;document.getElementById('edit-camp-badge').style.display='none';document.getElementById('camp-add').textContent='Adicionar campanha';
+  }else{campaigns.push({id:'cp_'+Date.now(),name,start,end,color:selCampColor});}
   document.getElementById('camp-name').value='';
   saveConfig();renderCampList();renderCal();
 });
 
 function renderChList(){
   const el=document.getElementById('channel-list');el.innerHTML='';
-  if(!channels.length){el.innerHTML='<div style="font-size:12px;color:#aaa">Nenhum canal.</div>';return;}
   channels.forEach(ch=>{
-    const c=gc(ch.color);const row=document.createElement('div');row.className='list-row';
+    const c=gc(ch.color),row=document.createElement('div');row.className='list-row';
     const dot=document.createElement('div');dot.className='dot-sm';dot.style.background=c.dot;
     const name=document.createElement('span');name.style.cssText='flex:1;font-size:13px;color:#1a1a1a';name.textContent=ch.name;
     const delBtn=document.createElement('button');delBtn.textContent='✕';delBtn.style.cssText='background:none;border:none;cursor:pointer;color:#bbb;font-size:13px';
     delBtn.addEventListener('click',()=>{channels=channels.filter(x=>x.id!==ch.id);saveConfig();renderChList();refreshChSel();renderCal();});
-    row.appendChild(dot);row.appendChild(name);row.appendChild(delBtn);
-    el.appendChild(row);
+    row.appendChild(dot);row.appendChild(name);row.appendChild(delBtn);el.appendChild(row);
   });
 }
 document.getElementById('ch-add').addEventListener('click',()=>{
@@ -583,14 +456,13 @@ document.getElementById('ch-add').addEventListener('click',()=>{
 function renderAudList(){
   const el=document.getElementById('audience-list');el.innerHTML='';
   audiences.forEach(aud=>{
-    const c=gc(aud.color);const row=document.createElement('div');row.className='list-row';
+    const c=gc(aud.color),row=document.createElement('div');row.className='list-row';
     const dot=document.createElement('div');dot.className='dot-sm';dot.style.background=c.dot;
     const name=document.createElement('span');name.style.cssText='flex:1;font-size:13px;color:#1a1a1a';name.textContent=aud.name;
     const delBtn=document.createElement('button');delBtn.textContent='✕';delBtn.style.cssText='background:none;border:none;cursor:pointer;color:#bbb;font-size:13px';
     if(aud.id==='aud_todos'){delBtn.disabled=true;delBtn.style.opacity='.3';delBtn.style.cursor='default';}
     else delBtn.addEventListener('click',()=>{audiences=audiences.filter(x=>x.id!==aud.id);saveConfig();renderAudList();refreshAudPills();renderFilterBar();renderCal();});
-    row.appendChild(dot);row.appendChild(name);row.appendChild(delBtn);
-    el.appendChild(row);
+    row.appendChild(dot);row.appendChild(name);row.appendChild(delBtn);el.appendChild(row);
   });
 }
 document.getElementById('aud-add').addEventListener('click',()=>{
@@ -622,99 +494,101 @@ function campsForDay(k){
 }
 
 function renderCal(){
-  const grid=document.getElementById('cal-grid');
+  const body=document.getElementById('cal-body');
   document.getElementById('month-label').textContent=MONTHS[cur.m]+' '+cur.y;
-  grid.innerHTML='';
+  body.innerHTML='';
+
   const first=new Date(cur.y,cur.m,1);
   let dow=first.getDay();dow=dow===0?6:dow-1;
   const total=new Date(cur.y,cur.m+1,0).getDate();
   const prevTotal=new Date(cur.y,cur.m,0).getDate();
+
+  // build full flat list of cells
   const cells=[];
-  for(let i=dow-1;i>=0;i--) cells.push({d:prevTotal-i,cur:false});
-  for(let d=1;d<=total;d++) cells.push({d,cur:true});
-  let nxt=1;while(cells.length%7!==0) cells.push({d:nxt++,cur:false});
+  for(let i=dow-1;i>=0;i--)cells.push({d:prevTotal-i,cur:false});
+  for(let d=1;d<=total;d++)cells.push({d,cur:true});
+  let nxt=1;while(cells.length%7!==0)cells.push({d:nxt++,cur:false});
 
-  cells.forEach(({d,cur:isCur},idx)=>{
-    const cell=document.createElement('div');
-    cell.className='day-cell'+(isCur?'':' other-month');
-    const isToday=isCur&&d===today.getDate()&&cur.m===today.getMonth()&&cur.y===today.getFullYear();
-    if(isToday) cell.classList.add('today');
-    const k=isCur?dkey(cur.y,cur.m,d):'';
+  // split into weeks
+  for(let w=0;w<cells.length/7;w++){
+    const week=cells.slice(w*7,(w+1)*7);
+    const weekRow=document.createElement('div');weekRow.className='cal-week';
 
-    const numEl=document.createElement('div');numEl.className='day-num';numEl.textContent=d;
-    cell.appendChild(numEl);
+    // pre-compute which campaigns are active this week and how many layers
+    // map campId -> layer index for the week
+    const weekKeys=week.map(({d,cur:isCur},i)=>isCur?dkey(cur.y,cur.m,d):null);
+    // unique campaigns active in this week, in order
+    const weekCamps=[];
+    weekKeys.forEach(k=>{if(!k)return;campsForDay(k).forEach(cp=>{if(!weekCamps.find(x=>x.id===cp.id))weekCamps.push(cp);});});
 
-    // events area — no overflow hidden, no fixed height
-    const evArea=document.createElement('div');evArea.className='events-area';
-    if(isCur&&events[k]){
-      events[k].forEach((ev,i)=>{
-        const c=gc(ev.color);
-        const ch=channels.find(x=>x.id===ev.channelId);
-        const aud=audiences.find(x=>x.id===ev.audienceId);
-        const dimmed=(filterCh.size>0||filterTh.size>0||filterAud.size>0)&&!isActive(ev);
-        const chip=document.createElement('div');
-        chip.className='event-chip'+(dimmed?' dimmed':'');
-        chip.style.background=c.bg;chip.style.color=c.text;
-        const audDot=aud?`<span class="chip-aud-dot" style="background:${gc(aud.color).dot}" title="${aud.name}"></span>`:'';
-        const chName=ch?`<span>${ch.name}</span>`:'';
-        chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del" title="Remover">✕</span>`;
-        chip.addEventListener('click',e=>{
-          if(e.target.classList.contains('chip-del')) return;
-          e.stopPropagation();openEditEvent(k,i);
+    week.forEach(({d,cur:isCur},colIdx)=>{
+      const cell=document.createElement('div');
+      cell.className='day-cell'+(isCur?'':' other-month');
+      const k=isCur?dkey(cur.y,cur.m,d):null;
+      const isToday=isCur&&d===today.getDate()&&cur.m===today.getMonth()&&cur.y===today.getFullYear();
+      if(isToday)cell.classList.add('today');
+
+      const numEl=document.createElement('div');numEl.className='day-num';numEl.textContent=d;cell.appendChild(numEl);
+
+      // events
+      const evArea=document.createElement('div');evArea.className='events-area';
+      if(isCur&&events[k]){
+        events[k].forEach((ev,i)=>{
+          const c=gc(ev.color);
+          const ch=channels.find(x=>x.id===ev.channelId);
+          const aud=audiences.find(x=>x.id===ev.audienceId);
+          const dimmed=(filterCh.size>0||filterTh.size>0||filterAud.size>0)&&!isActive(ev);
+          const chip=document.createElement('div');chip.className='event-chip'+(dimmed?' dimmed':'');
+          chip.style.background=c.bg;chip.style.color=c.text;
+          const audDot=aud?`<span class="chip-aud-dot" style="background:${gc(aud.color).dot}" title="${aud.name}"></span>`:'';
+          const chName=ch?`<span>${ch.name}</span>`:'';
+          chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del" title="Remover">✕</span>`;
+          chip.addEventListener('click',e=>{if(e.target.classList.contains('chip-del'))return;e.stopPropagation();openEditEvent(k,i);});
+          chip.querySelector('.chip-del').addEventListener('click',e=>{e.stopPropagation();events[k].splice(i,1);if(!events[k].length)delete events[k];saveEvents();renderCal();renderFilterBar();});
+          evArea.appendChild(chip);
         });
-        chip.querySelector('.chip-del').addEventListener('click',e=>{
-          e.stopPropagation();
-          events[k].splice(i,1);
-          if(!events[k].length)delete events[k];
-          saveEvents();renderCal();renderFilterBar();
-        });
-        evArea.appendChild(chip);
-      });
-    }
-    cell.appendChild(evArea);
+      }
+      cell.appendChild(evArea);
 
-    // campaigns
-    if(isCur){
-      const campArea=document.createElement('div');campArea.className='campaigns-area';
-      campsForDay(k).forEach(cp=>{
-        const c=gc(cp.color);
-        const s=parseDate(cp.start),e=parseDate(cp.end),cellDate=dateFromKey(k);
-        const isStart=cellDate.getTime()===s.getTime();
-        const isEnd=cellDate.getTime()===e.getTime();
-        const isSolo=isStart&&isEnd;
-        const isMonStart=idx%7===0;
-        const isMonEnd=idx%7===6;
-        let cls='camp-bar ';
-        if(isSolo) cls+='solo';
-        else if(isStart||isMonStart) cls+=(isEnd||isMonEnd)?'solo':'start';
-        else if(isEnd||isMonEnd) cls+='end';
-        else cls+='middle';
-        const bar=document.createElement('div');bar.className=cls;bar.style.background=c.dot;
-        const showText=isStart||isMonStart;
-        bar.innerHTML=showText?`${cp.name}<span class="bar-del">✕</span>`:`<span class="bar-del">✕</span>`;
-        bar.addEventListener('click',e=>{
-          if(e.target.classList.contains('bar-del')){
-            e.stopPropagation();
-            campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCal();
+      // campaigns area — one bar slot per campaign in weekCamps (placeholder if not active)
+      if(isCur){
+        const campArea=document.createElement('div');campArea.className='campaigns-area';
+        weekCamps.forEach(cp=>{
+          const active=k?campsForDay(k).find(x=>x.id===cp.id):null;
+          if(!active){
+            // placeholder to keep alignment
+            const ph=document.createElement('div');ph.className='camp-bar placeholder';ph.textContent='\u00A0';campArea.appendChild(ph);
             return;
           }
-          e.stopPropagation();
-          openCell=k;
-          document.getElementById('modal-bg').style.display='flex';
-          switchTab('campaign');
-          setTimeout(()=>startEditCamp(cp.id),50);
+          const c=gc(cp.color);
+          const s=parseDate(cp.start),e=parseDate(cp.end),cellDate=dateFromKey(k);
+          const isStart=cellDate.getTime()===s.getTime(),isEnd=cellDate.getTime()===e.getTime();
+          const isSolo=isStart&&isEnd,isMonStart=colIdx===0,isMonEnd=colIdx===6;
+          let cls='camp-bar ';
+          if(isSolo)cls+='solo';
+          else if(isStart||isMonStart)cls+=(isEnd||isMonEnd)?'solo':'start';
+          else if(isEnd||isMonEnd)cls+='end';
+          else cls+='middle';
+          const bar=document.createElement('div');bar.className=cls;bar.style.background=c.dot;
+          const showText=isStart||isMonStart;
+          bar.innerHTML=showText?`${cp.name}<span class="bar-del">✕</span>`:`<span class="bar-del">✕</span>`;
+          bar.addEventListener('click',e=>{
+            if(e.target.classList.contains('bar-del')){e.stopPropagation();campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCal();return;}
+            e.stopPropagation();openCell=k;document.getElementById('modal-bg').style.display='flex';switchTab('campaign');setTimeout(()=>startEditCamp(cp.id),50);
+          });
+          campArea.appendChild(bar);
         });
-        campArea.appendChild(bar);
-      });
-      cell.appendChild(campArea);
+        cell.appendChild(campArea);
 
-      const btn=document.createElement('button');btn.className='add-btn';btn.textContent='+';
-      btn.addEventListener('click',e=>{e.stopPropagation();openModal(k,d);});
-      cell.appendChild(btn);
-      cell.addEventListener('click',()=>openModal(k,d));
-    }
-    grid.appendChild(cell);
-  });
+        const btn=document.createElement('button');btn.className='add-btn';btn.textContent='+';
+        btn.addEventListener('click',e=>{e.stopPropagation();openModal(k,d);});
+        cell.appendChild(btn);
+        cell.addEventListener('click',()=>openModal(k,d));
+      }
+      weekRow.appendChild(cell);
+    });
+    body.appendChild(weekRow);
+  }
   renderLegend();renderFilterBar();
 }
 
@@ -723,21 +597,17 @@ function openModal(k,d){
   document.getElementById('edit-badge').style.display='none';
   document.getElementById('modal-save').textContent='Salvar';
   document.getElementById('modal-title').textContent='Disparo — dia '+d;
-  document.getElementById('ev-name').value='';
-  document.getElementById('ev-hour').value='09';
-  document.getElementById('ev-min').value='00';
+  document.getElementById('ev-name').value='';document.getElementById('ev-hour').value='09';document.getElementById('ev-min').value='00';
   selColor='purple';selAudienceId='aud_todos';
-  refreshChSel();refreshAudPills();
-  buildGrid('color-grid',selColor,id=>{selColor=id;});
+  refreshChSel();refreshAudPills();buildGrid('color-grid',selColor,id=>{selColor=id;});
   const sug=document.getElementById('theme-suggestions');sug.innerHTML='';
   Object.entries(usedThemes()).forEach(([name,color])=>{
-    const c=gc(color);const tag=document.createElement('div');tag.className='theme-tag';tag.textContent=name;
+    const c=gc(color),tag=document.createElement('div');tag.className='theme-tag';tag.textContent=name;
     tag.style.background=c.bg;tag.style.color=c.text;tag.style.borderColor=c.dot;
     tag.addEventListener('click',()=>{document.getElementById('ev-name').value=name;selColor=color;buildGrid('color-grid',selColor,id=>{selColor=id;});});
     sug.appendChild(tag);
   });
-  switchTab('event');
-  document.getElementById('modal-bg').style.display='flex';
+  switchTab('event');document.getElementById('modal-bg').style.display='flex';
   setTimeout(()=>document.getElementById('ev-name').focus(),50);
 }
 
@@ -745,55 +615,35 @@ function openEditEvent(k,i){
   const ev=events[k]&&events[k][i];if(!ev)return;
   editEvKey=k;editEvIdx=i;openCell=k;
   const[h,m]=(ev.time||'09:00').split(':');
-  document.getElementById('ev-hour').value=h||'09';
-  document.getElementById('ev-min').value=(m==='30'?'30':'00');
+  document.getElementById('ev-hour').value=h||'09';document.getElementById('ev-min').value=(m==='30'?'30':'00');
   document.getElementById('ev-name').value=ev.name||'';
-  selColor=ev.color||'purple';
-  selAudienceId=ev.audienceId||'aud_todos';
-  refreshChSel();
-  document.getElementById('ev-channel').value=ev.channelId||'';
-  updChColor();
-  buildGrid('color-grid',selColor,id=>{selColor=id;});
-  refreshAudPills();
+  selColor=ev.color||'purple';selAudienceId=ev.audienceId||'aud_todos';
+  refreshChSel();document.getElementById('ev-channel').value=ev.channelId||'';updChColor();
+  buildGrid('color-grid',selColor,id=>{selColor=id;});refreshAudPills();
   document.getElementById('edit-badge').style.display='inline-block';
-  document.getElementById('modal-title').textContent='Editar disparo';
-  document.getElementById('modal-save').textContent='Salvar alterações';
+  document.getElementById('modal-title').textContent='Editar disparo';document.getElementById('modal-save').textContent='Salvar alterações';
   const sug=document.getElementById('theme-suggestions');sug.innerHTML='';
   Object.entries(usedThemes()).forEach(([name,color])=>{
-    const c=gc(color);const tag=document.createElement('div');tag.className='theme-tag';tag.textContent=name;
+    const c=gc(color),tag=document.createElement('div');tag.className='theme-tag';tag.textContent=name;
     tag.style.background=c.bg;tag.style.color=c.text;tag.style.borderColor=c.dot;
     tag.addEventListener('click',()=>{document.getElementById('ev-name').value=name;selColor=color;buildGrid('color-grid',selColor,id=>{selColor=id;});});
     sug.appendChild(tag);
   });
-  switchTab('event');
-  document.getElementById('modal-bg').style.display='flex';
+  switchTab('event');document.getElementById('modal-bg').style.display='flex';
   setTimeout(()=>document.getElementById('ev-name').focus(),50);
 }
 
 document.getElementById('modal-save').addEventListener('click',()=>{
   const name=document.getElementById('ev-name').value.trim();
-  const h=document.getElementById('ev-hour').value;
-  const m=document.getElementById('ev-min').value;
-  const time=h+':'+m;
-  const channelId=document.getElementById('ev-channel').value||null;
-  const audienceId=selAudienceId||null;
+  const h=document.getElementById('ev-hour').value,m=document.getElementById('ev-min').value,time=h+':'+m;
+  const channelId=document.getElementById('ev-channel').value||null,audienceId=selAudienceId||null;
   if(!name)return;
-  if(editEvKey!==null&&editEvIdx!==null){
-    events[editEvKey][editEvIdx]={name,time,color:selColor,channelId,audienceId};
-    events[editEvKey].sort((a,b)=>a.time.localeCompare(b.time));
-  } else {
-    if(!events[openCell])events[openCell]=[];
-    events[openCell].push({name,time,color:selColor,channelId,audienceId});
-    events[openCell].sort((a,b)=>a.time.localeCompare(b.time));
-  }
-  saveEvents();renderCal();renderFilterBar();
-  document.getElementById('modal-bg').style.display='none';
+  if(editEvKey!==null&&editEvIdx!==null){events[editEvKey][editEvIdx]={name,time,color:selColor,channelId,audienceId};events[editEvKey].sort((a,b)=>a.time.localeCompare(b.time));}
+  else{if(!events[openCell])events[openCell]=[];events[openCell].push({name,time,color:selColor,channelId,audienceId});events[openCell].sort((a,b)=>a.time.localeCompare(b.time));}
+  saveEvents();renderCal();renderFilterBar();document.getElementById('modal-bg').style.display='none';
 });
 
-document.getElementById('modal-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none';});
-document.getElementById('camp-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none';});
-document.getElementById('ch-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none';});
-document.getElementById('aud-cancel').addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none';});
+['modal-cancel','camp-cancel','ch-cancel','aud-cancel'].forEach(id=>document.getElementById(id).addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none';}));
 document.getElementById('modal-bg').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('modal-bg').style.display='none';});
 document.getElementById('ev-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('modal-save').click();});
 document.getElementById('new-ch-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ch-add').click();});
