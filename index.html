@@ -10,21 +10,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit;padding:6px 8px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#1a1a1a;outline:none}
 input:focus,select:focus{border-color:#aaa}
-.cal-wrap{max-width:1200px;margin:0 auto;padding:1rem 0}
+
+.cal-wrap{max-width:1400px;margin:0 auto;padding:1rem 0}
 .nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
 .nav-row h2{font-size:16px;font-weight:600;color:#1a1a1a}
-.nav-btn{background:#fff;border:1px solid #ddd;border-radius:8px;padding:5px 12px;font-size:14px;color:#1a1a1a}
+.nav-btn{background:#fff;border:1px solid #ddd;border-radius:8px;padding:5px 14px;font-size:14px;color:#1a1a1a}
 .nav-btn:hover{background:#f0f0ee}
-.sync-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px}
+
+.sync-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-bottom:6px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;transition:background .3s}
 .sync-dot.syncing{background:#f59e0b;animation:pulse 1s infinite}
 .sync-dot.ok{background:#1D9E75}
 .sync-dot.error{background:#E24B4A}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes spin{to{transform:rotate(360deg)}}
+
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-bottom:.75rem;padding:10px 14px;background:#f0f0ee;border-radius:10px;border:1px solid #e0e0dc}
 .filter-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
-.filter-bar label{font-size:11px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.filter-bar label{font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 .filter-chips{display:flex;flex-wrap:wrap;gap:4px}
 .fchip{font-size:11px;padding:3px 10px;border-radius:10px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#555;transition:all .1s;white-space:nowrap}
 .fchip:hover{border-color:#bbb}
@@ -32,40 +35,80 @@ input:focus,select:focus{border-color:#aaa}
 .fchip.active{border-color:transparent}
 .filter-divider{width:1px;background:#ddd;align-self:stretch;flex-shrink:0;margin:0 2px}
 .active-filters-row{font-size:11px;color:#aaa;margin-bottom:6px;min-height:14px}
+
 .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.75rem;align-items:center}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#555}
-.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.ldot-sq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#555}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ldot-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* CALENDAR GRID — cells grow with content */
 .cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
 .cal-header div{text-align:center;font-size:11px;font-weight:600;color:#888;padding:4px 0;letter-spacing:.05em}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.day-cell{background:#fff;border:1px solid #e8e8e5;border-radius:8px;padding:6px 5px 4px;min-height:120px;cursor:pointer;transition:border-color .15s;position:relative;display:flex;flex-direction:column}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;align-items:start}
+
+.day-cell{
+  background:#fff;
+  border:1px solid #e8e8e5;
+  border-radius:8px;
+  padding:6px 5px 5px;
+  min-height:80px;        /* minimum so empty cells look ok */
+  cursor:pointer;
+  transition:border-color .15s;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  /* NO fixed height — grows with content */
+}
 .day-cell:hover{border-color:#ccc}
 .day-cell.today{border:2px solid #1D9E75}
-.day-cell.other-month{background:#f6f6f4;opacity:.5}
-.day-num{font-size:12px;font-weight:500;color:#888;margin-bottom:3px;flex-shrink:0}
+.day-cell.other-month{background:#f6f6f4;opacity:.45}
+
+.day-num{font-size:12px;font-weight:500;color:#888;margin-bottom:4px;flex-shrink:0}
 .day-cell.today .day-num{color:#1D9E75;font-weight:700}
-.events-area{flex:1;overflow:hidden}
-.event-chip{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;display:flex;align-items:center;gap:3px;overflow:hidden;transition:opacity .15s;cursor:pointer}
+
+.events-area{display:flex;flex-direction:column;gap:2px}
+
+.event-chip{
+  font-size:10px;
+  padding:2px 5px;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  gap:3px;
+  overflow:hidden;
+  transition:opacity .15s;
+  cursor:pointer;
+  flex-shrink:0;
+}
 .event-chip:hover{filter:brightness(.96)}
 .event-chip.dimmed{opacity:.12}
-.chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
-.chip-meta{font-size:9px;opacity:.6;white-space:nowrap;flex-shrink:0;display:flex;gap:3px;align-items:center}
+.chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;font-weight:500}
+.chip-meta{font-size:9px;opacity:.65;white-space:nowrap;flex-shrink:0;display:flex;gap:3px;align-items:center}
 .chip-aud-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
 .chip-del{display:none;flex-shrink:0;font-size:9px;cursor:pointer;opacity:.7;margin-left:2px;line-height:1}
 .event-chip:hover .chip-del{display:inline}
-.campaigns-area{flex-shrink:0;margin-top:3px;display:flex;flex-direction:column;gap:2px}
-.camp-bar{font-size:9px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;cursor:pointer;position:relative;min-height:15px;line-height:15px;color:#fff}
+
+.campaigns-area{margin-top:4px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.camp-bar{
+  font-size:9px;padding:2px 5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-weight:600;cursor:pointer;position:relative;
+  min-height:16px;line-height:16px;color:#fff;
+}
 .camp-bar:hover{filter:brightness(.9)}
-.camp-bar .bar-del{display:none;position:absolute;right:3px;top:0;font-size:9px;cursor:pointer;opacity:.9;line-height:15px}
+.camp-bar .bar-del{display:none;position:absolute;right:3px;top:0;font-size:9px;cursor:pointer;opacity:.9;line-height:16px}
 .camp-bar:hover .bar-del{display:inline}
 .camp-bar.start{border-radius:6px 0 0 6px}
 .camp-bar.end{border-radius:0 6px 6px 0}
 .camp-bar.solo{border-radius:6px}
 .camp-bar.middle{border-radius:0}
-.add-btn{background:none;border:none;color:#bbb;font-size:16px;cursor:pointer;padding:0;line-height:1;position:absolute;top:4px;right:5px;opacity:0}
+
+.add-btn{background:none;border:none;color:#bbb;font-size:15px;cursor:pointer;padding:0;line-height:1;position:absolute;top:5px;right:5px;opacity:0}
 .day-cell:hover .add-btn{opacity:1}
 .add-btn:hover{color:#888}
+
+/* MODAL */
 .modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100}
 .modal{background:#fff;border-radius:14px;border:1px solid #e0e0dc;padding:1.25rem;width:360px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
 .modal h3{font-size:15px;font-weight:600;margin-bottom:1rem;color:#1a1a1a}
@@ -112,11 +155,9 @@ input:focus,select:focus{border-color:#aaa}
     <h2 id="month-label"></h2>
     <button class="nav-btn" id="next">&#8250;</button>
   </div>
-  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:6px">
-    <div class="sync-indicator">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span id="sync-label">Conectando...</span>
-    </div>
+  <div class="sync-indicator">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Conectando...</span>
   </div>
   <div class="filter-bar">
     <div class="filter-group">
@@ -223,7 +264,6 @@ input:focus,select:focus{border-color:#aaa}
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -285,7 +325,7 @@ let filterCh=new Set(),filterTh=new Set(),filterAud=new Set();
 let isSaving=false;
 let editEvKey=null,editEvIdx=null,editCampId=null;
 
-// populate hours
+// hours
 const hourSel=document.getElementById('ev-hour');
 for(let h=0;h<24;h++){
   const o=document.createElement('option');
@@ -295,16 +335,16 @@ for(let h=0;h<24;h++){
 }
 hourSel.value='09';
 
-// TAB SWITCHING — using data attributes + addEventListener (no onclick)
+// tabs
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>switchTab(tab.dataset.tab));
 });
 
 function switchTab(t){
   ['event','campaign','channels','audiences'].forEach(p=>{
-    document.getElementById('pane-'+p).style.display = p===t ? '' : 'none';
+    document.getElementById('pane-'+p).style.display=p===t?'':'none';
     const el=document.getElementById('tab-'+p);
-    if(el) el.className = 'tab'+(p===t?' active':'');
+    if(el) el.className='tab'+(p===t?' active':'');
   });
   if(t==='campaign') renderCampList();
   if(t==='channels') renderChList();
@@ -483,15 +523,14 @@ function renderCampList(){
     const dot=document.createElement('div');dot.style.cssText=`width:10px;height:10px;border-radius:50%;background:${c.dot};flex-shrink:0`;
     const name=document.createElement('span');name.style.cssText='flex:1;font-size:13px;color:#1a1a1a';name.textContent=cp.name;
     const dates=document.createElement('span');dates.style.cssText='font-size:11px;color:#aaa';dates.textContent=`${cp.start}→${cp.end}`;
-    const editBtn=document.createElement('button');editBtn.textContent='✏️';editBtn.style.cssText='background:none;border:none;cursor:pointer;font-size:12px;padding:0 4px';editBtn.title='Editar';
-    const delBtn=document.createElement('button');delBtn.textContent='✕';delBtn.style.cssText='background:none;border:none;cursor:pointer;color:#bbb;font-size:13px;padding:0';delBtn.title='Remover';
+    const editBtn=document.createElement('button');editBtn.textContent='✏️';editBtn.style.cssText='background:none;border:none;cursor:pointer;font-size:12px;padding:0 4px';
+    const delBtn=document.createElement('button');delBtn.textContent='✕';delBtn.style.cssText='background:none;border:none;cursor:pointer;color:#bbb;font-size:13px;padding:0';
     editBtn.addEventListener('click',e=>{e.stopPropagation();startEditCamp(cp.id);});
     delBtn.addEventListener('click',e=>{e.stopPropagation();campaigns=campaigns.filter(x=>x.id!==cp.id);saveConfig();renderCampList();renderCal();});
     row.appendChild(dot);row.appendChild(name);row.appendChild(dates);row.appendChild(editBtn);row.appendChild(delBtn);
     el.appendChild(row);
   });
 }
-
 function startEditCamp(id){
   const cp=campaigns.find(x=>x.id===id);if(!cp)return;
   editCampId=id;
@@ -503,7 +542,6 @@ function startEditCamp(id){
   document.getElementById('edit-camp-badge').style.display='inline-block';
   document.getElementById('camp-add').textContent='Salvar alterações';
 }
-
 document.getElementById('camp-add').addEventListener('click',()=>{
   const name=document.getElementById('camp-name').value.trim();
   const start=document.getElementById('camp-start').value;
@@ -602,7 +640,11 @@ function renderCal(){
     const isToday=isCur&&d===today.getDate()&&cur.m===today.getMonth()&&cur.y===today.getFullYear();
     if(isToday) cell.classList.add('today');
     const k=isCur?dkey(cur.y,cur.m,d):'';
-    const numEl=document.createElement('div');numEl.className='day-num';numEl.textContent=d;cell.appendChild(numEl);
+
+    const numEl=document.createElement('div');numEl.className='day-num';numEl.textContent=d;
+    cell.appendChild(numEl);
+
+    // events area — no overflow hidden, no fixed height
     const evArea=document.createElement('div');evArea.className='events-area';
     if(isCur&&events[k]){
       events[k].forEach((ev,i)=>{
@@ -618,8 +660,7 @@ function renderCal(){
         chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del" title="Remover">✕</span>`;
         chip.addEventListener('click',e=>{
           if(e.target.classList.contains('chip-del')) return;
-          e.stopPropagation();
-          openEditEvent(k,i);
+          e.stopPropagation();openEditEvent(k,i);
         });
         chip.querySelector('.chip-del').addEventListener('click',e=>{
           e.stopPropagation();
@@ -631,13 +672,18 @@ function renderCal(){
       });
     }
     cell.appendChild(evArea);
+
+    // campaigns
     if(isCur){
       const campArea=document.createElement('div');campArea.className='campaigns-area';
       campsForDay(k).forEach(cp=>{
         const c=gc(cp.color);
         const s=parseDate(cp.start),e=parseDate(cp.end),cellDate=dateFromKey(k);
-        const isStart=cellDate.getTime()===s.getTime(),isEnd=cellDate.getTime()===e.getTime();
-        const isSolo=isStart&&isEnd,isMonStart=idx%7===0,isMonEnd=idx%7===6;
+        const isStart=cellDate.getTime()===s.getTime();
+        const isEnd=cellDate.getTime()===e.getTime();
+        const isSolo=isStart&&isEnd;
+        const isMonStart=idx%7===0;
+        const isMonEnd=idx%7===6;
         let cls='camp-bar ';
         if(isSolo) cls+='solo';
         else if(isStart||isMonStart) cls+=(isEnd||isMonEnd)?'solo':'start';
@@ -661,6 +707,7 @@ function renderCal(){
         campArea.appendChild(bar);
       });
       cell.appendChild(campArea);
+
       const btn=document.createElement('button');btn.className='add-btn';btn.textContent='+';
       btn.addEventListener('click',e=>{e.stopPropagation();openModal(k,d);});
       cell.appendChild(btn);
@@ -672,8 +719,7 @@ function renderCal(){
 }
 
 function openModal(k,d){
-  openCell=k;
-  editEvKey=null;editEvIdx=null;
+  openCell=k;editEvKey=null;editEvIdx=null;
   document.getElementById('edit-badge').style.display='none';
   document.getElementById('modal-save').textContent='Salvar';
   document.getElementById('modal-title').textContent='Disparo — dia '+d;
