@@ -1272,6 +1272,10 @@ function renderOpTable(){
 
   rows.forEach((r,i)=>{
     const tr=document.createElement('tr');
+    // Pre-compute image cell to avoid nested template literals
+    const imgCell = r.imagem_url
+      ? '<img class="op-img-thumb" src="'+r.imagem_url+'" title="'+esc(r.imagem_nome||'')+'" onerror="this.style.display='none'"/> <span class="op-img-name">'+esc(r.imagem_nome||'')+'</span>'
+      : '<span style="color:#ddd;font-size:11px">—</span>';
     tr.innerHTML=`
       <td style="color:#bbb;font-size:11px">${i+1}</td>
       <td><span class="status-badge ${statusClass(r.status)}">${r.status||'—'}</span></td>
@@ -1285,12 +1289,7 @@ function renderOpTable(){
       <td style="font-size:11px;color:#888">${esc(r.subtema)}</td>
       <td class="td-title">${esc(r.titulo)}</td>
       <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
-      <td>${r.imagem_url
-        ? `<img class="op-img-thumb" src="${r.imagem_url}" title="${esc(r.imagem_nome||'')}"
-              onerror="this.style.display='none'"/>
-           <span class="op-img-name">${esc(r.imagem_nome||'')}</span>`
-        : '<span style="color:#ddd;font-size:11px">—</span>'
-      }</td>
+      <td>${imgCell}</td>
       <td>
         <div class="row-actions">
           <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
@@ -1432,15 +1431,43 @@ function parseCSV(text){
   const headers=parseLine(lines[0]).map(h=>h.trim().toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // remove accents
     .replace(/[^a-z0-9]/g,'_'));
-  // Map CSV header → internal field name
+  // Map CSV header → internal field name (broad matching)
+  // Headers are already lowercased, accent-stripped, non-alphanum → _
   const MAP={
-    'status':'status','campanha':'campanha','data':'data','hora':'hora',
-    'canal':'canal','plataforma':'plataforma',
-    'segmentacao':'segmentacao','segmentacao_publico_base':'segmentacao',
-    'segmentacao__publico___base_':'segmentacao',
-    'tema':'tema','sub_tema':'subtema','subtema':'subtema',
-    'titulo':'titulo','titulo_do_push':'titulo',
-    'mensagem':'mensagem','texto':'mensagem','mensagem___texto':'mensagem'
+    // status
+    'status':'status',
+    // campanha
+    'campanha':'campanha','campanha_nome_id_':'campanha','campaign':'campanha',
+    'id':'campanha','utm':'campanha','nome':'campanha',
+    // data
+    'data':'data','date':'data','dt':'data',
+    // hora
+    'hora':'hora','horario':'hora','time':'hora','hour':'hora',
+    // canal
+    'canal':'canal','channel':'canal',
+    // plataforma
+    'plataforma':'plataforma','ferramenta':'plataforma','platform':'plataforma','tool':'plataforma',
+    // segmentacao
+    'segmentacao':'segmentacao','base':'segmentacao','publico':'segmentacao',
+    'segmentacao_publico_base_':'segmentacao','segmentacao__publico___base_':'segmentacao',
+    'segmentacao_publico_base':'segmentacao','audience':'segmentacao',
+    // tema
+    'tema':'tema','theme':'tema',
+    // subtema
+    'sub_tema':'subtema','subtema':'subtema','sub_theme':'subtema',
+    // titulo
+    'titulo':'titulo','titulo_do_push':'titulo','title':'titulo','titulo_push':'titulo',
+    'titulos':'titulo',
+    // mensagem
+    'mensagem':'mensagem','texto':'mensagem','text':'mensagem',
+    'mensagem___texto':'mensagem','body':'mensagem','conteudo':'mensagem',
+    'mensagem_texto':'mensagem',
+    // imagem
+    'imagem':'imagem_nome','imagem_nome':'imagem_nome','image':'imagem_nome',
+    'imagem_url':'imagem_url','image_url':'imagem_url',
+    // destino / link (ignore gracefully)
+    'destino':'_ignore','link':'_ignore','max':'_ignore',
+    'tipo':'_ignore','plataforma_2':'_ignore'
   };
   const colMap=headers.map(h=>MAP[h]||null);
   const rows=[];
@@ -1449,7 +1476,7 @@ function parseCSV(text){
     if(vals.every(v=>!v.trim())) continue;
     const row={id:'row_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5)};
     colMap.forEach((field,idx)=>{
-      if(field) row[field]=(vals[idx]||'').trim();
+      if(field && field!=='_ignore') row[field]=(vals[idx]||'').trim();
     });
     // Ensure all fields exist
     ['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem']
