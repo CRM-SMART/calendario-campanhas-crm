@@ -833,6 +833,14 @@ document.getElementById('camp-end').value=`${cur.y}-${pad(cur.m+1)}-${new Date(c
 
 await loadFromFirebase();
 startListener();
+// Pre-fetch image library silently in background so the
+// image picker in Operacional works without visiting the Imagens tab
+(async()=>{
+  try{
+    const snap=await getDoc(imgMetaRef);
+    if(snap.exists()) imgLibrary=snap.data().images||[];
+  }catch(e){}
+})();
 
 /* ═══════════════════════════════════════════════
    IMAGE REPOSITORY
@@ -874,14 +882,16 @@ async function imgSaveMeta(){
   setTimeout(()=>{ imgIsSaving = false; }, 500);
 }
 
-/* Live listener */
-onSnapshot(imgMetaRef, (snap)=>{
-  if(snap.exists() && !imgIsSaving){
-    imgLibrary = snap.data().images || [];
-    renderImgGallery();
-    imgSetSync('ok');
-  }
-});
+/* Live listener — started lazily on first tab visit */
+function imgStartListener(){
+  onSnapshot(imgMetaRef, (snap)=>{
+    if(snap.exists() && !imgIsSaving){
+      imgLibrary = snap.data().images || [];
+      renderImgGallery();
+      imgSetSync('ok');
+    }
+  });
+}
 
 /* ── Gallery render ── */
 function renderImgGallery(){
@@ -1136,14 +1146,16 @@ function uploadAllPending(){
 /* ── Search ── */
 document.getElementById('img-search').addEventListener('input', renderImgGallery);
 
-/* Load on startup */
-imgLoad();
+/* imgLoad() called lazily on first tab visit */
 
 
 
 /* ═══════════════════════════════════════════════
    PAGE NAVIGATION LOGIC
 ═══════════════════════════════════════════════ */
+let opInitialized = false;
+let imgInitialized = false;
+
 document.querySelectorAll('.page-nav-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const target=btn.dataset.page;
@@ -1151,8 +1163,27 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('page-'+target).classList.add('active');
-    if(target==='op'){opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();renderOpTable();}
-    if(target==='img'){renderImgGallery();}
+
+    if(target==='op'){
+      if(!opInitialized){
+        opInitialized=true;
+        opLoad();          // first visit: fetch data + start listener
+        opStartListener();
+      } else {
+        opRows=opAllData[opMonthKey()]||[];
+        opUpdateMonthLabel();
+        renderOpTable();
+      }
+    }
+    if(target==='img'){
+      if(!imgInitialized){
+        imgInitialized=true;
+        imgLoad();         // first visit: fetch data + start listener
+        imgStartListener();
+      } else {
+        renderImgGallery();
+      }
+    }
   });
 });
 
@@ -1204,15 +1235,17 @@ async function opSave(){
   setTimeout(()=>{opIsSaving=false;},500);
 }
 
-// Live listener — updates current month's rows when another client writes
-onSnapshot(opDataRef,(snap)=>{
-  if(snap.exists()&&!opIsSaving){
-    opAllData=snap.data();
-    opRows=opAllData[opMonthKey()]||[];
-    renderOpTable();
-    opSetSync('ok');
-  }
-});
+// Live listener — started lazily on first tab visit
+function opStartListener(){
+  onSnapshot(opDataRef,(snap)=>{
+    if(snap.exists()&&!opIsSaving){
+      opAllData=snap.data();
+      opRows=opAllData[opMonthKey()]||[];
+      renderOpTable();
+      opSetSync('ok');
+    }
+  });
+}
 
 /* ── Month navigation for Operacional page ── */
 document.getElementById('op-prev').addEventListener('click',()=>{
@@ -1617,8 +1650,7 @@ document.getElementById('op-search').addEventListener('input',renderOpTable);
 document.getElementById('op-filter-status').addEventListener('change',renderOpTable);
 document.getElementById('op-filter-canal').addEventListener('change',renderOpTable);
 
-// Load operacional data alongside calendar
-opLoad();
+// opLoad() called lazily on first tab visit
 
 </script>
 
