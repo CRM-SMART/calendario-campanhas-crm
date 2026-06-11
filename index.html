@@ -202,83 +202,6 @@ tr:hover .row-actions{opacity:1}
 .op-month-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .op-month-row h2{font-size:16px;font-weight:600;color:#1a1a1a}
 
-/* ═══ IMAGE REPOSITORY ═══ */
-.img-wrap{max-width:1400px;margin:0 auto;padding:.5rem 0}
-.img-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.img-toolbar input[type=text]{padding:6px 12px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;width:220px}
-
-/* Drop zone */
-.img-dropzone{border:2px dashed #ddd;border-radius:12px;background:#fafaf8;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:18px}
-.img-dropzone:hover,.img-dropzone.drag-over{border-color:#1D9E75;background:#f0faf5}
-.img-dropzone p{font-size:14px;color:#aaa;margin-top:8px}
-.img-dropzone strong{font-size:15px;color:#555}
-.img-dropzone input{display:none}
-.img-dz-icon{font-size:36px;line-height:1}
-
-/* Upload queue */
-.img-queue{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-.img-queue-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:1px solid #e8e8e5;border-radius:8px;font-size:12px}
-.img-queue-item .q-name{flex:1;font-weight:500;color:#1a1a1a;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.img-queue-item .q-size{color:#aaa;flex-shrink:0}
-.img-progress-bar{width:100%;height:4px;background:#eee;border-radius:2px;margin-top:4px;overflow:hidden}
-.img-progress-fill{height:100%;background:#1D9E75;border-radius:2px;transition:width .2s}
-.q-status{flex-shrink:0;font-size:11px;font-weight:600}
-.q-status.uploading{color:#f59e0b}
-.q-status.done{color:#1D9E75}
-.q-status.error{color:#E24B4A}
-
-/* Gallery grid */
-.img-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.img-card{background:#fff;border:1px solid #e8e8e5;border-radius:10px;overflow:hidden;transition:box-shadow .15s}
-.img-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
-.img-card-thumb{width:100%;height:140px;object-fit:cover;background:#f0f0ee;display:block}
-.img-card-thumb-placeholder{width:100%;height:140px;background:#f5f5f3;display:flex;align-items:center;justify-content:center;font-size:32px}
-.img-card-body{padding:10px 12px}
-.img-card-name{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
-.img-card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px;min-height:20px}
-.img-tag{font-size:10px;padding:1px 7px;border-radius:8px;background:#f0f0ee;color:#555}
-.img-card-meta{font-size:10px;color:#bbb;margin-bottom:8px}
-.img-card-actions{display:flex;gap:6px}
-.img-act-btn{flex:1;font-size:11px;padding:5px 0;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;text-align:center;color:#555}
-.img-act-btn:hover{background:#f0f0ee}
-.img-act-btn.copy-btn.copied{background:#E1F5EE;color:#1D9E75;border-color:#1D9E75}
-.img-act-btn.del-btn:hover{background:#FCEBEB;color:#E24B4A;border-color:#E24B4A}
-
-/* Tags input */
-.tags-input-wrap{display:flex;flex-wrap:wrap;gap:4px;padding:5px 8px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:text;min-height:36px;align-items:center}
-.tags-input-wrap input{border:none;outline:none;font-size:13px;padding:0;min-width:80px;flex:1;background:transparent}
-.tag-pill{display:flex;align-items:center;gap:3px;font-size:11px;padding:2px 8px;border-radius:8px;background:#f0f0ee;color:#555}
-.tag-pill button{background:none;border:none;cursor:pointer;font-size:10px;padding:0;color:#aaa;line-height:1}
-
-/* img sync */
-.img-sync{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px;margin-left:auto}
-.img-sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc}
-.img-sync-dot.ok{background:#1D9E75}
-.img-sync-dot.syncing{background:#f59e0b;animation:pulse 1s infinite}
-.img-sync-dot.error{background:#E24B4A}
-.img-count{font-size:12px;color:#aaa;margin-bottom:10px}
-.img-empty{text-align:center;padding:60px 20px;color:#bbb;font-size:14px}
-
-
-/* Image picker inside Operacional modal */
-.img-picker-wrap{position:relative}
-.img-picker-input{width:100%;padding:7px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;outline:none}
-.img-picker-input:focus{border-color:#aaa}
-.img-picker-dropdown{position:absolute;top:100%;left:0;right:0;z-index:500;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;margin-top:3px;display:none}
-.img-picker-dropdown.open{display:block}
-.img-picker-item{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;transition:background .1s}
-.img-picker-item:hover{background:#f5f5f3}
-.img-picker-item img{width:36px;height:36px;object-fit:cover;border-radius:5px;background:#f0f0ee;flex-shrink:0}
-.img-picker-item-info{flex:1;min-width:0}
-.img-picker-item-name{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.img-picker-item-tags{font-size:10px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.img-picker-selected{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0faf5;border:1px solid #1D9E75;border-radius:8px;margin-top:6px}
-.img-picker-selected img{width:40px;height:40px;object-fit:cover;border-radius:6px}
-.img-picker-selected-info{flex:1;min-width:0}
-.img-picker-selected-name{font-size:12px;font-weight:600;color:#0F6E56}
-.img-picker-selected-url{font-size:10px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.img-picker-clear{background:none;border:none;cursor:pointer;color:#bbb;font-size:14px;flex-shrink:0;padding:0}
-.img-picker-clear:hover{color:#E24B4A}
 /* Table thumbnail */
 .op-img-thumb{width:32px;height:32px;object-fit:cover;border-radius:4px;vertical-align:middle}
 .op-img-name{font-size:11px;color:#555;margin-left:5px;vertical-align:middle}
@@ -291,7 +214,6 @@ tr:hover .row-actions{opacity:1}
 <div class="page-nav">
   <button class="page-nav-btn active" data-page="cal">📅 Calendário</button>
   <button class="page-nav-btn" data-page="op">📋 Operacional</button>
-  <button class="page-nav-btn" data-page="img">🖼️ Imagens</button>
 </div>
 
 <!-- ═══ PAGE: CALENDÁRIO (original, untouched) ═══ -->
@@ -399,7 +321,6 @@ import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstat
 const firebaseConfig={apiKey:"AIzaSyC7xA8-P1kAhf_6ItweNk9lxV64lautOSo",authDomain:"crm-calendario-f3b18.firebaseapp.com",projectId:"crm-calendario-f3b18",storageBucket:"crm-calendario-f3b18.firebasestorage.app",messagingSenderId:"1069676978590",appId:"1:1069676978590:web:c9a99be01b991df9f0b68f"};
 const fbApp=initializeApp(firebaseConfig);
 const db=getFirestore(fbApp);
-const IMGBB_KEY="f607fc141d6c3c2883cb0297487094aa";
 
 const PALETTE=[
   {id:'purple',bg:'#EEEDFE',text:'#3C3489',dot:'#7F77DD'},
@@ -460,12 +381,54 @@ function setSyncStatus(s){
 
 const calRef=doc(db,'calendario','data'),cfgRef=doc(db,'calendario','config');
 
+const LS_EVENTS='crm_events';
+const LS_CONFIG='crm_config';
+
+function lsLoad(){
+  // Render from cache instantly — no network needed
+  try{
+    const ce=localStorage.getItem(LS_EVENTS);
+    const cc=localStorage.getItem(LS_CONFIG);
+    if(ce) events=JSON.parse(ce);
+    if(cc){
+      const cfg=JSON.parse(cc);
+      channels=cfg.channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+      campaigns=cfg.campaigns||[];
+      audiences=cfg.audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+    } else {
+      channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+      audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+    }
+    if(ce||cc){
+      document.getElementById('loading-overlay').style.display='none';
+      renderCal();
+      return true; // rendered from cache
+    }
+  }catch(e){}
+  return false;
+}
+
+function lsSave(){
+  try{
+    localStorage.setItem(LS_EVENTS, JSON.stringify(events));
+    localStorage.setItem(LS_CONFIG, JSON.stringify({channels,campaigns,audiences}));
+  }catch(e){}
+}
+
 async function loadFromFirebase(){
   try{
     const[calSnap,cfgSnap]=await Promise.all([getDoc(calRef),getDoc(cfgRef)]);
     if(calSnap.exists())events=calSnap.data().events||{};
-    if(cfgSnap.exists()){channels=cfgSnap.data().channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));campaigns=cfgSnap.data().campaigns||[];audiences=cfgSnap.data().audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));}
-    else{channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));campaigns=[];await saveConfig();}
+    if(cfgSnap.exists()){
+      channels=cfgSnap.data().channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+      campaigns=cfgSnap.data().campaigns||[];
+      audiences=cfgSnap.data().audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+    }else{
+      channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+      audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+      campaigns=[];await saveConfig();
+    }
+    lsSave();
     setSyncStatus('ok');
   }catch(e){console.error(e);setSyncStatus('error');}
   document.getElementById('loading-overlay').style.display='none';
@@ -473,12 +436,24 @@ async function loadFromFirebase(){
 }
 
 function startListener(){
-  onSnapshot(calRef,(snap)=>{if(snap.exists()&&!isSaving){events=snap.data().events||{};renderCal();setSyncStatus('ok');}});
-  onSnapshot(cfgRef,(snap)=>{if(snap.exists()&&!isSaving){channels=snap.data().channels||DEFAULT_CHANNELS;campaigns=snap.data().campaigns||[];audiences=snap.data().audiences||DEFAULT_AUDIENCES;renderCal();setSyncStatus('ok');}});
+  onSnapshot(calRef,(snap)=>{
+    if(snap.exists()&&!isSaving){
+      events=snap.data().events||{};
+      lsSave();renderCal();setSyncStatus('ok');
+    }
+  });
+  onSnapshot(cfgRef,(snap)=>{
+    if(snap.exists()&&!isSaving){
+      channels=snap.data().channels||DEFAULT_CHANNELS;
+      campaigns=snap.data().campaigns||[];
+      audiences=snap.data().audiences||DEFAULT_AUDIENCES;
+      lsSave();renderCal._configChanged=true;renderCal();setSyncStatus('ok');
+    }
+  });
 }
 
-async function saveEvents(){isSaving=true;setSyncStatus('syncing');try{await setDoc(calRef,{events});setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
-async function saveConfig(){isSaving=true;setSyncStatus('syncing');try{await setDoc(cfgRef,{channels,campaigns,audiences});setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
+async function saveEvents(){isSaving=true;setSyncStatus('syncing');try{await setDoc(calRef,{events});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
+async function saveConfig(){isSaving=true;setSyncStatus('syncing');try{await setDoc(cfgRef,{channels,campaigns,audiences});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
 
 function buildGrid(cid,selId,cb){
   const g=document.getElementById(cid);if(!g)return;g.innerHTML='';
@@ -660,10 +635,21 @@ function campsForDay(k){
   return campaigns.filter(cp=>{const s=parseDate(cp.start),e=parseDate(cp.end);return d>=s&&d<=e;});
 }
 
+let _renderCalTimer=null;
 function renderCal(){
+  if(_renderCalTimer) return;          // already scheduled
+  _renderCalTimer=setTimeout(()=>{
+    _renderCalTimer=null;
+    _renderCalImmediate();
+  },16);                               // one animation frame
+}
+renderCal._firstRun=true;
+renderCal._configChanged=true;
+function _renderCalImmediate(){
   const body=document.getElementById('cal-body');
   document.getElementById('month-label').textContent=MONTHS[cur.m]+' '+cur.y;
   body.innerHTML='';
+  const _frag=document.createDocumentFragment();
 
   const first=new Date(cur.y,cur.m,1);
   let dow=first.getDay();dow=dow===0?6:dow-1;
@@ -754,9 +740,14 @@ function renderCal(){
       }
       weekRow.appendChild(cell);
     });
-    body.appendChild(weekRow);
+    _frag.appendChild(weekRow);
   }
-  renderLegend();renderFilterBar();
+  body.appendChild(_frag);
+  if(renderCal._firstRun||renderCal._configChanged){
+    renderLegend();renderFilterBar();
+    renderCal._configChanged=false;
+    renderCal._firstRun=false;
+  }
 }
 
 function openModal(k,d){
@@ -831,322 +822,15 @@ const pad=n=>String(n).padStart(2,'0');
 document.getElementById('camp-start').value=`${cur.y}-${pad(cur.m+1)}-01`;
 document.getElementById('camp-end').value=`${cur.y}-${pad(cur.m+1)}-${new Date(cur.y,cur.m+1,0).getDate()}`;
 
-await loadFromFirebase();
-startListener();
-// Pre-fetch image library silently in background so the
-// image picker in Operacional works without visiting the Imagens tab
-(async()=>{
-  try{
-    const snap=await getDoc(imgMetaRef);
-    if(snap.exists()) imgLibrary=snap.data().images||[];
-  }catch(e){}
-})();
-
-/* ═══════════════════════════════════════════════
-   IMAGE REPOSITORY
-   Firestore:  calendario/imagens_meta  → { images: [...] }
-   Storage:    gs://crm-calendario-f3b18.appspot.com/imagens/{id}_{name}
-═══════════════════════════════════════════════ */
-const imgMetaRef = doc(db, 'calendario', 'imagens_meta');
-let imgLibrary = [];       // [{id, name, url, path, tags, size, uploadedAt}]
-let imgPendingFiles = [];  // files waiting for meta input
-let imgCurrentFileIdx = 0;
-let imgCurrentTags = [];
-let imgIsSaving = false;
-
-function imgSetSync(s){
-  const dot=document.getElementById('img-sync-dot');
-  const lbl=document.getElementById('img-sync-label');
-  if(s==='ok'){dot.className='img-sync-dot ok';lbl.textContent='Sincronizado';}
-  else if(s==='syncing'){dot.className='img-sync-dot syncing';lbl.textContent='Salvando...';}
-  else if(s==='error'){dot.className='img-sync-dot error';lbl.textContent='Erro';}
-  else{dot.className='img-sync-dot';lbl.textContent='—';}
+// Show cached data instantly, then sync with Firebase
+const _hadCache = lsLoad();
+if(!_hadCache){
+  // No cache yet — show spinner until Firebase responds
 }
+// Firebase sync in background
+loadFromFirebase().then(()=>startListener());
 
-/* Load metadata from Firestore */
-async function imgLoad(){
-  try{
-    const snap = await getDoc(imgMetaRef);
-    if(snap.exists()) imgLibrary = snap.data().images || [];
-    else imgLibrary = [];
-    imgSetSync('ok');
-  }catch(e){ imgSetSync('error'); }
-  renderImgGallery();
-}
 
-/* Save metadata to Firestore */
-async function imgSaveMeta(){
-  imgIsSaving = true; imgSetSync('syncing');
-  try{ await setDoc(imgMetaRef, { images: imgLibrary }); imgSetSync('ok'); }
-  catch(e){ imgSetSync('error'); }
-  setTimeout(()=>{ imgIsSaving = false; }, 500);
-}
-
-/* Live listener — started lazily on first tab visit */
-function imgStartListener(){
-  onSnapshot(imgMetaRef, (snap)=>{
-    if(snap.exists() && !imgIsSaving){
-      imgLibrary = snap.data().images || [];
-      renderImgGallery();
-      imgSetSync('ok');
-    }
-  });
-}
-
-/* ── Gallery render ── */
-function renderImgGallery(){
-  const search = (document.getElementById('img-search')?.value||'').toLowerCase();
-  let items = imgLibrary.filter(img=>{
-    if(!search) return true;
-    return (img.name+' '+(img.tags||[]).join(' ')).toLowerCase().includes(search);
-  });
-  const count = document.getElementById('img-count');
-  if(count) count.textContent = items.length + ' imagem'+(items.length!==1?'ns':'')+
-    (imgLibrary.length!==items.length?' (filtrado de '+imgLibrary.length+')':'');
-  const gallery = document.getElementById('img-gallery');
-  if(!gallery) return;
-  gallery.innerHTML = '';
-  if(!items.length){
-    gallery.innerHTML = '<div class="img-empty">'+
-      (imgLibrary.length===0
-        ? '📂 Nenhuma imagem ainda.<br>Arraste arquivos ou clique em <b>+ Fazer upload</b>.'
-        : '🔍 Nenhuma imagem encontrada para "<b>'+search+'</b>".')+
-      '</div>';
-    return;
-  }
-  items.forEach(img=>{
-    const card = document.createElement('div');
-    card.className = 'img-card';
-    const tagsHtml = (img.tags||[]).map(t=>`<span class="img-tag">${esc(t)}</span>`).join('');
-    const kb = img.size ? Math.round(img.size/1024)+'KB' : '';
-    const date = img.uploadedAt ? new Date(img.uploadedAt).toLocaleDateString('pt-BR') : '';
-    card.innerHTML = `
-      <img class="img-card-thumb" src="${img.thumb||img.url}" alt="${esc(img.name)}"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-           loading="lazy"/>
-      <div class="img-card-thumb-placeholder" style="display:none">🖼️</div>
-      <div class="img-card-body">
-        <div class="img-card-name" title="${esc(img.name)}">${esc(img.name)}</div>
-        <div class="img-card-tags">${tagsHtml}</div>
-        <div class="img-card-meta">${[kb,date].filter(Boolean).join(' · ')}</div>
-        <div class="img-card-actions">
-          <button class="img-act-btn copy-btn" data-url="${img.url}">📋 Copiar URL</button>
-          <button class="img-act-btn del-btn" data-id="${img.id}" data-path="${img.path||''}">🗑</button>
-        </div>
-      </div>`;
-    gallery.appendChild(card);
-  });
-
-  /* Copy URL */
-  gallery.querySelectorAll('.copy-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      navigator.clipboard.writeText(btn.dataset.url).then(()=>{
-        btn.textContent='✅ Copiado!';btn.classList.add('copied');
-        setTimeout(()=>{btn.textContent='📋 Copiar URL';btn.classList.remove('copied');},2000);
-      });
-    });
-  });
-
-  /* Delete */
-  gallery.querySelectorAll('.del-btn').forEach(btn=>{
-    btn.addEventListener('click',async()=>{
-      if(!confirm('Excluir esta imagem? A ação não pode ser desfeita.')) return;
-      const id=btn.dataset.id;
-      // Remove from Firestore metadata (ImgBB images remain on their CDN)
-      imgLibrary = imgLibrary.filter(i=>i.id!==id);
-      imgSaveMeta(); renderImgGallery();
-    });
-  });
-}
-
-/* ── File selection + drag & drop ── */
-const dropzone = document.getElementById('img-dropzone');
-const fileInput = document.getElementById('img-file-input');
-
-dropzone.addEventListener('click', ()=>fileInput.click());
-document.getElementById('img-upload-trigger').addEventListener('click',()=>fileInput.click());
-
-dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag-over'); });
-dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('drag-over'));
-dropzone.addEventListener('drop', e=>{
-  e.preventDefault(); dropzone.classList.remove('drag-over');
-  handleFiles([...e.dataTransfer.files]);
-});
-fileInput.addEventListener('change', ()=>{ handleFiles([...fileInput.files]); fileInput.value=''; });
-
-function handleFiles(files){
-  const valid = files.filter(f=>{
-    if(!f.type.startsWith('image/')){ alert('Arquivo ignorado (não é imagem): '+f.name); return false; }
-    if(f.size>5*1024*1024){ alert('Arquivo muito grande (máx 5MB): '+f.name); return false; }
-    return true;
-  });
-  if(!valid.length) return;
-  imgPendingFiles = valid;
-  imgCurrentFileIdx = 0;
-  imgCurrentTags = [];
-  showMetaModal();
-}
-
-/* ── Meta modal (name + tags before upload) ── */
-function showMetaModal(){
-  if(imgCurrentFileIdx >= imgPendingFiles.length){
-    // All files collected — start uploading
-    uploadAllPending();
-    return;
-  }
-  const file = imgPendingFiles[imgCurrentFileIdx];
-  document.getElementById('img-meta-title').textContent =
-    'Detalhes — '+(imgCurrentFileIdx+1)+'/'+imgPendingFiles.length+': '+file.name;
-  // Pre-fill name without extension
-  document.getElementById('img-meta-name').value = file.name.replace(/\.[^.]+$/,'');
-  // Preview
-  const preview = document.getElementById('img-meta-preview');
-  const previewWrap = document.getElementById('img-meta-preview-wrap');
-  const reader = new FileReader();
-  reader.onload = e=>{ preview.src=e.target.result; previewWrap.style.display=''; };
-  reader.readAsDataURL(file);
-  // Reset tags
-  imgCurrentTags = [];
-  renderTagPills();
-  document.getElementById('img-tags-input').value='';
-  document.getElementById('img-meta-modal-bg').style.display='flex';
-  setTimeout(()=>document.getElementById('img-meta-name').focus(),50);
-}
-
-function renderTagPills(){
-  const wrap = document.getElementById('img-tags-wrap');
-  const input = document.getElementById('img-tags-input');
-  wrap.innerHTML='';
-  imgCurrentTags.forEach((tag,i)=>{
-    const pill=document.createElement('div');pill.className='tag-pill';
-    pill.innerHTML=`<span>${esc(tag)}</span><button>×</button>`;
-    pill.querySelector('button').addEventListener('click',()=>{
-      imgCurrentTags.splice(i,1); renderTagPills();
-    });
-    wrap.appendChild(pill);
-  });
-  wrap.appendChild(input);
-  input.focus();
-}
-
-document.getElementById('img-tags-wrap').addEventListener('click',()=>{
-  document.getElementById('img-tags-input').focus();
-});
-document.getElementById('img-tags-input').addEventListener('keydown',e=>{
-  const val=e.target.value.trim();
-  if((e.key==='Enter'||e.key===',')&&val){
-    e.preventDefault();
-    imgCurrentTags.push(val); renderTagPills(); e.target.value='';
-  }
-  if(e.key==='Backspace'&&!e.target.value&&imgCurrentTags.length){
-    imgCurrentTags.pop(); renderTagPills();
-  }
-});
-
-function collectMeta(){
-  const name = document.getElementById('img-meta-name').value.trim()
-    || imgPendingFiles[imgCurrentFileIdx].name.replace(/\.[^.]+$/,'');
-  const lastInput = document.getElementById('img-tags-input').value.trim();
-  const tags = [...imgCurrentTags, ...(lastInput?[lastInput]:[])];
-  return { name, tags };
-}
-
-document.getElementById('img-meta-confirm').addEventListener('click',()=>{
-  imgPendingFiles[imgCurrentFileIdx]._meta = collectMeta();
-  document.getElementById('img-meta-modal-bg').style.display='none';
-  imgCurrentFileIdx++;
-  imgCurrentTags=[];
-  showMetaModal();
-});
-document.getElementById('img-meta-skip').addEventListener('click',()=>{
-  const file = imgPendingFiles[imgCurrentFileIdx];
-  imgPendingFiles[imgCurrentFileIdx]._meta = {
-    name: file.name.replace(/\.[^.]+$/,''), tags: []
-  };
-  document.getElementById('img-meta-modal-bg').style.display='none';
-  imgCurrentFileIdx++;
-  imgCurrentTags=[];
-  showMetaModal();
-});
-
-/* ── Upload all pending files ── */
-function uploadAllPending(){
-  const queue = document.getElementById('img-queue');
-  queue.innerHTML=''; queue.style.display='flex';
-
-  imgPendingFiles.forEach((file,i)=>{
-    const meta = file._meta || { name:file.name.replace(/\.[^.]+$/,''), tags:[] };
-    const id = 'img_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5);
-
-    // Queue item UI
-    const item = document.createElement('div');
-    item.className='img-queue-item'; item.id='qi_'+id;
-    item.innerHTML=`
-      <span class="q-name">${esc(meta.name)}</span>
-      <span class="q-size">${Math.round(file.size/1024)}KB</span>
-      <span class="q-status uploading" id="qs_${id}">⏳ Enviando...</span>
-      <div style="flex-basis:100%;order:99">
-        <div class="img-progress-bar"><div class="img-progress-fill" id="qp_${id}" style="width:0%"></div></div>
-      </div>`;
-    queue.appendChild(item);
-
-    // Upload via ImgBB
-    (async()=>{
-      try{
-        // Simulate progress while uploading
-        let fakeProgress = 0;
-        const bar = document.getElementById('qp_'+id);
-        const progressInterval = setInterval(()=>{
-          fakeProgress = Math.min(fakeProgress + Math.random()*15, 90);
-          if(bar) bar.style.width=fakeProgress+'%';
-        }, 200);
-
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('name', meta.name);
-        const resp = await fetch('https://api.imgbb.com/1/upload?key='+IMGBB_KEY, {
-          method:'POST', body:formData
-        });
-        clearInterval(progressInterval);
-        if(bar) bar.style.width='100%';
-
-        if(!resp.ok) throw new Error('HTTP '+resp.status);
-        const json = await resp.json();
-        if(!json.success) throw new Error(json.error?.message||'ImgBB error');
-
-        const url = json.data.display_url;    // direct image URL
-        const thumb = json.data.thumb?.url || url;
-        const deleteHash = json.data.delete_url || '';
-
-        imgLibrary.push({
-          id, name:meta.name, url, thumb,
-          deleteHash,
-          tags:meta.tags, size:file.size,
-          uploadedAt: new Date().toISOString()
-        });
-        await imgSaveMeta();
-        renderImgGallery();
-
-        const st = document.getElementById('qs_'+id);
-        if(st){ st.textContent='✅ Pronto'; st.className='q-status done'; }
-      }catch(err){
-        const st = document.getElementById('qs_'+id);
-        if(st){ st.textContent='❌ Erro'; st.className='q-status error'; }
-        console.error('ImgBB upload error:', err);
-      }finally{
-        const allDone=[...queue.querySelectorAll('.q-status')].every(s=>s.classList.contains('done')||s.classList.contains('error'));
-        if(allDone) setTimeout(()=>{ queue.style.display='none'; queue.innerHTML=''; },2500);
-      }
-    })();
-  });
-
-  imgPendingFiles = [];
-}
-
-/* ── Search ── */
-document.getElementById('img-search').addEventListener('input', renderImgGallery);
-
-/* imgLoad() called lazily on first tab visit */
 
 
 
@@ -1154,7 +838,6 @@ document.getElementById('img-search').addEventListener('input', renderImgGallery
    PAGE NAVIGATION LOGIC
 ═══════════════════════════════════════════════ */
 let opInitialized = false;
-let imgInitialized = false;
 
 document.querySelectorAll('.page-nav-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -1173,15 +856,6 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
         opRows=opAllData[opMonthKey()]||[];
         opUpdateMonthLabel();
         renderOpTable();
-      }
-    }
-    if(target==='img'){
-      if(!imgInitialized){
-        imgInitialized=true;
-        imgLoad();         // first visit: fetch data + start listener
-        imgStartListener();
-      } else {
-        renderImgGallery();
       }
     }
   });
@@ -1299,16 +973,13 @@ function renderOpTable(){
   tbody.innerHTML='';
 
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="14" class="op-empty">Nenhuma linha em <b>'+MONTHS[cur.m]+' '+cur.y+'</b>.<br>Clique em <b>+ Nova linha</b> para começar.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="13" class="op-empty">Nenhuma linha em <b>'+MONTHS[cur.m]+' '+cur.y+'</b>.<br>Clique em <b>+ Nova linha</b> para começar.</td></tr>';
     return;
   }
 
   rows.forEach((r,i)=>{
     const tr=document.createElement('tr');
-    // Pre-compute image cell to avoid nested template literals
-    const imgCell = r.imagem_url
-      ? '<img class="op-img-thumb" src="'+r.imagem_url+'" title="'+esc(r.imagem_nome||'')+'" onerror="this.style.display='none'"/> <span class="op-img-name">'+esc(r.imagem_nome||'')+'</span>'
-      : '<span style="color:#ddd;font-size:11px">—</span>';
+
     tr.innerHTML=`
       <td style="color:#bbb;font-size:11px">${i+1}</td>
       <td><span class="status-badge ${statusClass(r.status)}">${r.status||'—'}</span></td>
@@ -1322,7 +993,6 @@ function renderOpTable(){
       <td style="font-size:11px;color:#888">${esc(r.subtema)}</td>
       <td class="td-title">${esc(r.titulo)}</td>
       <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
-      <td>${imgCell}</td>
       <td>
         <div class="row-actions">
           <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
@@ -1374,8 +1044,6 @@ function opOpenAdd(){
     if(el) el.value='';
   });
   document.getElementById('op-modal-bg').style.display='flex';
-  opImgPickerClear();
-  opImgPickerWire();
   setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
 }
 
@@ -1385,21 +1053,11 @@ function opOpenEdit(id){
   opEditId=id;
   document.getElementById('op-modal-title').textContent='Editar linha — '+MONTHS[cur.m]+' '+cur.y;
   const fields=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
-  // Image fields come from hidden inputs set by the picker
-  const imgUrl = document.getElementById('op-f-img-url')?.value||'';
-  const imgNome = document.getElementById('op-f-img-nome')?.value||'';
   fields.forEach(f=>{
     const el=document.getElementById('op-f-'+f);
     if(el) el.value=r[f]||'';
   });
   document.getElementById('op-modal-bg').style.display='flex';
-  // Restore image picker state
-  opImgPickerClear();
-  opImgPickerWire();
-  if(r.imagem_url){
-    const lib = imgLibrary.find(i=>i.url===r.imagem_url);
-    opImgPickerSelect(r.imagem_url, lib?lib.thumb||r.imagem_url:r.imagem_url, r.imagem_nome||'');
-  }
   setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
 }
 
@@ -1410,8 +1068,6 @@ function opSaveModal(){
     const el=document.getElementById('op-f-'+f);
     obj[f]=el?el.value.trim():'';
   });
-  obj.imagem_url = imgUrl;
-  obj.imagem_nome = imgNome;
   if(opEditId){
     const idx=opRows.findIndex(r=>r.id===opEditId);
     if(idx>-1) opRows[idx]=Object.assign({},opRows[idx],obj);
@@ -1425,8 +1081,8 @@ function opSaveModal(){
 
 /* CSV Export — only current month */
 function opExportCSV(){
-  const cols=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','imagem_nome','imagem_url','mensagem'];
-  const headers=['Status','Campanha','Data','Hora','Canal','Plataforma','Segmentação','Tema','Sub-tema','Título','Imagem Nome','Imagem URL','Mensagem'];
+  const cols=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
+  const headers=['Status','Campanha','Data','Hora','Canal','Plataforma','Segmentação','Tema','Sub-tema','Título','Mensagem'];
   const lines=[headers.join(',')];
   opRows.forEach(r=>{
     lines.push(cols.map(c=>{
@@ -1495,9 +1151,6 @@ function parseCSV(text){
     'mensagem':'mensagem','texto':'mensagem','text':'mensagem',
     'mensagem___texto':'mensagem','body':'mensagem','conteudo':'mensagem',
     'mensagem_texto':'mensagem',
-    // imagem
-    'imagem':'imagem_nome','imagem_nome':'imagem_nome','image':'imagem_nome',
-    'imagem_url':'imagem_url','image_url':'imagem_url',
     // destino / link (ignore gracefully)
     'destino':'_ignore','link':'_ignore','max':'_ignore',
     'tipo':'_ignore','plataforma_2':'_ignore'
@@ -1563,82 +1216,6 @@ document.getElementById('op-import-modal-bg').addEventListener('click',e=>{
 
 
 
-/* ═══════════════════════════════════════════════
-   OPERACIONAL — Image Picker
-   Reads from imgLibrary (loaded by image repo page)
-   Stores imagem_nome + imagem_url in row data
-═══════════════════════════════════════════════ */
-let opSelImgUrl = '';
-let opSelImgNome = '';
-
-function opImgPickerRender(query){
-  const dd = document.getElementById('op-f-img-dropdown');
-  if(!dd) return;
-  const q = (query||'').toLowerCase().trim();
-  // Filter imgLibrary
-  const results = (imgLibrary||[]).filter(img=>{
-    if(!q) return true;
-    return (img.name+' '+(img.tags||[]).join(' ')).toLowerCase().includes(q);
-  }).slice(0,12);
-
-  if(!results.length){
-    dd.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:#aaa">'+(imgLibrary.length===0?'Nenhuma imagem no repositório ainda.':'Nenhuma imagem encontrada.')+'</div>';
-  } else {
-    dd.innerHTML = results.map(img=>`
-      <div class="img-picker-item" data-url="${img.url}" data-thumb="${img.thumb||img.url}" data-name="${esc(img.name)}">
-        <img src="${img.thumb||img.url}" onerror="this.src='data:image/svg+xml,<svg/>'"/>
-        <div class="img-picker-item-info">
-          <div class="img-picker-item-name">${esc(img.name)}</div>
-          <div class="img-picker-item-tags">${(img.tags||[]).join(', ')}</div>
-        </div>
-      </div>`).join('');
-    dd.querySelectorAll('.img-picker-item').forEach(item=>{
-      item.addEventListener('mousedown', e=>{
-        e.preventDefault();
-        opImgPickerSelect(item.dataset.url, item.dataset.thumb, item.dataset.name);
-      });
-    });
-  }
-  dd.classList.add('open');
-}
-
-function opImgPickerSelect(url, thumb, name){
-  opSelImgUrl = url;
-  opSelImgNome = name;
-  document.getElementById('op-f-img-url').value = url;
-  document.getElementById('op-f-img-nome').value = name;
-  document.getElementById('op-f-img-search').value = '';
-  document.getElementById('op-f-img-search').placeholder = name;
-  document.getElementById('op-f-img-dropdown').classList.remove('open');
-  // Show selected preview
-  document.getElementById('op-f-img-thumb').src = thumb||url;
-  document.getElementById('op-f-img-name').textContent = name;
-  document.getElementById('op-f-img-url-display').textContent = url;
-  document.getElementById('op-f-img-selected').style.display = '';
-}
-
-function opImgPickerClear(){
-  opSelImgUrl = '';
-  opSelImgNome = '';
-  document.getElementById('op-f-img-url').value = '';
-  document.getElementById('op-f-img-nome').value = '';
-  document.getElementById('op-f-img-search').value = '';
-  document.getElementById('op-f-img-search').placeholder = 'Digite o nome ou tag da imagem...';
-  document.getElementById('op-f-img-selected').style.display = 'none';
-  document.getElementById('op-f-img-dropdown').classList.remove('open');
-}
-
-function opImgPickerWire(){
-  const input = document.getElementById('op-f-img-search');
-  const dd    = document.getElementById('op-f-img-dropdown');
-  const clear = document.getElementById('op-f-img-clear');
-  if(!input) return;
-
-  input.addEventListener('focus', ()=>{ opImgPickerRender(input.value); });
-  input.addEventListener('input', ()=>{ opImgPickerRender(input.value); });
-  input.addEventListener('blur',  ()=>{ setTimeout(()=>dd.classList.remove('open'), 150); });
-  if(clear) clear.addEventListener('click', opImgPickerClear);
-}
 
 /* Wire up controls */
 document.getElementById('op-add-btn').addEventListener('click',opOpenAdd);
@@ -1712,7 +1289,6 @@ document.getElementById('op-filter-canal').addEventListener('change',renderOpTab
             <th style="width:110px">Sub-tema</th>
             <th style="width:180px">Título</th>
             <th>Mensagem</th>
-            <th style="width:120px">Imagem</th>
             <th style="width:56px"></th>
           </tr>
         </thead>
@@ -1723,78 +1299,8 @@ document.getElementById('op-filter-canal').addEventListener('change',renderOpTab
 
 </div><!-- end page-op -->
 
-<!-- ═══ PAGE: IMAGENS ═══ -->
-<div class="page" id="page-img">
-  <div class="img-wrap">
-
-    <!-- Toolbar -->
-    <div class="img-toolbar">
-      <input type="text" id="img-search" placeholder="Buscar por nome ou tag..."/>
-      <button class="op-btn primary" id="img-upload-trigger">+ Fazer upload</button>
-      <div class="img-sync">
-        <div class="img-sync-dot" id="img-sync-dot"></div>
-        <span id="img-sync-label">—</span>
-      </div>
-    </div>
-
-    <!-- Drop zone -->
-    <div class="img-dropzone" id="img-dropzone">
-      <div class="img-dz-icon">🖼️</div>
-      <strong>Arraste imagens aqui</strong>
-      <p>ou clique em <b>+ Fazer upload</b> para selecionar arquivos<br>
-      Formatos aceitos: JPG, PNG, GIF, WEBP · Máx. 5 MB por arquivo</p>
-      <input type="file" id="img-file-input" accept="image/*" multiple/>
-    </div>
-
-    <!-- Upload queue (shown during uploads) -->
-    <div class="img-queue" id="img-queue" style="display:none"></div>
-
-    <!-- Tags + name modal (before confirming upload) -->
-    <div class="op-modal-bg" id="img-meta-modal-bg" style="display:none">
-      <div class="op-modal" style="width:480px">
-        <h3 id="img-meta-title">Detalhes da imagem</h3>
-        <div class="op-form-grid">
-          <div class="op-form-group full">
-            <label>Nome da imagem</label>
-            <input type="text" id="img-meta-name" placeholder="Ex: Banner São João 2026"/>
-          </div>
-          <div class="op-form-group full">
-            <label>Tags (pressione Enter para adicionar)</label>
-            <div class="tags-input-wrap" id="img-tags-wrap">
-              <input type="text" id="img-tags-input" placeholder="Ex: São João, Banner, 600x300..."/>
-            </div>
-          </div>
-          <div class="op-form-group full" id="img-meta-preview-wrap" style="display:none">
-            <label>Preview</label>
-            <img id="img-meta-preview" style="max-width:100%;max-height:200px;border-radius:8px;object-fit:contain;background:#f5f5f3"/>
-          </div>
-        </div>
-        <div class="op-modal-btns">
-          <button class="op-btn" id="img-meta-skip">Pular / Usar nome do arquivo</button>
-          <button class="op-btn primary" id="img-meta-confirm">Confirmar e fazer upload</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gallery -->
-    <div class="img-count" id="img-count"></div>
-    <div class="img-gallery" id="img-gallery"></div>
-
-  </div>
-</div><!-- end page-img -->
 
 
-<!-- ═══ IMPORT PREVIEW MODAL ═══ -->
-<div class="op-modal-bg" id="op-import-modal-bg" style="display:none">
-  <div class="op-modal" style="width:520px">
-    <h3 id="op-import-title">Importar CSV</h3>
-    <p id="op-import-info" style="font-size:13px;color:#555;margin-bottom:14px;line-height:1.5"></p>
-    <div style="display:flex;gap:10px;justify-content:flex-end;border-top:1px solid #f0f0f0;padding-top:14px;margin-top:4px">
-      <button class="op-btn" id="op-import-cancel">Cancelar</button>
-      <button class="op-btn" id="op-import-append" style="background:#1D9E75;color:#fff;border-color:#1D9E75">+ Adicionar ao mês</button>
-      <button class="op-btn" id="op-import-replace" style="background:#E24B4A;color:#fff;border-color:#E24B4A">⟳ Substituir mês</button>
-    </div>
-  </div>
 </div>
 <div class="op-modal-bg" id="op-modal-bg" style="display:none">
   <div class="op-modal">
@@ -1861,26 +1367,6 @@ document.getElementById('op-filter-canal').addEventListener('change',renderOpTab
       <div class="op-form-group full">
         <label>Título do Push</label>
         <input type="text" id="op-f-titulo" placeholder="Máx. ~50 chars"/>
-      </div>
-      <div class="op-form-group full">
-        <label>Imagem</label>
-        <div class="img-picker-wrap">
-          <input type="text" class="img-picker-input" id="op-f-img-search"
-                 placeholder="Digite o nome ou tag da imagem..." autocomplete="off"/>
-          <div class="img-picker-dropdown" id="op-f-img-dropdown"></div>
-        </div>
-        <div id="op-f-img-selected" style="display:none">
-          <div class="img-picker-selected">
-            <img id="op-f-img-thumb" src="" alt=""/>
-            <div class="img-picker-selected-info">
-              <div class="img-picker-selected-name" id="op-f-img-name"></div>
-              <div class="img-picker-selected-url" id="op-f-img-url-display"></div>
-            </div>
-            <button class="img-picker-clear" id="op-f-img-clear" title="Remover imagem">×</button>
-          </div>
-        </div>
-        <input type="hidden" id="op-f-img-url"/>
-        <input type="hidden" id="op-f-img-nome"/>
       </div>
       <div class="op-form-group full">
         <label>Mensagem / Texto</label>
