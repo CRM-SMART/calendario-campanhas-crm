@@ -314,13 +314,62 @@ tr:hover .row-actions{opacity:1}
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script>
+/* ── Firestore REST API (zero SDK overhead) ── */
+const FB_KEY  = 'AIzaSyC7xA8-P1kAhf_6ItweNk9lxV64lautOSo';
+const FB_BASE = 'https://firestore.googleapis.com/v1/projects/crm-calendario-f3b18/databases/(default)/documents/calendario';
 
-const firebaseConfig={apiKey:"AIzaSyC7xA8-P1kAhf_6ItweNk9lxV64lautOSo",authDomain:"crm-calendario-f3b18.firebaseapp.com",projectId:"crm-calendario-f3b18",storageBucket:"crm-calendario-f3b18.firebasestorage.app",messagingSenderId:"1069676978590",appId:"1:1069676978590:web:c9a99be01b991df9f0b68f"};
-const fbApp=initializeApp(firebaseConfig);
-const db=getFirestore(fbApp);
+/* Firestore typed value → plain JS */
+function fromFS(v){
+  if(!v) return null;
+  if('stringValue'  in v) return v.stringValue;
+  if('integerValue' in v) return parseInt(v.integerValue);
+  if('doubleValue'  in v) return v.doubleValue;
+  if('booleanValue' in v) return v.booleanValue;
+  if('nullValue'    in v) return null;
+  if('arrayValue'   in v) return (v.arrayValue.values||[]).map(fromFS);
+  if('mapValue'     in v){
+    const o={};
+    for(const[k,w] of Object.entries(v.mapValue.fields||{})) o[k]=fromFS(w);
+    return o;
+  }
+  return null;
+}
+/* plain JS → Firestore typed value */
+function toFS(v){
+  if(v===null||v===undefined) return {nullValue:null};
+  if(typeof v==='boolean')    return {booleanValue:v};
+  if(typeof v==='number')     return Number.isInteger(v)?{integerValue:''+v}:{doubleValue:v};
+  if(typeof v==='string')     return {stringValue:v};
+  if(Array.isArray(v))        return {arrayValue:{values:v.map(toFS)}};
+  if(typeof v==='object'){
+    const f={};
+    for(const[k,w] of Object.entries(v)) f[k]=toFS(w);
+    return {mapValue:{fields:f}};
+  }
+  return {stringValue:''+v};
+}
+async function fbGet(docName){
+  try{
+    const r=await fetch(FB_BASE+'/'+docName+'?key='+FB_KEY);
+    if(!r.ok) return null;
+    const j=await r.json();
+    const o={};
+    for(const[k,v] of Object.entries(j.fields||{})) o[k]=fromFS(v);
+    return o;
+  }catch(e){return null;}
+}
+async function fbSet(docName,data){
+  const fields={};
+  for(const[k,v] of Object.entries(data)) fields[k]=toFS(v);
+  try{
+    await fetch(FB_BASE+'/'+docName+'?key='+FB_KEY,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fields})
+    });
+  }catch(e){}
+}
 
 const PALETTE=[
   {id:'purple',bg:'#EEEDFE',text:'#3C3489',dot:'#7F77DD'},
@@ -379,7 +428,7 @@ function setSyncStatus(s){
   else{dot.className='sync-dot';lbl.textContent='Conectando...';}
 }
 
-const calRef=doc(db,'calendario','data'),cfgRef=doc(db,'calendario','config');
+
 
 const LS_EVENTS='crm_events';
 const LS_CONFIG='crm_config';
@@ -417,12 +466,12 @@ function lsSave(){
 
 async function loadFromFirebase(){
   try{
-    const[calSnap,cfgSnap]=await Promise.all([getDoc(calRef),getDoc(cfgRef)]);
-    if(calSnap.exists())events=calSnap.data().events||{};
-    if(cfgSnap.exists()){
-      channels=cfgSnap.data().channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-      campaigns=cfgSnap.data().campaigns||[];
-      audiences=cfgSnap.data().audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+    const[calData,cfgData]=await Promise.all([fbGet('data'),fbGet('config')]);
+    if(calData) events=calData.events||{};
+    if(cfgData){
+      channels=cfgData.channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+      campaigns=cfgData.campaigns||[];
+      audiences=cfgData.audiences||JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
     }else{
       channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
       audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
@@ -436,24 +485,19 @@ async function loadFromFirebase(){
 }
 
 function startListener(){
-  onSnapshot(calRef,(snap)=>{
-    if(snap.exists()&&!isSaving){
-      events=snap.data().events||{};
-      lsSave();renderCal();setSyncStatus('ok');
-    }
-  });
-  onSnapshot(cfgRef,(snap)=>{
-    if(snap.exists()&&!isSaving){
-      channels=snap.data().channels||DEFAULT_CHANNELS;
-      campaigns=snap.data().campaigns||[];
-      audiences=snap.data().audiences||DEFAULT_AUDIENCES;
-      lsSave();renderCal._configChanged=true;renderCal();setSyncStatus('ok');
-    }
-  });
+  // Poll every 20s for changes from other users
+  setInterval(async()=>{
+    if(isSaving) return;
+    const[calData,cfgData]=await Promise.all([fbGet('data'),fbGet('config')]);
+    let changed=false;
+    if(calData){const s=JSON.stringify(calData.events||{});if(s!==JSON.stringify(events)){events=calData.events||{};changed=true;}}
+    if(cfgData){const s=JSON.stringify(cfgData);const cur=JSON.stringify({channels,campaigns,audiences});if(s!==cur){channels=cfgData.channels||DEFAULT_CHANNELS;campaigns=cfgData.campaigns||[];audiences=cfgData.audiences||DEFAULT_AUDIENCES;renderCal._configChanged=true;changed=true;}}
+    if(changed){lsSave();renderCal();setSyncStatus('ok');}
+  },20000);
 }
 
-async function saveEvents(){isSaving=true;setSyncStatus('syncing');try{await setDoc(calRef,{events});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
-async function saveConfig(){isSaving=true;setSyncStatus('syncing');try{await setDoc(cfgRef,{channels,campaigns,audiences});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
+async function saveEvents(){isSaving=true;setSyncStatus('syncing');try{await fbSet('data',{events});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
+async function saveConfig(){isSaving=true;setSyncStatus('syncing');try{await fbSet('config',{channels,campaigns,audiences});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
 
 function buildGrid(cid,selId,cb){
   const g=document.getElementById(cid);if(!g)return;g.innerHTML='';
@@ -827,7 +871,7 @@ const _hadCache = lsLoad();
 if(!_hadCache){
   // No cache yet — show spinner until Firebase responds
 }
-// Firebase sync in background
+// Firebase sync in background (plain promise, no top-level await)
 loadFromFirebase().then(()=>startListener());
 
 
@@ -866,7 +910,7 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
    Storage: calendario/operacional_data
    Structure: { "2026-6": [row, row, ...], "2026-7": [...] }
 ═══════════════════════════════════════════════ */
-const opDataRef=doc(db,'calendario','operacional_data');
+
 let opAllData={};       // all months cached
 let opRows=[];          // rows for the current month
 let opEditId=null;
@@ -891,9 +935,8 @@ function opUpdateMonthLabel(){
 
 async function opLoad(){
   try{
-    const snap=await getDoc(opDataRef);
-    if(snap.exists()) opAllData=snap.data();
-    else opAllData={};
+    const data=await fbGet('operacional_data');
+    opAllData=data||{};
     opSetSync('ok');
   }catch(e){opSetSync('error');}
   opRows=opAllData[opMonthKey()]||[];
@@ -904,21 +947,26 @@ async function opLoad(){
 async function opSave(){
   opIsSaving=true;opSetSync('syncing');
   opAllData[opMonthKey()]=opRows;
-  try{await setDoc(opDataRef,opAllData);opSetSync('ok');}
+  try{await fbSet('operacional_data',opAllData);opSetSync('ok');}
   catch(e){opSetSync('error');}
   setTimeout(()=>{opIsSaving=false;},500);
 }
 
-// Live listener — started lazily on first tab visit
+// Poll every 20s for operacional changes (started lazily)
 function opStartListener(){
-  onSnapshot(opDataRef,(snap)=>{
-    if(snap.exists()&&!opIsSaving){
-      opAllData=snap.data();
-      opRows=opAllData[opMonthKey()]||[];
-      renderOpTable();
-      opSetSync('ok');
+  setInterval(async()=>{
+    if(opIsSaving) return;
+    const data=await fbGet('operacional_data');
+    if(data){
+      const s=JSON.stringify(data[opMonthKey()]||[]);
+      if(s!==JSON.stringify(opRows)){
+        opAllData=data;
+        opRows=opAllData[opMonthKey()]||[];
+        renderOpTable();
+        opSetSync('ok');
+      }
     }
-  });
+  },20000);
 }
 
 /* ── Month navigation for Operacional page ── */
