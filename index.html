@@ -1284,13 +1284,13 @@ function renderOpTable(){
       <td>${esc(r.tema)}</td>
       <td style="font-size:11px;color:#888">${esc(r.subtema)}</td>
       <td class="td-title">${esc(r.titulo)}</td>
+      <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
       <td>${r.imagem_url
         ? `<img class="op-img-thumb" src="${r.imagem_url}" title="${esc(r.imagem_nome||'')}"
               onerror="this.style.display='none'"/>
            <span class="op-img-name">${esc(r.imagem_nome||'')}</span>`
         : '<span style="color:#ddd;font-size:11px">—</span>'
       }</td>
-      <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
       <td>
         <div class="row-actions">
           <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
@@ -1650,8 +1650,8 @@ opLoad();
             <th style="width:110px">Tema</th>
             <th style="width:110px">Sub-tema</th>
             <th style="width:180px">Título</th>
-            <th style="width:120px">Imagem</th>
             <th>Mensagem</th>
+            <th style="width:120px">Imagem</th>
             <th style="width:56px"></th>
           </tr>
         </thead>
