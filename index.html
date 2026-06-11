@@ -1081,8 +1081,8 @@ function opSaveModal(){
 
 /* CSV Export — only current month */
 function opExportCSV(){
-  const cols=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
-  const headers=['Status','Campanha','Data','Hora','Canal','Plataforma','Segmentação','Tema','Sub-tema','Título','Mensagem'];
+  const cols=CSV_COLS.map(c=>c.field);
+  const headers=CSV_COLS.map(c=>c.header);
   const lines=[headers.join(',')];
   opRows.forEach(r=>{
     lines.push(cols.map(c=>{
@@ -1100,77 +1100,104 @@ function opExportCSV(){
 /* CSV Import */
 let opImportParsed=[];
 
-function parseCSV(text){
-  const lines=text.split(/\r?\n/).filter(l=>l.trim());
-  if(!lines.length) return [];
-  // Parse a single CSV line respecting quoted fields
-  function parseLine(line){
-    const fields=[];let cur='';let inQ=false;
-    for(let i=0;i<line.length;i++){
-      const c=line[i];
-      if(c==='"'){
-        if(inQ&&line[i+1]==='"'){cur+='"';i++;}
-        else inQ=!inQ;
-      } else if(c===','&&!inQ){fields.push(cur);cur='';}
-      else cur+=c;
-    }
-    fields.push(cur);
-    return fields;
+/* Canonical columns — must match template headers */
+const CSV_COLS=[
+  {header:'Status',      field:'status'},
+  {header:'Campanha',    field:'campanha'},
+  {header:'Data',        field:'data'},
+  {header:'Hora',        field:'hora'},
+  {header:'Canal',       field:'canal'},
+  {header:'Plataforma',  field:'plataforma'},
+  {header:'Segmentacao', field:'segmentacao'},
+  {header:'Tema',        field:'tema'},
+  {header:'Subtema',     field:'subtema'},
+  {header:'Titulo',      field:'titulo'},
+  {header:'Mensagem',    field:'mensagem'},
+];
+
+function parseLine(line){
+  const fields=[];let cur='';let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){
+      if(inQ&&line[i+1]==='"'){cur+='"';i++;}
+      else inQ=!inQ;
+    }else if(c===','&&!inQ){fields.push(cur);cur='';}
+    else cur+=c;
   }
-  const headers=parseLine(lines[0]).map(h=>h.trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // remove accents
-    .replace(/[^a-z0-9]/g,'_'));
-  // Map CSV header → internal field name (broad matching)
-  // Headers are already lowercased, accent-stripped, non-alphanum → _
-  const MAP={
-    // status
-    'status':'status',
-    // campanha
-    'campanha':'campanha','campanha_nome_id_':'campanha','campaign':'campanha',
-    'id':'campanha','utm':'campanha','nome':'campanha',
-    // data
-    'data':'data','date':'data','dt':'data',
-    // hora
-    'hora':'hora','horario':'hora','time':'hora','hour':'hora',
-    // canal
-    'canal':'canal','channel':'canal',
-    // plataforma
-    'plataforma':'plataforma','ferramenta':'plataforma','platform':'plataforma','tool':'plataforma',
-    // segmentacao
-    'segmentacao':'segmentacao','base':'segmentacao','publico':'segmentacao',
-    'segmentacao_publico_base_':'segmentacao','segmentacao__publico___base_':'segmentacao',
-    'segmentacao_publico_base':'segmentacao','audience':'segmentacao',
-    // tema
-    'tema':'tema','theme':'tema',
-    // subtema
-    'sub_tema':'subtema','subtema':'subtema','sub_theme':'subtema',
-    // titulo
-    'titulo':'titulo','titulo_do_push':'titulo','title':'titulo','titulo_push':'titulo',
-    'titulos':'titulo',
-    // mensagem
-    'mensagem':'mensagem','texto':'mensagem','text':'mensagem',
-    'mensagem___texto':'mensagem','body':'mensagem','conteudo':'mensagem',
-    'mensagem_texto':'mensagem',
-    // destino / link (ignore gracefully)
-    'destino':'_ignore','link':'_ignore','max':'_ignore',
-    'tipo':'_ignore','plataforma_2':'_ignore'
-  };
-  const colMap=headers.map(h=>MAP[h]||null);
+  fields.push(cur);
+  return fields;
+}
+
+function normalizeH(h){
+  return h.trim()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
+}
+
+function parseCSV(text){
+  const lines=text.split(/
+?
+/).filter(l=>l.trim());
+  if(!lines.length) return [];
+
+  // Build lookup: normalizedHeader → internal field
+  const MAP={};
+  CSV_COLS.forEach(c=>{
+    MAP[normalizeH(c.header)]=c.field;
+    MAP[c.field]=c.field; // also accept raw field name
+  });
+
+  const rawHeaders=parseLine(lines[0]);
+  const colMap=rawHeaders.map(h=>MAP[normalizeH(h)]||null);
+  const matched=colMap.filter(Boolean).length;
+
+  if(matched===0){
+    alert('Nenhuma coluna reconhecida no arquivo.\nBaixe o Template CSV (botão 📄) para ver o formato correto.');
+    return [];
+  }
+
   const rows=[];
   for(let i=1;i<lines.length;i++){
     const vals=parseLine(lines[i]);
     if(vals.every(v=>!v.trim())) continue;
     const row={id:'row_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5)};
     colMap.forEach((field,idx)=>{
-      if(field && field!=='_ignore') row[field]=(vals[idx]||'').trim();
+      if(field) row[field]=(vals[idx]||'').trim();
     });
-    // Ensure all fields exist
-    ['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem']
-      .forEach(f=>{if(!row[f])row[f]='';});
+    CSV_COLS.forEach(c=>{if(!row[c.field])row[c.field]='';});
     rows.push(row);
   }
   return rows;
 }
+
+
+/* Download CSV template with example row */
+function opDownloadTemplate(){
+  const headers = CSV_COLS.map(c=>c.header).join(',');
+  const statusOpts = 'Aguardando Agendamento';
+  const canalOpts  = 'App Push';
+  const platOpts   = 'Insider';
+  const example = [
+    '"'+statusOpts+'"',
+    '"20260701_guanabara_insider_apppush_exemplo"',
+    '"01/07"',
+    '"09:00"',
+    '"'+canalOpts+'"',
+    '"'+platOpts+'"',
+    '"Ativos"',
+    '"Comercial"',
+    '"Institucional"',
+    '"Exemplo de título 🚌"',
+    '"Texto da mensagem de exemplo. Use aspas duplas para textos com vírgulas."',
+  ].join(',');
+  const blob = new Blob([headers+'\n'+example], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='template_operacional.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+document.getElementById('op-template-btn').addEventListener('click', opDownloadTemplate);
 
 document.getElementById('op-import-btn').addEventListener('click',()=>{
   document.getElementById('op-import-input').value='';
@@ -1266,6 +1293,7 @@ document.getElementById('op-filter-canal').addEventListener('change',renderOpTab
       <button class="op-btn primary" id="op-add-btn">+ Nova linha</button>
       <button class="op-btn" id="op-export-btn">↓ Exportar CSV</button>
       <button class="op-btn" id="op-import-btn">↑ Importar CSV</button>
+      <button class="op-btn" id="op-template-btn">📄 Baixar Template</button>
       <input type="file" id="op-import-input" accept=".csv" style="display:none"/>
       <div class="op-sync">
         <div class="op-sync-dot" id="op-sync-dot"></div>
