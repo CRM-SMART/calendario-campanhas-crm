@@ -127,9 +127,151 @@ input:focus,select:focus{border-color:#aaa}
 .loading-overlay p{font-size:14px;color:#888}
 .spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#1D9E75;border-radius:50%;animation:spin .7s linear infinite}
 .edit-badge{font-size:10px;color:#666;margin-bottom:8px;padding:4px 8px;background:#f5f5f3;border-radius:6px;display:inline-block}
+
+/* ═══════════════════════════════════════════════
+   PAGE NAVIGATION (Calendário / Operacional)
+═══════════════════════════════════════════════ */
+.page-nav{display:flex;gap:0;border-bottom:2px solid #e8e8e5;margin-bottom:18px;background:#fff;border-radius:10px 10px 0 0;padding:0 8px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.page-nav-btn{font-size:13px;font-weight:600;padding:12px 20px;border:none;background:none;cursor:pointer;color:#888;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s}
+.page-nav-btn:hover{color:#555}
+.page-nav-btn.active{color:#1a1a1a;border-bottom-color:#1a1a1a}
+.page{display:none}.page.active{display:block}
+
+/* ═══════════════════════════════════════════════
+   OPERACIONAL TABLE PAGE
+═══════════════════════════════════════════════ */
+.op-wrap{max-width:1600px;margin:0 auto;padding:.5rem 0}
+.op-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.op-toolbar input{padding:6px 12px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;width:220px}
+.op-toolbar select{padding:6px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff}
+.op-btn{font-size:12px;padding:7px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;cursor:pointer;white-space:nowrap}
+.op-btn:hover{background:#f0f0ee}
+.op-btn.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.op-btn.primary:hover{opacity:.85}
+.op-sync{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px;margin-left:auto}
+.op-sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc}
+.op-sync-dot.ok{background:#1D9E75}
+.op-sync-dot.syncing{background:#f59e0b;animation:pulse 1s infinite}
+.op-sync-dot.error{background:#E24B4A}
+
+.op-table-wrap{overflow-x:auto;border-radius:10px;border:1px solid #e8e8e5;background:#fff}
+.op-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1100px}
+.op-table th{background:#f5f5f3;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;text-align:left;border-bottom:1px solid #e8e8e5;white-space:nowrap;position:sticky;top:0;z-index:2}
+.op-table td{padding:7px 10px;border-bottom:1px solid #f0f0ee;vertical-align:top;max-width:260px}
+.op-table tr:last-child td{border-bottom:none}
+.op-table tr:hover td{background:#fafaf8}
+.op-table td.td-msg{max-width:320px;white-space:pre-wrap;word-break:break-word}
+.op-table td.td-title{max-width:180px;white-space:pre-wrap;word-break:break-word}
+
+/* Status badge */
+.status-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.s-enviado{background:#E1F5EE;color:#0F6E56}
+.s-agendado{background:#E6F1FB;color:#185FA5}
+.s-emvalidacao{background:#FEF8E3;color:#8A6500}
+.s-emproducao{background:#F3EEFF;color:#5B3AA8}
+.s-blockcomercial{background:#FCEBEB;color:#A32D2D}
+.s-blocktecnico{background:#FAECE7;color:#993C1D}
+.s-alteracao{background:#F1EFE8;color:#5F5E5A}
+.s-aguardando{background:#E0F2FE;color:#0C5A87}
+
+/* Action buttons in rows */
+.row-actions{display:flex;gap:4px;opacity:0;transition:opacity .1s}
+tr:hover .row-actions{opacity:1}
+.row-act-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;border-radius:4px;color:#999}
+.row-act-btn:hover{background:#f0f0ee;color:#1a1a1a}
+
+/* Operacional modal */
+.op-modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:300}
+.op-modal{background:#fff;border-radius:14px;padding:1.5rem;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.18);border:1px solid #e0e0dc}
+.op-modal h3{font-size:15px;font-weight:700;margin-bottom:1.25rem;color:#1a1a1a}
+.op-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.op-form-grid .full{grid-column:1/-1}
+.op-form-group{display:flex;flex-direction:column;gap:4px}
+.op-form-group label{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.04em}
+.op-form-group input,.op-form-group select,.op-form-group textarea{width:100%;padding:7px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit;outline:none}
+.op-form-group input:focus,.op-form-group select:focus,.op-form-group textarea:focus{border-color:#aaa}
+.op-form-group textarea{resize:vertical;min-height:72px}
+.op-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;border-top:1px solid #f0f0f0;padding-top:14px}
+
+/* Empty state */
+.op-empty{text-align:center;padding:48px 20px;color:#bbb;font-size:14px}
+.op-count{font-size:12px;color:#aaa;margin-bottom:8px}
+
+
+/* Operacional month header (shared nav context) */
+.op-month-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.op-month-row h2{font-size:16px;font-weight:600;color:#1a1a1a}
+
+/* ═══ IMAGE REPOSITORY ═══ */
+.img-wrap{max-width:1400px;margin:0 auto;padding:.5rem 0}
+.img-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.img-toolbar input[type=text]{padding:6px 12px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;width:220px}
+
+/* Drop zone */
+.img-dropzone{border:2px dashed #ddd;border-radius:12px;background:#fafaf8;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:18px}
+.img-dropzone:hover,.img-dropzone.drag-over{border-color:#1D9E75;background:#f0faf5}
+.img-dropzone p{font-size:14px;color:#aaa;margin-top:8px}
+.img-dropzone strong{font-size:15px;color:#555}
+.img-dropzone input{display:none}
+.img-dz-icon{font-size:36px;line-height:1}
+
+/* Upload queue */
+.img-queue{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.img-queue-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:1px solid #e8e8e5;border-radius:8px;font-size:12px}
+.img-queue-item .q-name{flex:1;font-weight:500;color:#1a1a1a;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.img-queue-item .q-size{color:#aaa;flex-shrink:0}
+.img-progress-bar{width:100%;height:4px;background:#eee;border-radius:2px;margin-top:4px;overflow:hidden}
+.img-progress-fill{height:100%;background:#1D9E75;border-radius:2px;transition:width .2s}
+.q-status{flex-shrink:0;font-size:11px;font-weight:600}
+.q-status.uploading{color:#f59e0b}
+.q-status.done{color:#1D9E75}
+.q-status.error{color:#E24B4A}
+
+/* Gallery grid */
+.img-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.img-card{background:#fff;border:1px solid #e8e8e5;border-radius:10px;overflow:hidden;transition:box-shadow .15s}
+.img-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.img-card-thumb{width:100%;height:140px;object-fit:cover;background:#f0f0ee;display:block}
+.img-card-thumb-placeholder{width:100%;height:140px;background:#f5f5f3;display:flex;align-items:center;justify-content:center;font-size:32px}
+.img-card-body{padding:10px 12px}
+.img-card-name{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.img-card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px;min-height:20px}
+.img-tag{font-size:10px;padding:1px 7px;border-radius:8px;background:#f0f0ee;color:#555}
+.img-card-meta{font-size:10px;color:#bbb;margin-bottom:8px}
+.img-card-actions{display:flex;gap:6px}
+.img-act-btn{flex:1;font-size:11px;padding:5px 0;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;text-align:center;color:#555}
+.img-act-btn:hover{background:#f0f0ee}
+.img-act-btn.copy-btn.copied{background:#E1F5EE;color:#1D9E75;border-color:#1D9E75}
+.img-act-btn.del-btn:hover{background:#FCEBEB;color:#E24B4A;border-color:#E24B4A}
+
+/* Tags input */
+.tags-input-wrap{display:flex;flex-wrap:wrap;gap:4px;padding:5px 8px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:text;min-height:36px;align-items:center}
+.tags-input-wrap input{border:none;outline:none;font-size:13px;padding:0;min-width:80px;flex:1;background:transparent}
+.tag-pill{display:flex;align-items:center;gap:3px;font-size:11px;padding:2px 8px;border-radius:8px;background:#f0f0ee;color:#555}
+.tag-pill button{background:none;border:none;cursor:pointer;font-size:10px;padding:0;color:#aaa;line-height:1}
+
+/* img sync */
+.img-sync{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px;margin-left:auto}
+.img-sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc}
+.img-sync-dot.ok{background:#1D9E75}
+.img-sync-dot.syncing{background:#f59e0b;animation:pulse 1s infinite}
+.img-sync-dot.error{background:#E24B4A}
+.img-count{font-size:12px;color:#aaa;margin-bottom:10px}
+.img-empty{text-align:center;padding:60px 20px;color:#bbb;font-size:14px}
+
 </style>
 </head>
 <body>
+
+<!-- ═══ PAGE NAVIGATION ═══ -->
+<div class="page-nav">
+  <button class="page-nav-btn active" data-page="cal">📅 Calendário</button>
+  <button class="page-nav-btn" data-page="op">📋 Operacional</button>
+  <button class="page-nav-btn" data-page="img">🖼️ Imagens</button>
+</div>
+
+<!-- ═══ PAGE: CALENDÁRIO (original, untouched) ═══ -->
+<div class="page active" id="page-cal">
 <div id="loading-overlay" class="loading-overlay">
   <div class="spinner"></div>
   <p>Carregando calendário...</p>
@@ -233,6 +375,7 @@ import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstat
 const firebaseConfig={apiKey:"AIzaSyC7xA8-P1kAhf_6ItweNk9lxV64lautOSo",authDomain:"crm-calendario-f3b18.firebaseapp.com",projectId:"crm-calendario-f3b18",storageBucket:"crm-calendario-f3b18.firebasestorage.app",messagingSenderId:"1069676978590",appId:"1:1069676978590:web:c9a99be01b991df9f0b68f"};
 const fbApp=initializeApp(firebaseConfig);
 const db=getFirestore(fbApp);
+const IMGBB_KEY="f607fc141d6c3c2883cb0297487094aa";
 
 const PALETTE=[
   {id:'purple',bg:'#EEEDFE',text:'#3C3489',dot:'#7F77DD'},
@@ -649,8 +792,16 @@ document.getElementById('ev-name').addEventListener('keydown',e=>{if(e.key==='En
 document.getElementById('new-ch-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ch-add').click();});
 document.getElementById('new-aud-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('aud-add').click();});
 document.getElementById('camp-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('camp-add').click();});
-document.getElementById('prev').addEventListener('click',()=>{cur.m--;if(cur.m<0){cur.m=11;cur.y--;}renderCal();});
-document.getElementById('next').addEventListener('click',()=>{cur.m++;if(cur.m>11){cur.m=0;cur.y++;}renderCal();});
+document.getElementById('prev').addEventListener('click',()=>{
+  cur.m--;if(cur.m<0){cur.m=11;cur.y--;}renderCal();
+  opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();
+  if(document.getElementById('page-op').classList.contains('active'))renderOpTable();
+});
+document.getElementById('next').addEventListener('click',()=>{
+  cur.m++;if(cur.m>11){cur.m=0;cur.y++;}renderCal();
+  opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();
+  if(document.getElementById('page-op').classList.contains('active'))renderOpTable();
+});
 
 const pad=n=>String(n).padStart(2,'0');
 document.getElementById('camp-start').value=`${cur.y}-${pad(cur.m+1)}-01`;
@@ -658,6 +809,886 @@ document.getElementById('camp-end').value=`${cur.y}-${pad(cur.m+1)}-${new Date(c
 
 await loadFromFirebase();
 startListener();
+
+/* ═══════════════════════════════════════════════
+   IMAGE REPOSITORY
+   Firestore:  calendario/imagens_meta  → { images: [...] }
+   Storage:    gs://crm-calendario-f3b18.appspot.com/imagens/{id}_{name}
+═══════════════════════════════════════════════ */
+const imgMetaRef = doc(db, 'calendario', 'imagens_meta');
+let imgLibrary = [];       // [{id, name, url, path, tags, size, uploadedAt}]
+let imgPendingFiles = [];  // files waiting for meta input
+let imgCurrentFileIdx = 0;
+let imgCurrentTags = [];
+let imgIsSaving = false;
+
+function imgSetSync(s){
+  const dot=document.getElementById('img-sync-dot');
+  const lbl=document.getElementById('img-sync-label');
+  if(s==='ok'){dot.className='img-sync-dot ok';lbl.textContent='Sincronizado';}
+  else if(s==='syncing'){dot.className='img-sync-dot syncing';lbl.textContent='Salvando...';}
+  else if(s==='error'){dot.className='img-sync-dot error';lbl.textContent='Erro';}
+  else{dot.className='img-sync-dot';lbl.textContent='—';}
+}
+
+/* Load metadata from Firestore */
+async function imgLoad(){
+  try{
+    const snap = await getDoc(imgMetaRef);
+    if(snap.exists()) imgLibrary = snap.data().images || [];
+    else imgLibrary = [];
+    imgSetSync('ok');
+  }catch(e){ imgSetSync('error'); }
+  renderImgGallery();
+}
+
+/* Save metadata to Firestore */
+async function imgSaveMeta(){
+  imgIsSaving = true; imgSetSync('syncing');
+  try{ await setDoc(imgMetaRef, { images: imgLibrary }); imgSetSync('ok'); }
+  catch(e){ imgSetSync('error'); }
+  setTimeout(()=>{ imgIsSaving = false; }, 500);
+}
+
+/* Live listener */
+onSnapshot(imgMetaRef, (snap)=>{
+  if(snap.exists() && !imgIsSaving){
+    imgLibrary = snap.data().images || [];
+    renderImgGallery();
+    imgSetSync('ok');
+  }
+});
+
+/* ── Gallery render ── */
+function renderImgGallery(){
+  const search = (document.getElementById('img-search')?.value||'').toLowerCase();
+  let items = imgLibrary.filter(img=>{
+    if(!search) return true;
+    return (img.name+' '+(img.tags||[]).join(' ')).toLowerCase().includes(search);
+  });
+  const count = document.getElementById('img-count');
+  if(count) count.textContent = items.length + ' imagem'+(items.length!==1?'ns':'')+
+    (imgLibrary.length!==items.length?' (filtrado de '+imgLibrary.length+')':'');
+  const gallery = document.getElementById('img-gallery');
+  if(!gallery) return;
+  gallery.innerHTML = '';
+  if(!items.length){
+    gallery.innerHTML = '<div class="img-empty">'+
+      (imgLibrary.length===0
+        ? '📂 Nenhuma imagem ainda.<br>Arraste arquivos ou clique em <b>+ Fazer upload</b>.'
+        : '🔍 Nenhuma imagem encontrada para "<b>'+search+'</b>".')+
+      '</div>';
+    return;
+  }
+  items.forEach(img=>{
+    const card = document.createElement('div');
+    card.className = 'img-card';
+    const tagsHtml = (img.tags||[]).map(t=>`<span class="img-tag">${esc(t)}</span>`).join('');
+    const kb = img.size ? Math.round(img.size/1024)+'KB' : '';
+    const date = img.uploadedAt ? new Date(img.uploadedAt).toLocaleDateString('pt-BR') : '';
+    card.innerHTML = `
+      <img class="img-card-thumb" src="${img.thumb||img.url}" alt="${esc(img.name)}"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+           loading="lazy"/>
+      <div class="img-card-thumb-placeholder" style="display:none">🖼️</div>
+      <div class="img-card-body">
+        <div class="img-card-name" title="${esc(img.name)}">${esc(img.name)}</div>
+        <div class="img-card-tags">${tagsHtml}</div>
+        <div class="img-card-meta">${[kb,date].filter(Boolean).join(' · ')}</div>
+        <div class="img-card-actions">
+          <button class="img-act-btn copy-btn" data-url="${img.url}">📋 Copiar URL</button>
+          <button class="img-act-btn del-btn" data-id="${img.id}" data-path="${img.path||''}">🗑</button>
+        </div>
+      </div>`;
+    gallery.appendChild(card);
+  });
+
+  /* Copy URL */
+  gallery.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      navigator.clipboard.writeText(btn.dataset.url).then(()=>{
+        btn.textContent='✅ Copiado!';btn.classList.add('copied');
+        setTimeout(()=>{btn.textContent='📋 Copiar URL';btn.classList.remove('copied');},2000);
+      });
+    });
+  });
+
+  /* Delete */
+  gallery.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      if(!confirm('Excluir esta imagem? A ação não pode ser desfeita.')) return;
+      const id=btn.dataset.id;
+      // Remove from Firestore metadata (ImgBB images remain on their CDN)
+      imgLibrary = imgLibrary.filter(i=>i.id!==id);
+      imgSaveMeta(); renderImgGallery();
+    });
+  });
+}
+
+/* ── File selection + drag & drop ── */
+const dropzone = document.getElementById('img-dropzone');
+const fileInput = document.getElementById('img-file-input');
+
+dropzone.addEventListener('click', ()=>fileInput.click());
+document.getElementById('img-upload-trigger').addEventListener('click',()=>fileInput.click());
+
+dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e=>{
+  e.preventDefault(); dropzone.classList.remove('drag-over');
+  handleFiles([...e.dataTransfer.files]);
+});
+fileInput.addEventListener('change', ()=>{ handleFiles([...fileInput.files]); fileInput.value=''; });
+
+function handleFiles(files){
+  const valid = files.filter(f=>{
+    if(!f.type.startsWith('image/')){ alert('Arquivo ignorado (não é imagem): '+f.name); return false; }
+    if(f.size>5*1024*1024){ alert('Arquivo muito grande (máx 5MB): '+f.name); return false; }
+    return true;
+  });
+  if(!valid.length) return;
+  imgPendingFiles = valid;
+  imgCurrentFileIdx = 0;
+  imgCurrentTags = [];
+  showMetaModal();
+}
+
+/* ── Meta modal (name + tags before upload) ── */
+function showMetaModal(){
+  if(imgCurrentFileIdx >= imgPendingFiles.length){
+    // All files collected — start uploading
+    uploadAllPending();
+    return;
+  }
+  const file = imgPendingFiles[imgCurrentFileIdx];
+  document.getElementById('img-meta-title').textContent =
+    'Detalhes — '+(imgCurrentFileIdx+1)+'/'+imgPendingFiles.length+': '+file.name;
+  // Pre-fill name without extension
+  document.getElementById('img-meta-name').value = file.name.replace(/\.[^.]+$/,'');
+  // Preview
+  const preview = document.getElementById('img-meta-preview');
+  const previewWrap = document.getElementById('img-meta-preview-wrap');
+  const reader = new FileReader();
+  reader.onload = e=>{ preview.src=e.target.result; previewWrap.style.display=''; };
+  reader.readAsDataURL(file);
+  // Reset tags
+  imgCurrentTags = [];
+  renderTagPills();
+  document.getElementById('img-tags-input').value='';
+  document.getElementById('img-meta-modal-bg').style.display='flex';
+  setTimeout(()=>document.getElementById('img-meta-name').focus(),50);
+}
+
+function renderTagPills(){
+  const wrap = document.getElementById('img-tags-wrap');
+  const input = document.getElementById('img-tags-input');
+  wrap.innerHTML='';
+  imgCurrentTags.forEach((tag,i)=>{
+    const pill=document.createElement('div');pill.className='tag-pill';
+    pill.innerHTML=`<span>${esc(tag)}</span><button>×</button>`;
+    pill.querySelector('button').addEventListener('click',()=>{
+      imgCurrentTags.splice(i,1); renderTagPills();
+    });
+    wrap.appendChild(pill);
+  });
+  wrap.appendChild(input);
+  input.focus();
+}
+
+document.getElementById('img-tags-wrap').addEventListener('click',()=>{
+  document.getElementById('img-tags-input').focus();
+});
+document.getElementById('img-tags-input').addEventListener('keydown',e=>{
+  const val=e.target.value.trim();
+  if((e.key==='Enter'||e.key===',')&&val){
+    e.preventDefault();
+    imgCurrentTags.push(val); renderTagPills(); e.target.value='';
+  }
+  if(e.key==='Backspace'&&!e.target.value&&imgCurrentTags.length){
+    imgCurrentTags.pop(); renderTagPills();
+  }
+});
+
+function collectMeta(){
+  const name = document.getElementById('img-meta-name').value.trim()
+    || imgPendingFiles[imgCurrentFileIdx].name.replace(/\.[^.]+$/,'');
+  const lastInput = document.getElementById('img-tags-input').value.trim();
+  const tags = [...imgCurrentTags, ...(lastInput?[lastInput]:[])];
+  return { name, tags };
+}
+
+document.getElementById('img-meta-confirm').addEventListener('click',()=>{
+  imgPendingFiles[imgCurrentFileIdx]._meta = collectMeta();
+  document.getElementById('img-meta-modal-bg').style.display='none';
+  imgCurrentFileIdx++;
+  imgCurrentTags=[];
+  showMetaModal();
+});
+document.getElementById('img-meta-skip').addEventListener('click',()=>{
+  const file = imgPendingFiles[imgCurrentFileIdx];
+  imgPendingFiles[imgCurrentFileIdx]._meta = {
+    name: file.name.replace(/\.[^.]+$/,''), tags: []
+  };
+  document.getElementById('img-meta-modal-bg').style.display='none';
+  imgCurrentFileIdx++;
+  imgCurrentTags=[];
+  showMetaModal();
+});
+
+/* ── Upload all pending files ── */
+function uploadAllPending(){
+  const queue = document.getElementById('img-queue');
+  queue.innerHTML=''; queue.style.display='flex';
+
+  imgPendingFiles.forEach((file,i)=>{
+    const meta = file._meta || { name:file.name.replace(/\.[^.]+$/,''), tags:[] };
+    const id = 'img_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5);
+
+    // Queue item UI
+    const item = document.createElement('div');
+    item.className='img-queue-item'; item.id='qi_'+id;
+    item.innerHTML=`
+      <span class="q-name">${esc(meta.name)}</span>
+      <span class="q-size">${Math.round(file.size/1024)}KB</span>
+      <span class="q-status uploading" id="qs_${id}">⏳ Enviando...</span>
+      <div style="flex-basis:100%;order:99">
+        <div class="img-progress-bar"><div class="img-progress-fill" id="qp_${id}" style="width:0%"></div></div>
+      </div>`;
+    queue.appendChild(item);
+
+    // Upload via ImgBB
+    (async()=>{
+      try{
+        // Simulate progress while uploading
+        let fakeProgress = 0;
+        const bar = document.getElementById('qp_'+id);
+        const progressInterval = setInterval(()=>{
+          fakeProgress = Math.min(fakeProgress + Math.random()*15, 90);
+          if(bar) bar.style.width=fakeProgress+'%';
+        }, 200);
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('name', meta.name);
+        const resp = await fetch('https://api.imgbb.com/1/upload?key='+IMGBB_KEY, {
+          method:'POST', body:formData
+        });
+        clearInterval(progressInterval);
+        if(bar) bar.style.width='100%';
+
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        const json = await resp.json();
+        if(!json.success) throw new Error(json.error?.message||'ImgBB error');
+
+        const url = json.data.display_url;    // direct image URL
+        const thumb = json.data.thumb?.url || url;
+        const deleteHash = json.data.delete_url || '';
+
+        imgLibrary.push({
+          id, name:meta.name, url, thumb,
+          deleteHash,
+          tags:meta.tags, size:file.size,
+          uploadedAt: new Date().toISOString()
+        });
+        await imgSaveMeta();
+        renderImgGallery();
+
+        const st = document.getElementById('qs_'+id);
+        if(st){ st.textContent='✅ Pronto'; st.className='q-status done'; }
+      }catch(err){
+        const st = document.getElementById('qs_'+id);
+        if(st){ st.textContent='❌ Erro'; st.className='q-status error'; }
+        console.error('ImgBB upload error:', err);
+      }finally{
+        const allDone=[...queue.querySelectorAll('.q-status')].every(s=>s.classList.contains('done')||s.classList.contains('error'));
+        if(allDone) setTimeout(()=>{ queue.style.display='none'; queue.innerHTML=''; },2500);
+      }
+    })();
+  });
+
+  imgPendingFiles = [];
+}
+
+/* ── Search ── */
+document.getElementById('img-search').addEventListener('input', renderImgGallery);
+
+/* Load on startup */
+imgLoad();
+
+
+
+/* ═══════════════════════════════════════════════
+   PAGE NAVIGATION LOGIC
+═══════════════════════════════════════════════ */
+document.querySelectorAll('.page-nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const target=btn.dataset.page;
+    document.querySelectorAll('.page-nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-'+target).classList.add('active');
+    if(target==='op'){opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();renderOpTable();}
+    if(target==='img'){renderImgGallery();}
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   OPERACIONAL — Firebase ref + state (per month)
+   Storage: calendario/operacional_data
+   Structure: { "2026-6": [row, row, ...], "2026-7": [...] }
+═══════════════════════════════════════════════ */
+const opDataRef=doc(db,'calendario','operacional_data');
+let opAllData={};       // all months cached
+let opRows=[];          // rows for the current month
+let opEditId=null;
+let opIsSaving=false;
+let opListener=null;
+
+function opMonthKey(){return cur.y+'-'+cur.m;}  // e.g. "2026-5"
+
+function opSetSync(s){
+  const dot=document.getElementById('op-sync-dot');
+  const lbl=document.getElementById('op-sync-label');
+  if(s==='ok'){dot.className='op-sync-dot ok';lbl.textContent='Sincronizado';}
+  else if(s==='syncing'){dot.className='op-sync-dot syncing';lbl.textContent='Salvando...';}
+  else if(s==='error'){dot.className='op-sync-dot error';lbl.textContent='Erro';}
+  else{dot.className='op-sync-dot';lbl.textContent='—';}
+}
+
+function opUpdateMonthLabel(){
+  const el=document.getElementById('op-month-label-op');
+  if(el) el.textContent=MONTHS[cur.m]+' '+cur.y;
+}
+
+async function opLoad(){
+  try{
+    const snap=await getDoc(opDataRef);
+    if(snap.exists()) opAllData=snap.data();
+    else opAllData={};
+    opSetSync('ok');
+  }catch(e){opSetSync('error');}
+  opRows=opAllData[opMonthKey()]||[];
+  opUpdateMonthLabel();
+  renderOpTable();
+}
+
+async function opSave(){
+  opIsSaving=true;opSetSync('syncing');
+  opAllData[opMonthKey()]=opRows;
+  try{await setDoc(opDataRef,opAllData);opSetSync('ok');}
+  catch(e){opSetSync('error');}
+  setTimeout(()=>{opIsSaving=false;},500);
+}
+
+// Live listener — updates current month's rows when another client writes
+onSnapshot(opDataRef,(snap)=>{
+  if(snap.exists()&&!opIsSaving){
+    opAllData=snap.data();
+    opRows=opAllData[opMonthKey()]||[];
+    renderOpTable();
+    opSetSync('ok');
+  }
+});
+
+/* ── Month navigation for Operacional page ── */
+document.getElementById('op-prev').addEventListener('click',()=>{
+  cur.m--;if(cur.m<0){cur.m=11;cur.y--;}
+  opRows=opAllData[opMonthKey()]||[];
+  opUpdateMonthLabel();
+  renderOpTable();
+  // Also update calendar if it's visible
+  if(document.getElementById('page-cal').classList.contains('active')) renderCal();
+});
+document.getElementById('op-next').addEventListener('click',()=>{
+  cur.m++;if(cur.m>11){cur.m=0;cur.y++;}
+  opRows=opAllData[opMonthKey()]||[];
+  opUpdateMonthLabel();
+  renderOpTable();
+  if(document.getElementById('page-cal').classList.contains('active')) renderCal();
+});
+
+/* STATUS → CSS class */
+function statusClass(s){
+  const m={'Enviado':'s-enviado','Agendado':'s-agendado','Aguardando Agendamento':'s-aguardando',
+    'Em validação':'s-emvalidacao','Em Produção':'s-emproducao',
+    'Block - Comercial':'s-blockcomercial','Block - Técnico':'s-blocktecnico','Alteração':'s-alteracao'};
+  return m[s]||'s-aguardando';
+}
+
+/* RENDER TABLE */
+function renderOpTable(){
+  opUpdateMonthLabel();
+  const search=(document.getElementById('op-search')?.value||'').toLowerCase();
+  const filterStatus=document.getElementById('op-filter-status')?.value||'';
+  const filterCanal=document.getElementById('op-filter-canal')?.value||'';
+
+  let rows=(opRows||[]).filter(r=>{
+    if(filterStatus&&r.status!==filterStatus) return false;
+    if(filterCanal&&r.canal!==filterCanal) return false;
+    if(search){
+      const hay=(r.campanha+r.tema+r.subtema+r.titulo+r.mensagem+r.segmentacao).toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const count=document.getElementById('op-count');
+  if(count) count.textContent=rows.length+' linha'+(rows.length!==1?'s':'')+
+    (opRows.length!==rows.length?' (filtrado de '+opRows.length+')':'')+
+    ' — '+MONTHS[cur.m]+' '+cur.y;
+
+  const tbody=document.getElementById('op-tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="13" class="op-empty">Nenhuma linha em <b>'+MONTHS[cur.m]+' '+cur.y+'</b>.<br>Clique em <b>+ Nova linha</b> para começar.</td></tr>';
+    return;
+  }
+
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="color:#bbb;font-size:11px">${i+1}</td>
+      <td><span class="status-badge ${statusClass(r.status)}">${r.status||'—'}</span></td>
+      <td style="font-weight:500">${esc(r.campanha)}</td>
+      <td>${esc(r.data)}</td>
+      <td>${esc(r.hora)}</td>
+      <td>${esc(r.canal)}</td>
+      <td style="font-size:11px;color:#888">${esc(r.plataforma)}</td>
+      <td style="font-size:11px">${esc(r.segmentacao)}</td>
+      <td>${esc(r.tema)}</td>
+      <td style="font-size:11px;color:#888">${esc(r.subtema)}</td>
+      <td class="td-title">${esc(r.titulo)}</td>
+      <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
+      <td>
+        <div class="row-actions">
+          <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
+          <button class="row-act-btn" title="Duplicar" data-dup="${r.id}">⧉</button>
+          <button class="row-act-btn" title="Excluir" data-del="${r.id}" style="color:#E24B4A">✕</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('[data-id]').forEach(btn=>{
+    btn.addEventListener('click',e=>{e.stopPropagation();opOpenEdit(btn.dataset.id);});
+  });
+  tbody.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(confirm('Excluir esta linha?')){
+        opRows=opRows.filter(r=>r.id!==btn.dataset.del);
+        opSave();renderOpTable();
+      }
+    });
+  });
+  tbody.querySelectorAll('[data-dup]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const orig=opRows.find(r=>r.id===btn.dataset.dup);
+      if(orig){
+        const dup=Object.assign({},orig,{id:'row_'+Date.now()});
+        const idx=opRows.indexOf(orig);
+        opRows.splice(idx+1,0,dup);
+        opSave();renderOpTable();
+      }
+    });
+  });
+}
+
+function esc(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* MODAL open / edit */
+function opOpenAdd(){
+  opEditId=null;
+  document.getElementById('op-modal-title').textContent='Nova linha — '+MONTHS[cur.m]+' '+cur.y;
+  ['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'].forEach(f=>{
+    const el=document.getElementById('op-f-'+f);
+    if(el) el.value='';
+  });
+  document.getElementById('op-modal-bg').style.display='flex';
+  setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
+}
+
+function opOpenEdit(id){
+  const r=opRows.find(x=>x.id===id);
+  if(!r) return;
+  opEditId=id;
+  document.getElementById('op-modal-title').textContent='Editar linha — '+MONTHS[cur.m]+' '+cur.y;
+  const fields=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
+  fields.forEach(f=>{
+    const el=document.getElementById('op-f-'+f);
+    if(el) el.value=r[f]||'';
+  });
+  document.getElementById('op-modal-bg').style.display='flex';
+  setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
+}
+
+function opSaveModal(){
+  const fields=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
+  const obj={};
+  fields.forEach(f=>{
+    const el=document.getElementById('op-f-'+f);
+    obj[f]=el?el.value.trim():'';
+  });
+  if(opEditId){
+    const idx=opRows.findIndex(r=>r.id===opEditId);
+    if(idx>-1) opRows[idx]=Object.assign({},opRows[idx],obj);
+  } else {
+    obj.id='row_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    opRows.push(obj);
+  }
+  opSave();renderOpTable();
+  document.getElementById('op-modal-bg').style.display='none';
+}
+
+/* CSV Export — only current month */
+function opExportCSV(){
+  const cols=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
+  const headers=['Status','Campanha','Data','Hora','Canal','Plataforma','Segmentação','Tema','Sub-tema','Título','Mensagem'];
+  const lines=[headers.join(',')];
+  opRows.forEach(r=>{
+    lines.push(cols.map(c=>{
+      const v=String(r[c]||'').replace(/"/g,'""');
+      return '"'+v+'"';
+    }).join(','));
+  });
+  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download='operacional_'+MONTHS[cur.m].toLowerCase()+'_'+cur.y+'.csv';
+  a.click();URL.revokeObjectURL(url);
+}
+
+/* CSV Import */
+let opImportParsed=[];
+
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length) return [];
+  // Parse a single CSV line respecting quoted fields
+  function parseLine(line){
+    const fields=[];let cur='';let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){
+        if(inQ&&line[i+1]==='"'){cur+='"';i++;}
+        else inQ=!inQ;
+      } else if(c===','&&!inQ){fields.push(cur);cur='';}
+      else cur+=c;
+    }
+    fields.push(cur);
+    return fields;
+  }
+  const headers=parseLine(lines[0]).map(h=>h.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // remove accents
+    .replace(/[^a-z0-9]/g,'_'));
+  // Map CSV header → internal field name
+  const MAP={
+    'status':'status','campanha':'campanha','data':'data','hora':'hora',
+    'canal':'canal','plataforma':'plataforma',
+    'segmentacao':'segmentacao','segmentacao_publico_base':'segmentacao',
+    'segmentacao__publico___base_':'segmentacao',
+    'tema':'tema','sub_tema':'subtema','subtema':'subtema',
+    'titulo':'titulo','titulo_do_push':'titulo',
+    'mensagem':'mensagem','texto':'mensagem','mensagem___texto':'mensagem'
+  };
+  const colMap=headers.map(h=>MAP[h]||null);
+  const rows=[];
+  for(let i=1;i<lines.length;i++){
+    const vals=parseLine(lines[i]);
+    if(vals.every(v=>!v.trim())) continue;
+    const row={id:'row_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5)};
+    colMap.forEach((field,idx)=>{
+      if(field) row[field]=(vals[idx]||'').trim();
+    });
+    // Ensure all fields exist
+    ['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem']
+      .forEach(f=>{if(!row[f])row[f]='';});
+    rows.push(row);
+  }
+  return rows;
+}
+
+document.getElementById('op-import-btn').addEventListener('click',()=>{
+  document.getElementById('op-import-input').value='';
+  document.getElementById('op-import-input').click();
+});
+
+document.getElementById('op-import-input').addEventListener('change',function(){
+  const file=this.files[0];if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    opImportParsed=parseCSV(e.target.result);
+    const n=opImportParsed.length;
+    const existing=opRows.length;
+    document.getElementById('op-import-title').textContent='Importar CSV — '+MONTHS[cur.m]+' '+cur.y;
+    document.getElementById('op-import-info').innerHTML=
+      '<b>'+n+' linha'+(n!==1?'s':'')+' encontrada'+(n!==1?'s':'')+
+      '</b> no arquivo <b>'+file.name+'</b>.<br><br>'+
+      'O mês atual tem <b>'+existing+' linha'+(existing!==1?'s':'')+' existente'+(existing!==1?'s':'')+
+      '</b>. Escolha:<br>'+
+      '&nbsp;&nbsp;• <b style="color:#1D9E75">Adicionar</b> — mantém as linhas existentes e insere as novas no final.<br>'+
+      '&nbsp;&nbsp;• <b style="color:#E24B4A">Substituir</b> — apaga tudo do mês e importa apenas o arquivo.';
+    document.getElementById('op-import-modal-bg').style.display='flex';
+  };
+  reader.readAsText(file,'UTF-8');
+});
+
+document.getElementById('op-import-append').addEventListener('click',()=>{
+  opRows=opRows.concat(opImportParsed);
+  opSave();renderOpTable();
+  document.getElementById('op-import-modal-bg').style.display='none';
+});
+document.getElementById('op-import-replace').addEventListener('click',()=>{
+  opRows=opImportParsed;
+  opSave();renderOpTable();
+  document.getElementById('op-import-modal-bg').style.display='none';
+});
+document.getElementById('op-import-cancel').addEventListener('click',()=>{
+  document.getElementById('op-import-modal-bg').style.display='none';
+});
+document.getElementById('op-import-modal-bg').addEventListener('click',e=>{
+  if(e.target===e.currentTarget) document.getElementById('op-import-modal-bg').style.display='none';
+});
+
+/* Wire up controls */
+document.getElementById('op-add-btn').addEventListener('click',opOpenAdd);
+document.getElementById('op-export-btn').addEventListener('click',opExportCSV);
+document.getElementById('op-modal-cancel').addEventListener('click',()=>{document.getElementById('op-modal-bg').style.display='none';});
+document.getElementById('op-modal-save').addEventListener('click',opSaveModal);
+document.getElementById('op-modal-bg').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('op-modal-bg').style.display='none';});
+document.getElementById('op-search').addEventListener('input',renderOpTable);
+document.getElementById('op-filter-status').addEventListener('change',renderOpTable);
+document.getElementById('op-filter-canal').addEventListener('change',renderOpTable);
+
+// Load operacional data alongside calendar
+opLoad();
+
 </script>
+
+</div><!-- end page-cal -->
+
+<!-- ═══ PAGE: OPERACIONAL ═══ -->
+<div class="page" id="page-op">
+  <div class="op-wrap">
+    <!-- Month nav — synced with calendar -->
+    <div class="op-month-row">
+      <button class="nav-btn" id="op-prev">&#8249;</button>
+      <h2 id="op-month-label-op"></h2>
+      <button class="nav-btn" id="op-next">&#8250;</button>
+    </div>
+    <div class="op-toolbar">
+      <input type="text" id="op-search" placeholder="Buscar campanha, tema, título..."/>
+      <select id="op-filter-status">
+        <option value="">Todos os status</option>
+        <option value="Enviado">Enviado</option>
+        <option value="Agendado">Agendado</option>
+        <option value="Aguardando Agendamento">Aguardando Agendamento</option>
+        <option value="Em validação">Em validação</option>
+        <option value="Em Produção">Em Produção</option>
+        <option value="Block - Comercial">Block - Comercial</option>
+        <option value="Block - Técnico">Block - Técnico</option>
+        <option value="Alteração">Alteração</option>
+      </select>
+      <select id="op-filter-canal">
+        <option value="">Todos os canais</option>
+        <option value="Insider">Insider</option>
+        <option value="Firebase">Firebase</option>
+        <option value="Pushnews">Pushnews</option>
+      </select>
+      <button class="op-btn primary" id="op-add-btn">+ Nova linha</button>
+      <button class="op-btn" id="op-export-btn">↓ Exportar CSV</button>
+      <button class="op-btn" id="op-import-btn">↑ Importar CSV</button>
+      <input type="file" id="op-import-input" accept=".csv" style="display:none"/>
+      <div class="op-sync">
+        <div class="op-sync-dot" id="op-sync-dot"></div>
+        <span id="op-sync-label">—</span>
+      </div>
+    </div>
+    <div class="op-count" id="op-count"></div>
+    <div class="op-table-wrap">
+      <table class="op-table" id="op-table">
+        <thead>
+          <tr>
+            <th style="width:32px">#</th>
+            <th style="width:130px">Status</th>
+            <th style="width:160px">Campanha</th>
+            <th style="width:72px">Data</th>
+            <th style="width:58px">Hora</th>
+            <th style="width:90px">Canal</th>
+            <th style="width:110px">Plataforma</th>
+            <th style="width:140px">Segmentação</th>
+            <th style="width:110px">Tema</th>
+            <th style="width:110px">Sub-tema</th>
+            <th style="width:180px">Título</th>
+            <th>Mensagem</th>
+            <th style="width:56px"></th>
+          </tr>
+        </thead>
+        <tbody id="op-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end page-op -->
+
+<!-- ═══ PAGE: IMAGENS ═══ -->
+<div class="page" id="page-img">
+  <div class="img-wrap">
+
+    <!-- Toolbar -->
+    <div class="img-toolbar">
+      <input type="text" id="img-search" placeholder="Buscar por nome ou tag..."/>
+      <button class="op-btn primary" id="img-upload-trigger">+ Fazer upload</button>
+      <div class="img-sync">
+        <div class="img-sync-dot" id="img-sync-dot"></div>
+        <span id="img-sync-label">—</span>
+      </div>
+    </div>
+
+    <!-- Drop zone -->
+    <div class="img-dropzone" id="img-dropzone">
+      <div class="img-dz-icon">🖼️</div>
+      <strong>Arraste imagens aqui</strong>
+      <p>ou clique em <b>+ Fazer upload</b> para selecionar arquivos<br>
+      Formatos aceitos: JPG, PNG, GIF, WEBP · Máx. 5 MB por arquivo</p>
+      <input type="file" id="img-file-input" accept="image/*" multiple/>
+    </div>
+
+    <!-- Upload queue (shown during uploads) -->
+    <div class="img-queue" id="img-queue" style="display:none"></div>
+
+    <!-- Tags + name modal (before confirming upload) -->
+    <div class="op-modal-bg" id="img-meta-modal-bg" style="display:none">
+      <div class="op-modal" style="width:480px">
+        <h3 id="img-meta-title">Detalhes da imagem</h3>
+        <div class="op-form-grid">
+          <div class="op-form-group full">
+            <label>Nome da imagem</label>
+            <input type="text" id="img-meta-name" placeholder="Ex: Banner São João 2026"/>
+          </div>
+          <div class="op-form-group full">
+            <label>Tags (pressione Enter para adicionar)</label>
+            <div class="tags-input-wrap" id="img-tags-wrap">
+              <input type="text" id="img-tags-input" placeholder="Ex: São João, Banner, 600x300..."/>
+            </div>
+          </div>
+          <div class="op-form-group full" id="img-meta-preview-wrap" style="display:none">
+            <label>Preview</label>
+            <img id="img-meta-preview" style="max-width:100%;max-height:200px;border-radius:8px;object-fit:contain;background:#f5f5f3"/>
+          </div>
+        </div>
+        <div class="op-modal-btns">
+          <button class="op-btn" id="img-meta-skip">Pular / Usar nome do arquivo</button>
+          <button class="op-btn primary" id="img-meta-confirm">Confirmar e fazer upload</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gallery -->
+    <div class="img-count" id="img-count"></div>
+    <div class="img-gallery" id="img-gallery"></div>
+
+  </div>
+</div><!-- end page-img -->
+
+
+<!-- ═══ IMPORT PREVIEW MODAL ═══ -->
+<div class="op-modal-bg" id="op-import-modal-bg" style="display:none">
+  <div class="op-modal" style="width:520px">
+    <h3 id="op-import-title">Importar CSV</h3>
+    <p id="op-import-info" style="font-size:13px;color:#555;margin-bottom:14px;line-height:1.5"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;border-top:1px solid #f0f0f0;padding-top:14px;margin-top:4px">
+      <button class="op-btn" id="op-import-cancel">Cancelar</button>
+      <button class="op-btn" id="op-import-append" style="background:#1D9E75;color:#fff;border-color:#1D9E75">+ Adicionar ao mês</button>
+      <button class="op-btn" id="op-import-replace" style="background:#E24B4A;color:#fff;border-color:#E24B4A">⟳ Substituir mês</button>
+    </div>
+  </div>
+</div>
+<div class="op-modal-bg" id="op-modal-bg" style="display:none">
+  <div class="op-modal">
+    <h3 id="op-modal-title">Nova linha</h3>
+    <div class="op-form-grid">
+      <div class="op-form-group">
+        <label>Status</label>
+        <select id="op-f-status">
+          <option value="">— Selecione —</option>
+          <option value="Enviado">Enviado</option>
+          <option value="Agendado">Agendado</option>
+          <option value="Aguardando Agendamento">Aguardando Agendamento</option>
+          <option value="Em validação">Em validação</option>
+          <option value="Em Produção">Em Produção</option>
+          <option value="Block - Comercial">Block - Comercial</option>
+          <option value="Block - Técnico">Block - Técnico</option>
+          <option value="Alteração">Alteração</option>
+        </select>
+      </div>
+      <div class="op-form-group">
+        <label>Campanha (nome/ID)</label>
+        <input type="text" id="op-f-campanha" placeholder="Ex: São João 2026"/>
+      </div>
+      <div class="op-form-group">
+        <label>Data</label>
+        <input type="text" id="op-f-data" placeholder="DD/MM"/>
+      </div>
+      <div class="op-form-group">
+        <label>Hora</label>
+        <input type="text" id="op-f-hora" placeholder="HH:MM"/>
+      </div>
+      <div class="op-form-group">
+        <label>Canal</label>
+        <select id="op-f-canal">
+          <option value="">— Selecione —</option>
+          <option value="Insider">Insider</option>
+          <option value="Firebase">Firebase</option>
+          <option value="Pushnews">Pushnews</option>
+        </select>
+      </div>
+      <div class="op-form-group">
+        <label>Plataforma</label>
+        <select id="op-f-plataforma">
+          <option value="">— Selecione —</option>
+          <option value="IOS / Android">IOS / Android</option>
+          <option value="Browser">Browser</option>
+          <option value="IOS">IOS</option>
+          <option value="Android">Android</option>
+          <option value="Mobile">Mobile</option>
+          <option value="Web Mobile">Web Mobile</option>
+        </select>
+      </div>
+      <div class="op-form-group full">
+        <label>Segmentação (Público / Base)</label>
+        <input type="text" id="op-f-segmentacao" placeholder="Ex: Ativos, Frios, RIO DE JANEIRO - RJ..."/>
+      </div>
+      <div class="op-form-group">
+        <label>Tema</label>
+        <input type="text" id="op-f-tema" placeholder="Ex: São João, Copa do mundo..."/>
+      </div>
+      <div class="op-form-group">
+        <label>Sub-tema</label>
+        <input type="text" id="op-f-subtema" placeholder="Ex: ARRAIA10, Institucional..."/>
+      </div>
+      <div class="op-form-group full">
+        <label>Título do Push</label>
+        <input type="text" id="op-f-titulo" placeholder="Máx. ~50 chars"/>
+      </div>
+      <div class="op-form-group full">
+        <label>Mensagem / Texto</label>
+        <textarea id="op-f-mensagem" placeholder="Texto completo do disparo..."></textarea>
+      </div>
+    </div>
+    <div class="op-modal-btns">
+      <button class="op-btn" id="op-modal-cancel">Cancelar</button>
+      <button class="op-btn primary" id="op-modal-save">Salvar</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
