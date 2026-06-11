@@ -259,6 +259,30 @@ tr:hover .row-actions{opacity:1}
 .img-count{font-size:12px;color:#aaa;margin-bottom:10px}
 .img-empty{text-align:center;padding:60px 20px;color:#bbb;font-size:14px}
 
+
+/* Image picker inside Operacional modal */
+.img-picker-wrap{position:relative}
+.img-picker-input{width:100%;padding:7px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;outline:none}
+.img-picker-input:focus{border-color:#aaa}
+.img-picker-dropdown{position:absolute;top:100%;left:0;right:0;z-index:500;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;margin-top:3px;display:none}
+.img-picker-dropdown.open{display:block}
+.img-picker-item{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;transition:background .1s}
+.img-picker-item:hover{background:#f5f5f3}
+.img-picker-item img{width:36px;height:36px;object-fit:cover;border-radius:5px;background:#f0f0ee;flex-shrink:0}
+.img-picker-item-info{flex:1;min-width:0}
+.img-picker-item-name{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.img-picker-item-tags{font-size:10px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.img-picker-selected{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0faf5;border:1px solid #1D9E75;border-radius:8px;margin-top:6px}
+.img-picker-selected img{width:40px;height:40px;object-fit:cover;border-radius:6px}
+.img-picker-selected-info{flex:1;min-width:0}
+.img-picker-selected-name{font-size:12px;font-weight:600;color:#0F6E56}
+.img-picker-selected-url{font-size:10px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.img-picker-clear{background:none;border:none;cursor:pointer;color:#bbb;font-size:14px;flex-shrink:0;padding:0}
+.img-picker-clear:hover{color:#E24B4A}
+/* Table thumbnail */
+.op-img-thumb{width:32px;height:32px;object-fit:cover;border-radius:4px;vertical-align:middle}
+.op-img-name{font-size:11px;color:#555;margin-left:5px;vertical-align:middle}
+
 </style>
 </head>
 <body>
@@ -1242,7 +1266,7 @@ function renderOpTable(){
   tbody.innerHTML='';
 
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="13" class="op-empty">Nenhuma linha em <b>'+MONTHS[cur.m]+' '+cur.y+'</b>.<br>Clique em <b>+ Nova linha</b> para começar.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="14" class="op-empty">Nenhuma linha em <b>'+MONTHS[cur.m]+' '+cur.y+'</b>.<br>Clique em <b>+ Nova linha</b> para começar.</td></tr>';
     return;
   }
 
@@ -1260,6 +1284,12 @@ function renderOpTable(){
       <td>${esc(r.tema)}</td>
       <td style="font-size:11px;color:#888">${esc(r.subtema)}</td>
       <td class="td-title">${esc(r.titulo)}</td>
+      <td>${r.imagem_url
+        ? `<img class="op-img-thumb" src="${r.imagem_url}" title="${esc(r.imagem_nome||'')}"
+              onerror="this.style.display='none'"/>
+           <span class="op-img-name">${esc(r.imagem_nome||'')}</span>`
+        : '<span style="color:#ddd;font-size:11px">—</span>'
+      }</td>
       <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
       <td>
         <div class="row-actions">
@@ -1312,6 +1342,8 @@ function opOpenAdd(){
     if(el) el.value='';
   });
   document.getElementById('op-modal-bg').style.display='flex';
+  opImgPickerClear();
+  opImgPickerWire();
   setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
 }
 
@@ -1321,11 +1353,21 @@ function opOpenEdit(id){
   opEditId=id;
   document.getElementById('op-modal-title').textContent='Editar linha — '+MONTHS[cur.m]+' '+cur.y;
   const fields=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
+  // Image fields come from hidden inputs set by the picker
+  const imgUrl = document.getElementById('op-f-img-url')?.value||'';
+  const imgNome = document.getElementById('op-f-img-nome')?.value||'';
   fields.forEach(f=>{
     const el=document.getElementById('op-f-'+f);
     if(el) el.value=r[f]||'';
   });
   document.getElementById('op-modal-bg').style.display='flex';
+  // Restore image picker state
+  opImgPickerClear();
+  opImgPickerWire();
+  if(r.imagem_url){
+    const lib = imgLibrary.find(i=>i.url===r.imagem_url);
+    opImgPickerSelect(r.imagem_url, lib?lib.thumb||r.imagem_url:r.imagem_url, r.imagem_nome||'');
+  }
   setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
 }
 
@@ -1336,6 +1378,8 @@ function opSaveModal(){
     const el=document.getElementById('op-f-'+f);
     obj[f]=el?el.value.trim():'';
   });
+  obj.imagem_url = imgUrl;
+  obj.imagem_nome = imgNome;
   if(opEditId){
     const idx=opRows.findIndex(r=>r.id===opEditId);
     if(idx>-1) opRows[idx]=Object.assign({},opRows[idx],obj);
@@ -1349,8 +1393,8 @@ function opSaveModal(){
 
 /* CSV Export — only current month */
 function opExportCSV(){
-  const cols=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
-  const headers=['Status','Campanha','Data','Hora','Canal','Plataforma','Segmentação','Tema','Sub-tema','Título','Mensagem'];
+  const cols=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','imagem_nome','imagem_url','mensagem'];
+  const headers=['Status','Campanha','Data','Hora','Canal','Plataforma','Segmentação','Tema','Sub-tema','Título','Imagem Nome','Imagem URL','Mensagem'];
   const lines=[headers.join(',')];
   opRows.forEach(r=>{
     lines.push(cols.map(c=>{
@@ -1457,6 +1501,85 @@ document.getElementById('op-import-modal-bg').addEventListener('click',e=>{
   if(e.target===e.currentTarget) document.getElementById('op-import-modal-bg').style.display='none';
 });
 
+
+
+/* ═══════════════════════════════════════════════
+   OPERACIONAL — Image Picker
+   Reads from imgLibrary (loaded by image repo page)
+   Stores imagem_nome + imagem_url in row data
+═══════════════════════════════════════════════ */
+let opSelImgUrl = '';
+let opSelImgNome = '';
+
+function opImgPickerRender(query){
+  const dd = document.getElementById('op-f-img-dropdown');
+  if(!dd) return;
+  const q = (query||'').toLowerCase().trim();
+  // Filter imgLibrary
+  const results = (imgLibrary||[]).filter(img=>{
+    if(!q) return true;
+    return (img.name+' '+(img.tags||[]).join(' ')).toLowerCase().includes(q);
+  }).slice(0,12);
+
+  if(!results.length){
+    dd.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:#aaa">'+(imgLibrary.length===0?'Nenhuma imagem no repositório ainda.':'Nenhuma imagem encontrada.')+'</div>';
+  } else {
+    dd.innerHTML = results.map(img=>`
+      <div class="img-picker-item" data-url="${img.url}" data-thumb="${img.thumb||img.url}" data-name="${esc(img.name)}">
+        <img src="${img.thumb||img.url}" onerror="this.src='data:image/svg+xml,<svg/>'"/>
+        <div class="img-picker-item-info">
+          <div class="img-picker-item-name">${esc(img.name)}</div>
+          <div class="img-picker-item-tags">${(img.tags||[]).join(', ')}</div>
+        </div>
+      </div>`).join('');
+    dd.querySelectorAll('.img-picker-item').forEach(item=>{
+      item.addEventListener('mousedown', e=>{
+        e.preventDefault();
+        opImgPickerSelect(item.dataset.url, item.dataset.thumb, item.dataset.name);
+      });
+    });
+  }
+  dd.classList.add('open');
+}
+
+function opImgPickerSelect(url, thumb, name){
+  opSelImgUrl = url;
+  opSelImgNome = name;
+  document.getElementById('op-f-img-url').value = url;
+  document.getElementById('op-f-img-nome').value = name;
+  document.getElementById('op-f-img-search').value = '';
+  document.getElementById('op-f-img-search').placeholder = name;
+  document.getElementById('op-f-img-dropdown').classList.remove('open');
+  // Show selected preview
+  document.getElementById('op-f-img-thumb').src = thumb||url;
+  document.getElementById('op-f-img-name').textContent = name;
+  document.getElementById('op-f-img-url-display').textContent = url;
+  document.getElementById('op-f-img-selected').style.display = '';
+}
+
+function opImgPickerClear(){
+  opSelImgUrl = '';
+  opSelImgNome = '';
+  document.getElementById('op-f-img-url').value = '';
+  document.getElementById('op-f-img-nome').value = '';
+  document.getElementById('op-f-img-search').value = '';
+  document.getElementById('op-f-img-search').placeholder = 'Digite o nome ou tag da imagem...';
+  document.getElementById('op-f-img-selected').style.display = 'none';
+  document.getElementById('op-f-img-dropdown').classList.remove('open');
+}
+
+function opImgPickerWire(){
+  const input = document.getElementById('op-f-img-search');
+  const dd    = document.getElementById('op-f-img-dropdown');
+  const clear = document.getElementById('op-f-img-clear');
+  if(!input) return;
+
+  input.addEventListener('focus', ()=>{ opImgPickerRender(input.value); });
+  input.addEventListener('input', ()=>{ opImgPickerRender(input.value); });
+  input.addEventListener('blur',  ()=>{ setTimeout(()=>dd.classList.remove('open'), 150); });
+  if(clear) clear.addEventListener('click', opImgPickerClear);
+}
+
 /* Wire up controls */
 document.getElementById('op-add-btn').addEventListener('click',opOpenAdd);
 document.getElementById('op-export-btn').addEventListener('click',opExportCSV);
@@ -1527,6 +1650,7 @@ opLoad();
             <th style="width:110px">Tema</th>
             <th style="width:110px">Sub-tema</th>
             <th style="width:180px">Título</th>
+            <th style="width:120px">Imagem</th>
             <th>Mensagem</th>
             <th style="width:56px"></th>
           </tr>
@@ -1677,6 +1801,26 @@ opLoad();
       <div class="op-form-group full">
         <label>Título do Push</label>
         <input type="text" id="op-f-titulo" placeholder="Máx. ~50 chars"/>
+      </div>
+      <div class="op-form-group full">
+        <label>Imagem</label>
+        <div class="img-picker-wrap">
+          <input type="text" class="img-picker-input" id="op-f-img-search"
+                 placeholder="Digite o nome ou tag da imagem..." autocomplete="off"/>
+          <div class="img-picker-dropdown" id="op-f-img-dropdown"></div>
+        </div>
+        <div id="op-f-img-selected" style="display:none">
+          <div class="img-picker-selected">
+            <img id="op-f-img-thumb" src="" alt=""/>
+            <div class="img-picker-selected-info">
+              <div class="img-picker-selected-name" id="op-f-img-name"></div>
+              <div class="img-picker-selected-url" id="op-f-img-url-display"></div>
+            </div>
+            <button class="img-picker-clear" id="op-f-img-clear" title="Remover imagem">×</button>
+          </div>
+        </div>
+        <input type="hidden" id="op-f-img-url"/>
+        <input type="hidden" id="op-f-img-nome"/>
       </div>
       <div class="op-form-group full">
         <label>Mensagem / Texto</label>
