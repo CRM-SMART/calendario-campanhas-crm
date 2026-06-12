@@ -211,10 +211,11 @@ input:focus,select:focus{border-color:#aaa}
 .s-aguardando{background:#E0F2FE;color:#0C5A87}
 
 /* Action buttons in rows */
-.row-actions{display:flex;gap:4px;opacity:0;transition:opacity .1s}
-tr:hover .row-actions{opacity:1}
-.row-act-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;border-radius:4px;color:#999}
-.row-act-btn:hover{background:#f0f0ee;color:#1a1a1a}
+.row-actions{display:flex;gap:3px;align-items:center;justify-content:center}
+.row-act-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:11px;padding:2px 5px;border-radius:4px;color:#aaa;line-height:1}
+.row-act-btn:hover{background:#f0f0ee;border-color:#ddd;color:#1a1a1a}
+.row-act-btn.del-btn{color:#E24B4A}
+.row-act-btn.del-btn:hover{background:#FCEBEB;border-color:#f5c0c0}
 
 /* Operacional modal */
 .op-modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:300}
@@ -1106,9 +1107,19 @@ const MESES_ABREV = {
 };
 
 function fmtDate(raw, y, m){
-  if(!raw) return '—';
-  raw = raw.trim();
+  if(raw===null||raw===undefined||raw==='') return '—';
+  raw = String(raw).trim();
   let day, month, year = y;
+
+  // Fallback: Excel serial number (e.g. 46190)
+  const serial = parseFloat(raw);
+  if(!isNaN(serial) && serial > 40000 && serial < 60000 && /^\d+(\.\d+)?$/.test(raw)){
+    const d = new Date(Math.round((serial-25569)*86400*1000));
+    const dow = DIAS_SEMANA[d.getUTCDay()];
+    const dd  = String(d.getUTCDate()).padStart(2,'0');
+    const mm  = String(d.getUTCMonth()+1).padStart(2,'0');
+    return `<span style="font-size:10px;color:#aaa;margin-right:2px">${dow}</span>${dd}/${mm}`;
+  }
 
   // Try DD/MM or DD/MM/YYYY
   let match = raw.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?$/);
@@ -1125,7 +1136,7 @@ function fmtDate(raw, y, m){
         .normalize('NFD').replace(/[\u0300-\u036f]/g,'').slice(0,3);
       month = (MESES_ABREV[abr]||1) - 1;
     } else {
-      return raw; // unknown format, show as-is
+      return raw;
     }
   }
 
@@ -1175,6 +1186,22 @@ function initColResize(){
   });
 }
 
+function fmtHora(raw){
+  if(raw===null||raw===undefined||raw==='') return '—';
+  raw = String(raw).trim();
+  // Already HH:MM
+  if(/^\d{1,2}:\d{2}$/.test(raw)) return raw;
+  // Excel time fraction e.g. 0.666... or 0.75
+  const n = parseFloat(raw);
+  if(!isNaN(n) && n>=0 && n<1){
+    const totalMin=Math.round(n*24*60);
+    const hh=String(Math.floor(totalMin/60)%24).padStart(2,'0');
+    const mn=String(totalMin%60).padStart(2,'0');
+    return hh+':'+mn;
+  }
+  return raw;
+}
+
 function renderOpTable(){
   initColResize();
   opUpdateMonthLabel();
@@ -1215,7 +1242,7 @@ function renderOpTable(){
       <td><span class="status-badge ${statusClass(r.status)}">${r.status||'—'}</span></td>
       <td title="${esc(r.campanha)}" style="font-weight:500;font-size:11px">${esc(r.campanha)}</td>
       <td style="font-weight:600;color:#1a1a1a;white-space:nowrap">${dateDisplay}</td>
-      <td style="font-weight:600;color:#1D9E75">${esc(r.hora)}</td>
+      <td style="font-weight:600;color:#1D9E75">${fmtHora(r.hora)}</td>
       <td>${esc(r.canal)}</td>
       <td style="color:#888">${esc(r.plataforma)}</td>
       <td title="${esc(r.segmentacao)}">${esc(r.segmentacao)}</td>
@@ -1223,11 +1250,11 @@ function renderOpTable(){
       <td style="color:#888">${esc(r.subtema)}</td>
       <td title="${esc(r.titulo)}" style="font-weight:500">${esc(r.titulo)}</td>
       <td title="${esc(r.mensagem)}" style="color:#555">${esc(r.mensagem)}</td>
-      <td style="text-align:center">
+      <td style="text-align:center;overflow:visible">
         <div class="row-actions">
           <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
           <button class="row-act-btn" title="Duplicar" data-dup="${r.id}">⧉</button>
-          <button class="row-act-btn" title="Excluir" data-del="${r.id}" style="color:#E24B4A">✕</button>
+          <button class="row-act-btn del-btn" title="Excluir" data-del="${r.id}">✕</button>
         </div>
       </td>
     `;
@@ -1671,9 +1698,47 @@ document.getElementById('op-import-input').addEventListener('change',function(){
         try{
           const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
           const ws=wb.Sheets[wb.SheetNames[0]];
-          const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+          // raw:true → get Excel raw values (numbers for dates/times)
+          const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
           if(!json.length){alert('Planilha vazia.');return;}
-          const csvLines=json.map(row=>row.map(v=>{
+
+          // Identify date/time columns from header row
+          const headers=(json[0]||[]).map(h=>normalizeH(String(h)));
+          const dateIdx=new Set(), timeIdx=new Set();
+          headers.forEach((h,i)=>{
+            if(h==='data'||h==='date'||h==='dt') dateIdx.add(i);
+            if(h==='hora'||h==='horario'||h==='time'||h==='hour') timeIdx.add(i);
+          });
+
+          // Convert row values
+          const converted=json.map((row,ri)=>{
+            if(ri===0) return row; // keep header as-is
+            return row.map((v,ci)=>{
+              if(typeof v!=='number'||v===''||v===null) return v;
+              // Detect by column name first, then by value range
+              const isDateCol=dateIdx.has(ci);
+              const isTimeCol=timeIdx.has(ci);
+              const looksLikeDate=v>40000&&v<60000;   // Excel dates 2009-2063
+              const looksLikeTime=v>=0&&v<1;          // fractions of a day
+              if(isDateCol||(!isTimeCol&&looksLikeDate)){
+                // Excel serial → DD/MM
+                const d=new Date(Math.round((v-25569)*86400*1000));
+                const dd=String(d.getUTCDate()).padStart(2,'0');
+                const mm=String(d.getUTCMonth()+1).padStart(2,'0');
+                return dd+'/'+mm;
+              }
+              if(isTimeCol||(looksLikeTime&&!looksLikeDate)){
+                // Decimal fraction → HH:MM
+                const totalMin=Math.round(v*24*60);
+                const hh=String(Math.floor(totalMin/60)%24).padStart(2,'0');
+                const mn=String(totalMin%60).padStart(2,'0');
+                return hh+':'+mn;
+              }
+              return v;
+            });
+          });
+
+          const csvLines=converted.map(row=>row.map(v=>{
             const s=String(v===null||v===undefined?'':v);
             return (s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;
           }).join(','));
