@@ -1230,14 +1230,15 @@ const CSV_COLS=[
   {header:'Mensagem',    field:'mensagem'},
 ];
 
-function parseLine(line){
+function parseLine(line, sep){
+  sep = sep || ',';
   const fields=[];let cur='';let inQ=false;
   for(let i=0;i<line.length;i++){
     const c=line[i];
     if(c==='"'){
       if(inQ&&line[i+1]==='"'){cur+='"';i++;}
       else inQ=!inQ;
-    }else if(c===','&&!inQ){fields.push(cur);cur='';}
+    }else if(c===sep&&!inQ){fields.push(cur);cur='';}
     else cur+=c;
   }
   fields.push(cur);
@@ -1251,8 +1252,13 @@ function normalizeH(h){
 }
 
 function parseCSV(text){
-  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  // Normalize line endings
+  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
   if(!lines.length) return [];
+
+  // Auto-detect separator: count ; vs , in header line
+  const h0=lines[0];
+  const sep=(h0.split(';').length > h0.split(',').length) ? ';' : ',';
 
   // Build lookup: normalizedHeader → internal field
   const MAP={};
@@ -1261,7 +1267,7 @@ function parseCSV(text){
     MAP[c.field]=c.field; // also accept raw field name
   });
 
-  const rawHeaders=parseLine(lines[0]);
+  const rawHeaders=parseLine(lines[0], sep);
   const colMap=rawHeaders.map(h=>MAP[normalizeH(h)]||null);
   const matched=colMap.filter(Boolean).length;
 
@@ -1272,7 +1278,7 @@ function parseCSV(text){
 
   const rows=[];
   for(let i=1;i<lines.length;i++){
-    const vals=parseLine(lines[i]);
+    const vals=parseLine(lines[i], sep);
     if(vals.every(v=>!v.trim())) continue;
     const row={id:'row_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5)};
     colMap.forEach((field,idx)=>{
@@ -1561,7 +1567,18 @@ document.getElementById('op-import-input').addEventListener('change',function(){
     // CSV path
     const reader=new FileReader();
     reader.onload=function(e){
-      opImportParsed=parseCSV(e.target.result);
+      let text=e.target.result;
+      // If UTF-8 produced replacement chars, re-read as latin-1
+      if(text.includes('\uFFFD')){
+        const r2=new FileReader();
+        r2.onload=function(e2){
+          opImportParsed=parseCSV(e2.target.result);
+          showImportModal(file.name);
+        };
+        r2.readAsText(file,'windows-1252');
+        return;
+      }
+      opImportParsed=parseCSV(text);
       showImportModal(file.name);
     };
     reader.readAsText(file,'UTF-8');
