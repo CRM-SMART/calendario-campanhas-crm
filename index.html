@@ -202,9 +202,28 @@ tr:hover .row-actions{opacity:1}
 .op-month-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .op-month-row h2{font-size:16px;font-weight:600;color:#1a1a1a}
 
-/* Table thumbnail */
-.op-img-thumb{width:32px;height:32px;object-fit:cover;border-radius:4px;vertical-align:middle}
-.op-img-name{font-size:11px;color:#555;margin-left:5px;vertical-align:middle}
+
+
+
+/* ── Theme Summary Panel ── */
+.op-summary{margin:0 0 14px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.op-summary-toggle{font-size:12px;color:#888;cursor:pointer;user-select:none;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.op-summary-toggle:hover{color:#1D9E75}
+.op-summary-wrap{margin-bottom:8px}
+.theme-card{background:#fff;border:1px solid #e8e8e6;border-radius:8px;padding:8px 12px;min-width:160px;max-width:260px;flex:1}
+.theme-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.theme-card-name{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.theme-card-total{font-size:18px;font-weight:700;color:#1D9E75;line-height:1}
+.theme-card-channels{display:flex;flex-wrap:wrap;gap:3px}
+.theme-ch-chip{font-size:10px;padding:2px 6px;border-radius:10px;white-space:nowrap;font-weight:500}
+.theme-ch-chip.canal-apppush  {background:#f3e8ff;color:#7c3aed}
+.theme-ch-chip.canal-webpush  {background:#dbeafe;color:#1d4ed8}
+.theme-ch-chip.canal-firebase {background:#fef3c7;color:#b45309}
+.theme-ch-chip.canal-pushnews {background:#ffe4e6;color:#be123c}
+.theme-ch-chip.canal-email    {background:#ccfbf1;color:#0f766e}
+.theme-ch-chip.canal-whatsapp {background:#dcfce7;color:#15803d}
+.theme-ch-chip.canal-sms      {background:#f1f5f9;color:#475569}
+.theme-ch-chip.canal-other    {background:#f1f5f9;color:#6b7280}
 
 </style>
 </head>
@@ -969,22 +988,7 @@ function opStartListener(){
   },20000);
 }
 
-/* ── Month navigation for Operacional page ── */
-document.getElementById('op-prev').addEventListener('click',()=>{
-  cur.m--;if(cur.m<0){cur.m=11;cur.y--;}
-  opRows=opAllData[opMonthKey()]||[];
-  opUpdateMonthLabel();
-  renderOpTable();
-  // Also update calendar if it's visible
-  if(document.getElementById('page-cal').classList.contains('active')) renderCal();
-});
-document.getElementById('op-next').addEventListener('click',()=>{
-  cur.m++;if(cur.m>11){cur.m=0;cur.y++;}
-  opRows=opAllData[opMonthKey()]||[];
-  opUpdateMonthLabel();
-  renderOpTable();
-  if(document.getElementById('page-cal').classList.contains('active')) renderCal();
-});
+/* op-prev/next wired in block1 below */
 
 /* STATUS → CSS class */
 function statusClass(s){
@@ -995,8 +999,71 @@ function statusClass(s){
 }
 
 /* RENDER TABLE */
+
+/* ── Theme Summary Panel ── */
+let _summaryOpen = true;
+
+function toggleSummary(){
+  _summaryOpen = !_summaryOpen;
+  document.getElementById('op-summary').style.display = _summaryOpen ? 'flex' : 'none';
+  document.getElementById('op-summary-arrow').textContent = _summaryOpen ? '▾' : '▸';
+}
+
+function canalClass(canal){
+  const c = (canal||'').toLowerCase().replace(/\s+/g,'');
+  if(c.includes('apppush')||c.includes('app'))  return 'canal-apppush';
+  if(c.includes('webpush')||c.includes('web'))  return 'canal-webpush';
+  if(c.includes('firebase'))                    return 'canal-firebase';
+  if(c.includes('pushnews'))                    return 'canal-pushnews';
+  if(c.includes('email')||c.includes('e-mail')) return 'canal-email';
+  if(c.includes('whatsapp'))                    return 'canal-whatsapp';
+  if(c.includes('sms'))                         return 'canal-sms';
+  return 'canal-other';
+}
+
+function renderSummary(){
+  const wrap = document.getElementById('op-summary');
+  if(!wrap) return;
+
+  // Build map: tema → { total, channels: { canal: count } }
+  const map = {};
+  (opRows||[]).forEach(r => {
+    const tema = (r.tema||'').trim() || '(sem tema)';
+    if(!map[tema]) map[tema] = { total:0, channels:{} };
+    map[tema].total++;
+    const canal = (r.canal||'').trim() || 'Outros';
+    map[tema].channels[canal] = (map[tema].channels[canal]||0) + 1;
+  });
+
+  // Sort by total desc
+  const sorted = Object.entries(map).sort((a,b) => b[1].total - a[1].total);
+
+  if(!sorted.length){
+    wrap.innerHTML = '<div style="font-size:12px;color:#aaa;padding:4px 0">Nenhum dado no mês.</div>';
+    return;
+  }
+
+  wrap.innerHTML = sorted.map(([tema, data]) => {
+    const channelChips = Object.entries(data.channels)
+      .sort((a,b) => b[1]-a[1])
+      .map(([canal, n]) =>
+        `<span class="theme-ch-chip ${canalClass(canal)}">${esc(canal)} ${n}</span>`
+      ).join('');
+    return `<div class="theme-card">
+      <div class="theme-card-header">
+        <span class="theme-card-name" title="${esc(tema)}">${esc(tema)}</span>
+        <span class="theme-card-total">${data.total}</span>
+      </div>
+      <div class="theme-card-channels">${channelChips}</div>
+    </div>`;
+  }).join('');
+
+  wrap.style.display = _summaryOpen ? 'flex' : 'none';
+}
+
 function renderOpTable(){
   opUpdateMonthLabel();
+  renderSummary();
   const search=(document.getElementById('op-search')?.value||'').toLowerCase();
   const filterStatus=document.getElementById('op-filter-status')?.value||'';
   const filterCanal=document.getElementById('op-filter-canal')?.value||'';
@@ -1184,9 +1251,7 @@ function normalizeH(h){
 }
 
 function parseCSV(text){
-  const lines=text.split(/
-?
-/).filter(l=>l.trim());
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(!lines.length) return [];
 
   // Build lookup: normalizedHeader → internal field
@@ -1245,66 +1310,20 @@ function opDownloadTemplate(){
   a.href=url; a.download='template_operacional.csv'; a.click();
   URL.revokeObjectURL(url);
 }
-document.getElementById('op-template-btn').addEventListener('click', opDownloadTemplate);
+// (template btn wiring moved to end of body)
 
-document.getElementById('op-import-btn').addEventListener('click',()=>{
-  document.getElementById('op-import-input').value='';
-  document.getElementById('op-import-input').click();
-});
+// (import wiring moved to end of body)
 
-document.getElementById('op-import-input').addEventListener('change',function(){
-  const file=this.files[0];if(!file) return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    opImportParsed=parseCSV(e.target.result);
-    const n=opImportParsed.length;
-    const existing=opRows.length;
-    document.getElementById('op-import-title').textContent='Importar CSV — '+MONTHS[cur.m]+' '+cur.y;
-    document.getElementById('op-import-info').innerHTML=
-      '<b>'+n+' linha'+(n!==1?'s':'')+' encontrada'+(n!==1?'s':'')+
-      '</b> no arquivo <b>'+file.name+'</b>.<br><br>'+
-      'O mês atual tem <b>'+existing+' linha'+(existing!==1?'s':'')+' existente'+(existing!==1?'s':'')+
-      '</b>. Escolha:<br>'+
-      '&nbsp;&nbsp;• <b style="color:#1D9E75">Adicionar</b> — mantém as linhas existentes e insere as novas no final.<br>'+
-      '&nbsp;&nbsp;• <b style="color:#E24B4A">Substituir</b> — apaga tudo do mês e importa apenas o arquivo.';
-    document.getElementById('op-import-modal-bg').style.display='flex';
-  };
-  reader.readAsText(file,'UTF-8');
-});
-
-document.getElementById('op-import-append').addEventListener('click',()=>{
-  opRows=opRows.concat(opImportParsed);
-  opSave();renderOpTable();
-  document.getElementById('op-import-modal-bg').style.display='none';
-});
-document.getElementById('op-import-replace').addEventListener('click',()=>{
-  opRows=opImportParsed;
-  opSave();renderOpTable();
-  document.getElementById('op-import-modal-bg').style.display='none';
-});
-document.getElementById('op-import-cancel').addEventListener('click',()=>{
-  document.getElementById('op-import-modal-bg').style.display='none';
-});
-document.getElementById('op-import-modal-bg').addEventListener('click',e=>{
-  if(e.target===e.currentTarget) document.getElementById('op-import-modal-bg').style.display='none';
-});
+/* op-import modal wired in block1 below */
 
 
 
 
-/* Wire up controls */
-document.getElementById('op-add-btn').addEventListener('click',opOpenAdd);
-document.getElementById('op-export-btn').addEventListener('click',opExportCSV);
-document.getElementById('op-modal-cancel').addEventListener('click',()=>{document.getElementById('op-modal-bg').style.display='none';});
-document.getElementById('op-modal-save').addEventListener('click',opSaveModal);
-document.getElementById('op-modal-bg').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('op-modal-bg').style.display='none';});
-document.getElementById('op-search').addEventListener('input',renderOpTable);
-document.getElementById('op-filter-status').addEventListener('change',renderOpTable);
-document.getElementById('op-filter-canal').addEventListener('change',renderOpTable);
 
-// opLoad() called lazily on first tab visit
+// controls wired below (after DOM is ready)
 
 </script>
+
 
 </div><!-- end page-cal -->
 
@@ -1340,13 +1359,19 @@ document.getElementById('op-filter-canal').addEventListener('change',renderOpTab
       </select>
       <button class="op-btn primary" id="op-add-btn">+ Nova linha</button>
       <button class="op-btn" id="op-export-btn">↓ Exportar CSV</button>
-      <button class="op-btn" id="op-import-btn">↑ Importar CSV</button>
+      <button class="op-btn" id="op-import-btn">↑ Importar XLSX / CSV</button>
       <button class="op-btn" id="op-template-btn">📄 Baixar Template</button>
-      <input type="file" id="op-import-input" accept=".csv" style="display:none"/>
+      <input type="file" id="op-import-input" accept=".xlsx,.xls,.csv" style="display:none"/>
       <div class="op-sync">
         <div class="op-sync-dot" id="op-sync-dot"></div>
         <span id="op-sync-label">—</span>
       </div>
+    </div>
+    <div class="op-summary-wrap" id="op-summary-wrap">
+      <div class="op-summary-toggle" id="op-summary-toggle" onclick="toggleSummary()">
+        <span id="op-summary-arrow">▾</span> Resumo por tema
+      </div>
+      <div class="op-summary" id="op-summary"></div>
     </div>
     <div class="op-count" id="op-count"></div>
     <div class="op-table-wrap">
@@ -1456,5 +1481,122 @@ document.getElementById('op-filter-canal').addEventListener('change',renderOpTab
   </div>
 </div>
 
+
+<!-- ── Import confirmation modal ── -->
+<div class="op-modal-bg" id="op-import-modal-bg" style="display:none">
+  <div class="op-modal" style="max-width:440px">
+    <h3 id="op-import-title">Importar</h3>
+    <div id="op-import-info" style="font-size:13px;line-height:1.7;color:#444;margin:12px 0 20px"></div>
+    <div class="op-modal-btns">
+      <button class="op-btn" id="op-import-cancel">Cancelar</button>
+      <button class="op-btn" id="op-import-replace" style="background:#E24B4A;color:#fff;border-color:#E24B4A">Substituir mês</button>
+      <button class="op-btn primary" id="op-import-append">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Wire up Operacional controls (all DOM elements exist here) ── */
+document.getElementById('op-add-btn').addEventListener('click',opOpenAdd);
+document.getElementById('op-export-btn').addEventListener('click',opExportCSV);
+document.getElementById('op-template-btn').addEventListener('click',opDownloadTemplate);
+document.getElementById('op-modal-cancel').addEventListener('click',()=>{document.getElementById('op-modal-bg').style.display='none';});
+document.getElementById('op-modal-save').addEventListener('click',opSaveModal);
+document.getElementById('op-modal-bg').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('op-modal-bg').style.display='none';});
+document.getElementById('op-search').addEventListener('input',renderOpTable);
+document.getElementById('op-filter-status').addEventListener('change',renderOpTable);
+document.getElementById('op-filter-canal').addEventListener('change',renderOpTable);
+
+// Operacional month nav
+document.getElementById('op-prev').addEventListener('click',()=>{
+  cur.m--;if(cur.m<0){cur.m=11;cur.y--;}
+  if(opLoaded) opLoad();
+  else opUpdateMonthLabel();
+});
+document.getElementById('op-next').addEventListener('click',()=>{
+  cur.m++;if(cur.m>11){cur.m=0;cur.y++;}
+  if(opLoaded) opLoad();
+  else opUpdateMonthLabel();
+});
+
+
+// Import XLSX / CSV
+document.getElementById('op-import-btn').addEventListener('click',()=>{
+  document.getElementById('op-import-input').value='';
+  document.getElementById('op-import-input').click();
+});
+document.getElementById('op-import-input').addEventListener('change',function(){
+  const file=this.files[0]; if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='xlsx'||ext==='xls'){
+    function doParseXlsx(f){
+      const reader=new FileReader();
+      reader.onload=function(e){
+        try{
+          const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+          const ws=wb.Sheets[wb.SheetNames[0]];
+          const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+          if(!json.length){alert('Planilha vazia.');return;}
+          const csvLines=json.map(row=>row.map(v=>{
+            const s=String(v===null||v===undefined?'':v);
+            return (s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;
+          }).join(','));
+          opImportParsed=parseCSV(csvLines.join('\n'));
+          showImportModal(f.name);
+        }catch(err){alert('Erro ao ler XLSX: '+err.message);}
+      };
+      reader.readAsArrayBuffer(f);
+    }
+    // Load SheetJS only on first XLSX import
+    if(window.XLSX){
+      doParseXlsx(file);
+    } else {
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload=()=>doParseXlsx(file);
+      s.onerror=()=>alert('Não foi possível carregar o leitor de XLSX. Verifique sua conexão.');
+      document.head.appendChild(s);
+    }
+  } else {
+    // CSV path
+    const reader=new FileReader();
+    reader.onload=function(e){
+      opImportParsed=parseCSV(e.target.result);
+      showImportModal(file.name);
+    };
+    reader.readAsText(file,'UTF-8');
+  }
+});
+function showImportModal(filename){
+  const n=opImportParsed.length;
+  const existing=opRows.length;
+  if(n===0) return; // parseCSV already alerted
+  document.getElementById('op-import-title').textContent='Importar — '+MONTHS[cur.m]+' '+cur.y;
+  document.getElementById('op-import-info').innerHTML=
+    '<b>'+n+' linha'+(n!==1?'s':'')+' encontrada'+(n!==1?'s':'')+
+    '</b> no arquivo <b>'+filename+'</b>.<br><br>'+
+    'O mês atual tem <b>'+existing+' linha'+(existing!==1?'s':'')+' existente'+(existing!==1?'s':'')+
+    '</b>. Escolha:<br>'+
+    '&nbsp;&nbsp;• <b style="color:#1D9E75">Adicionar</b> — mantém as linhas existentes e insere as novas no final.<br>'+
+    '&nbsp;&nbsp;• <b style="color:#E24B4A">Substituir</b> — apaga tudo do mês e importa apenas o arquivo.';
+  document.getElementById('op-import-modal-bg').style.display='flex';
+}
+document.getElementById('op-import-append').addEventListener('click',()=>{
+  opRows=[...opRows,...opImportParsed];
+  opSave(); renderOpTable();
+  document.getElementById('op-import-modal-bg').style.display='none';
+});
+document.getElementById('op-import-replace').addEventListener('click',()=>{
+  opRows=[...opImportParsed];
+  opSave(); renderOpTable();
+  document.getElementById('op-import-modal-bg').style.display='none';
+});
+document.getElementById('op-import-cancel').addEventListener('click',()=>{
+  document.getElementById('op-import-modal-bg').style.display='none';
+});
+document.getElementById('op-import-modal-bg').addEventListener('click',e=>{
+  if(e.target===e.currentTarget) document.getElementById('op-import-modal-bg').style.display='none';
+});
+</script>
 </body>
 </html>
