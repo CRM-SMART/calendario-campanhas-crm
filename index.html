@@ -1696,11 +1696,33 @@ document.getElementById('op-import-input').addEventListener('change',function(){
       const reader=new FileReader();
       reader.onload=function(e){
         try{
-          const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-          const ws=wb.Sheets[wb.SheetNames[0]];
-          // raw:true → get Excel raw values (numbers for dates/times)
+          // cellDates:true → JS Date/time objects instead of serial numbers
+          const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true,cellText:false});
+
+          // Auto-detect the correct sheet (find the one with our headers)
+          const EXPECTED=['status','campanha','data'];
+          let ws=null, sheetName='';
+          for(const name of wb.SheetNames){
+            const s=wb.Sheets[name];
+            const preview=XLSX.utils.sheet_to_json(s,{header:1,defval:'',raw:false});
+            if(!preview.length) continue;
+            const hdrs=(preview[0]||[]).map(h=>normalizeH(String(h)));
+            const matches=EXPECTED.filter(e=>hdrs.includes(e)).length;
+            if(matches>=2){ws=s;sheetName=name;break;}
+          }
+          if(!ws){
+            // fallback: use first non-empty sheet
+            for(const name of wb.SheetNames){
+              const s=wb.Sheets[name];
+              const preview=XLSX.utils.sheet_to_json(s,{header:1,defval:'',raw:false});
+              if(preview.length>1){ws=s;sheetName=name;break;}
+            }
+          }
+          if(!ws){alert('Nenhuma aba com dados reconhecidos foi encontrada.\nAbas disponíveis: '+wb.SheetNames.join(', '));return;}
+
+          // raw:true for custom conversion; cellDates already applied above
           const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
-          if(!json.length){alert('Planilha vazia.');return;}
+          if(!json.length){alert('Planilha "'+sheetName+'" está vazia.');return;}
 
           // Identify date/time columns from header row
           const headers=(json[0]||[]).map(h=>normalizeH(String(h)));
@@ -1710,32 +1732,40 @@ document.getElementById('op-import-input').addEventListener('change',function(){
             if(h==='hora'||h==='horario'||h==='time'||h==='hour') timeIdx.add(i);
           });
 
-          // Convert row values
-          const converted=json.map((row,ri)=>{
-            if(ri===0) return row; // keep header as-is
-            return row.map((v,ci)=>{
-              if(typeof v!=='number'||v===''||v===null) return v;
-              // Detect by column name first, then by value range
-              const isDateCol=dateIdx.has(ci);
-              const isTimeCol=timeIdx.has(ci);
-              const looksLikeDate=v>40000&&v<60000;   // Excel dates 2009-2063
-              const looksLikeTime=v>=0&&v<1;          // fractions of a day
-              if(isDateCol||(!isTimeCol&&looksLikeDate)){
-                // Excel serial → DD/MM
-                const d=new Date(Math.round((v-25569)*86400*1000));
-                const dd=String(d.getUTCDate()).padStart(2,'0');
-                const mm=String(d.getUTCMonth()+1).padStart(2,'0');
+          function cleanVal(v, ci){
+            // JS Date object (from cellDates:true)
+            if(v instanceof Date){
+              if(dateIdx.has(ci)){
+                const dd=String(v.getDate()).padStart(2,'0');
+                const mm=String(v.getMonth()+1).padStart(2,'0');
                 return dd+'/'+mm;
               }
-              if(isTimeCol||(looksLikeTime&&!looksLikeDate)){
-                // Decimal fraction → HH:MM
-                const totalMin=Math.round(v*24*60);
-                const hh=String(Math.floor(totalMin/60)%24).padStart(2,'0');
-                const mn=String(totalMin%60).padStart(2,'0');
-                return hh+':'+mn;
+              // Might be a time stored as date (Excel time = Jan 0 1900 + fraction)
+              const hh=String(v.getHours()).padStart(2,'0');
+              const mn=String(v.getMinutes()).padStart(2,'0');
+              return hh+':'+mn;
+            }
+            if(typeof v==='number'){
+              const looksLikeDate=v>40000&&v<60000;
+              const looksLikeTime=v>=0&&v<1;
+              if(dateIdx.has(ci)||(!timeIdx.has(ci)&&looksLikeDate)){
+                const d=new Date(Math.round((v-25569)*86400*1000));
+                return String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0');
               }
-              return v;
-            });
+              if(timeIdx.has(ci)||(looksLikeTime&&!looksLikeDate)){
+                const t=Math.round(v*24*60);
+                return String(Math.floor(t/60)%24).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
+              }
+            }
+            // Strip leading apostrophe Excel adds to force text format
+            let s=String(v===null||v===undefined?'':v);
+            if(s.startsWith("'")) s=s.slice(1);
+            return s;
+          }
+
+          const converted=json.map((row,ri)=>{
+            if(ri===0) return row.map(h=>{let s=String(h||'');if(s.startsWith("'"))s=s.slice(1);return s;});
+            return row.map((v,ci)=>cleanVal(v,ci));
           });
 
           const csvLines=converted.map(row=>row.map(v=>{
