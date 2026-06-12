@@ -996,6 +996,7 @@ async function opLoad(){
     opSetSync('ok');
   }catch(e){opSetSync('error');}
   opRows=opAllData[opMonthKey()]||[];
+  sortOpRows();
   opUpdateMonthLabel();
   renderOpTable();
 }
@@ -1294,6 +1295,7 @@ function renderOpTable(){
         const dup=Object.assign({},orig,{id:'row_'+Date.now()});
         const idx=opRows.indexOf(orig);
         opRows.splice(idx+1,0,dup);
+        sortOpRows();
         opSave();renderOpTable();
       }
     });
@@ -1331,6 +1333,39 @@ function opOpenEdit(id){
   setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
 }
 
+/* ── Sort opRows by data + hora ascending ── */
+function parseDateSort(data, hora){
+  // data: "DD/MM", "DD/MM/YYYY", or raw serial (handled by fmtDate already)
+  // hora: "HH:MM"
+  let day=0, month=0, year=cur.y;
+  if(data){
+    const s=String(data).trim();
+    // Strip day-of-week prefix like "Ter 17/06" if it leaked in
+    const clean=s.replace(/^[A-Za-záéíóúãõç]+\s+/,'');
+    const m=clean.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+    if(m){
+      day=parseInt(m[1]); month=parseInt(m[2])-1;
+      if(m[3]) year=parseInt(m[3].length===2?'20'+m[3]:m[3]);
+    }
+  }
+  let h=0, min=0;
+  if(hora){
+    const t=String(hora).trim().match(/^(\d{1,2}):(\d{2})/);
+    if(t){h=parseInt(t[1]);min=parseInt(t[2]);}
+  }
+  return new Date(year,month,day,h,min).getTime();
+}
+
+function sortOpRows(){
+  opRows.sort((a,b)=>{
+    const ta=parseDateSort(a.data,a.hora);
+    const tb=parseDateSort(b.data,b.hora);
+    if(ta!==tb) return ta-tb;
+    // Secondary: canal alphabetical
+    return (a.canal||'').localeCompare(b.canal||'');
+  });
+}
+
 function opSaveModal(){
   const fields=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
   const obj={};
@@ -1345,6 +1380,7 @@ function opSaveModal(){
     obj.id='row_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
     opRows.push(obj);
   }
+  sortOpRows();
   opSave();renderOpTable();
   document.getElementById('op-modal-bg').style.display='none';
 }
@@ -1825,12 +1861,12 @@ function showImportModal(filename){
 }
 document.getElementById('op-import-append').addEventListener('click',()=>{
   opRows=[...opRows,...opImportParsed];
-  opSave(); renderOpTable();
+  sortOpRows(); opSave(); renderOpTable();
   document.getElementById('op-import-modal-bg').style.display='none';
 });
 document.getElementById('op-import-replace').addEventListener('click',()=>{
   opRows=[...opImportParsed];
-  opSave(); renderOpTable();
+  sortOpRows(); opSave(); renderOpTable();
   document.getElementById('op-import-modal-bg').style.display='none';
 });
 document.getElementById('op-import-cancel').addEventListener('click',()=>{
