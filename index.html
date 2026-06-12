@@ -211,8 +211,8 @@ input:focus,select:focus{border-color:#aaa}
 .s-aguardando{background:#E0F2FE;color:#0C5A87}
 
 /* Action buttons in rows */
-.row-actions{display:flex;gap:3px;align-items:center;justify-content:center}
-.row-act-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:11px;padding:2px 5px;border-radius:4px;color:#aaa;line-height:1}
+.row-actions{display:flex;gap:4px;align-items:center;justify-content:center;flex-wrap:nowrap}
+.row-act-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:12px;padding:3px 6px;border-radius:5px;color:#aaa;line-height:1;flex-shrink:0}
 .row-act-btn:hover{background:#f0f0ee;border-color:#ddd;color:#1a1a1a}
 .row-act-btn.del-btn{color:#E24B4A}
 .row-act-btn.del-btn:hover{background:#FCEBEB;border-color:#f5c0c0}
@@ -1250,7 +1250,7 @@ function renderOpTable(){
       <td style="color:#888">${esc(r.subtema)}</td>
       <td title="${esc(r.titulo)}" style="font-weight:500">${esc(r.titulo)}</td>
       <td title="${esc(r.mensagem)}" style="color:#555">${esc(r.mensagem)}</td>
-      <td style="text-align:center;overflow:visible">
+      <td style="text-align:center;overflow:visible;white-space:nowrap;width:82px;min-width:82px">
         <div class="row-actions">
           <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
           <button class="row-act-btn" title="Duplicar" data-dup="${r.id}">⧉</button>
@@ -1551,7 +1551,7 @@ function opDownloadTemplate(){
             <th style="width:110px" data-col="9"><span class="th-inner">Sub-tema</span><div class="resize-handle"></div></th>
             <th style="width:200px" data-col="10"><span class="th-inner">Título</span><div class="resize-handle"></div></th>
             <th style="width:320px" data-col="11"><span class="th-inner">Mensagem</span><div class="resize-handle"></div></th>
-            <th style="width:54px" data-col="12"><span class="th-inner">Ações</span></th>
+            <th style="width:82px;text-align:center" data-col="12"><span class="th-inner">Ações</span></th>
           </tr>
         </thead>
         <tbody id="op-tbody"></tbody>
