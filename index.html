@@ -997,15 +997,89 @@ async function opLoad(){
   }catch(e){opSetSync('error');}
   opRows=opAllData[opMonthKey()]||[];
   sortOpRows();
+  syncOpToCalendar();
+  lsSave();
+  renderCal();
   opUpdateMonthLabel();
   renderOpTable();
+}
+
+
+/* ═══════════════════════════════════════════════════
+   SYNC: Operacional → Calendário
+   Rebuilds calendar events tagged fromOp:true
+   from ALL months in opAllData.
+═══════════════════════════════════════════════════ */
+function syncOpToCalendar(){
+  // Remove only events generated from Operacional
+  for(const key of Object.keys(events)){
+    events[key]=(events[key]||[]).filter(e=>!e.fromOp);
+    if(!events[key].length) delete events[key];
+  }
+
+  // Rebuild from every month in opAllData
+  for(const [monthKey, rows] of Object.entries(opAllData)){
+    const parts=monthKey.split('-');
+    const yr=parseInt(parts[0]);
+    // monthKey uses 0-indexed month (e.g. "2026-6" = July)
+    // But data field has DD/MM (1-indexed) — we'll use the MM from data itself
+
+    for(const r of (rows||[])){
+      if(!r.data||!r.tema) continue;
+
+      // Parse "DD/MM" or "DD/MM/YYYY" from the data field
+      const raw=String(r.data).trim().replace(/^[A-Za-záéíóúãõç]+\s+/,''); // strip day-of-week
+      const dm=raw.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+      if(!dm) continue;
+      const day=parseInt(dm[1]);
+      const mon=parseInt(dm[2])-1; // 0-indexed
+      const year=dm[3]?parseInt(dm[3].length===2?'20'+dm[3]:dm[3]):yr;
+
+      const calKey=year+'-'+(mon+1)+'-'+day;
+
+      // Map canal → channelId
+      const canalLow=(r.canal||'').toLowerCase().trim();
+      const ch=channels.find(c=>c.name.toLowerCase().trim()===canalLow)
+               || channels.find(c=>canalLow.includes(c.name.toLowerCase().trim()));
+      const channelId=ch?ch.id:null;
+      const color=ch?ch.color:'gray';
+
+      // Map segmentacao → audienceId (partial match)
+      const segLow=(r.segmentacao||'').toLowerCase().trim();
+      const aud=audiences.find(a=>a.name.toLowerCase().trim()===segLow)
+                || audiences.find(a=>segLow.includes(a.name.toLowerCase().trim())
+                                  || a.name.toLowerCase().trim().includes(segLow));
+      const audienceId=aud?aud.id:(audiences[0]?.id||null);
+
+      // Use tema as the event name (visible on calendar chip)
+      const name=(r.tema||r.subtema||r.campanha||'—').trim();
+      const time=fmtHora(r.hora)||'09:00';
+
+      if(!events[calKey]) events[calKey]=[];
+      events[calKey].push({name,time,color,channelId,audienceId,fromOp:true});
+    }
+  }
+
+  // Sort each day's events by time
+  for(const key of Object.keys(events)){
+    events[key].sort((a,b)=>a.time.localeCompare(b.time));
+  }
 }
 
 async function opSave(){
   opIsSaving=true;opSetSync('syncing');
   opAllData[opMonthKey()]=opRows;
-  try{await fbSet('operacional_data',opAllData);opSetSync('ok');}
-  catch(e){opSetSync('error');}
+  syncOpToCalendar();                          // mirror to calendar
+  try{
+    await Promise.all([
+      fbSet('operacional_data',opAllData),
+      fbSet('data',{events})                   // save updated calendar events
+    ]);
+    lsSave();
+    opSetSync('ok');
+    setSyncStatus('ok');
+    renderCal();                               // refresh calendar if open
+  }catch(e){opSetSync('error');}
   setTimeout(()=>{opIsSaving=false;},500);
 }
 
