@@ -485,6 +485,7 @@ function lsLoad(){
   try{
     const ce=localStorage.getItem(LS_EVENTS);
     const cc=localStorage.getItem(LS_CONFIG);
+    const co=localStorage.getItem(LS_OP);
     if(ce) events=JSON.parse(ce);
     if(cc){
       const cfg=JSON.parse(cc);
@@ -495,7 +496,8 @@ function lsLoad(){
       channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
       audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
     }
-    if(ce||cc){
+    if(co) opAllData=JSON.parse(co);
+    if(ce||cc||co){
       document.getElementById('loading-overlay').style.display='none';
       renderCal();
       return true; // rendered from cache
@@ -513,7 +515,11 @@ function lsSave(){
 
 async function loadFromFirebase(){
   try{
-    const[calData,cfgData]=await Promise.all([fbGet('data'),fbGet('config')]);
+    const[calData,cfgData,opData]=await Promise.all([
+      fbGet('data'),
+      fbGet('config'),
+      fbGet('operacional_data')
+    ]);
     if(calData) events=calData.events||{};
     if(cfgData){
       channels=cfgData.channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
@@ -524,11 +530,26 @@ async function loadFromFirebase(){
       audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
       campaigns=[];await saveConfig();
     }
+    if(opData){
+      opAllData=opData;
+      opLsSave();
+    }
     lsSave();
     setSyncStatus('ok');
-  }catch(e){console.error(e);setSyncStatus('error');}
+    opSetSync('ok');
+  }catch(e){
+    console.error(e);
+    setSyncStatus('error');
+    opSetSync('error');
+  }
   document.getElementById('loading-overlay').style.display='none';
   renderCal();
+  if(document.getElementById('page-op').classList.contains('active')){
+    opRows=opAllData[opMonthKey()]||[];
+    opUpdateMonthLabel();
+    opUpdateFiltersDropdown();
+    renderOpTable();
+  }
 }
 
 function startListener(){
@@ -973,20 +994,11 @@ function _renderCalImmediate(){
               document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
               document.getElementById('page-op').classList.add('active');
               
-              if(!opInitialized){
-                opInitialized=true;
-                opLsLoad();
-                opRows=opAllData[opMonthKey()]||[];
-                opUpdateMonthLabel();
-                renderOpTable();
-                opLoad().then(() => opOpenEdit(ev.rowId));
-                opStartListener();
-              } else {
-                opRows=opAllData[opMonthKey()]||[];
-                opUpdateMonthLabel();
-                renderOpTable();
-                opOpenEdit(ev.rowId);
-              }
+              opRows=opAllData[opMonthKey()]||[];
+              opUpdateMonthLabel();
+              opUpdateFiltersDropdown();
+              renderOpTable();
+              opOpenEdit(ev.rowId);
             });
             chip.querySelector('.chip-del').addEventListener('click',e=>{
               e.stopPropagation();
@@ -1128,7 +1140,10 @@ if(!_hadCache){
   // No cache yet — show spinner until Firebase responds
 }
 // Firebase sync in background (plain promise, no top-level await)
-loadFromFirebase().then(()=>startListener());
+loadFromFirebase().then(()=>{
+  startListener();
+  opStartListener();
+});
 
 
 
@@ -1148,21 +1163,10 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
     document.getElementById('page-'+target).classList.add('active');
 
     if(target==='op'){
-      if(!opInitialized){
-        opInitialized=true;
-        opLsLoad();        // load instantly from cache
-        opRows=opAllData[opMonthKey()]||[];
-        opUpdateMonthLabel();
-        opUpdateFiltersDropdown();
-        renderOpTable();
-        opLoad();          // first visit: fetch data + start listener
-        opStartListener();
-      } else {
-        opRows=opAllData[opMonthKey()]||[];
-        opUpdateMonthLabel();
-        opUpdateFiltersDropdown();
-        renderOpTable();
-      }
+      opRows=opAllData[opMonthKey()]||[];
+      opUpdateMonthLabel();
+      opUpdateFiltersDropdown();
+      renderOpTable();
     } else if(target==='cal'){
       renderCal();
     }
@@ -1197,21 +1201,7 @@ function opUpdateMonthLabel(){
   if(el) el.textContent=MONTHS[cur.m]+' '+cur.y;
 }
 
-async function opLoad(){
-  try{
-    const data=await fbGet('operacional_data');
-    if(data){
-      opAllData=data;
-      opLsSave();
-    }
-    opSetSync('ok');
-  }catch(e){opSetSync('error');}
-  opRows=opAllData[opMonthKey()]||[];
-  opUpdateMonthLabel();
-  opUpdateFiltersDropdown();
-  renderOpTable();
-  renderCal();
-}
+// opLoad is no longer needed as all data is preloaded on startup
 
 async function opSave(){
   opIsSaving=true;opSetSync('syncing');
@@ -1825,13 +1815,17 @@ document.getElementById('op-filter-subtema').addEventListener('change',renderOpT
 // Operacional month nav
 document.getElementById('op-prev').addEventListener('click',()=>{
   cur.m--;if(cur.m<0){cur.m=11;cur.y--;}
-  if(opInitialized) opLoad();
-  else opUpdateMonthLabel();
+  opRows=opAllData[opMonthKey()]||[];
+  opUpdateMonthLabel();
+  opUpdateFiltersDropdown();
+  renderOpTable();
 });
 document.getElementById('op-next').addEventListener('click',()=>{
   cur.m++;if(cur.m>11){cur.m=0;cur.y++;}
-  if(opInitialized) opLoad();
-  else opUpdateMonthLabel();
+  opRows=opAllData[opMonthKey()]||[];
+  opUpdateMonthLabel();
+  opUpdateFiltersDropdown();
+  renderOpTable();
 });
 
 
