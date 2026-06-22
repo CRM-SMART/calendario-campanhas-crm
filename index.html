@@ -242,16 +242,7 @@ input:focus,select:focus{border-color:#aaa}
 
 
 
-/* ── Theme Summary Panel ── */
-.op-summary{margin:0 0 14px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
-.op-summary-toggle{font-size:12px;color:#888;cursor:pointer;user-select:none;margin-bottom:6px;display:flex;align-items:center;gap:4px}
-.op-summary-toggle:hover{color:#1D9E75}
-.op-summary-wrap{margin-bottom:8px}
-.theme-card{background:#fff;border:1px solid #e8e8e6;border-radius:8px;padding:8px 12px;min-width:160px;max-width:260px;flex:1}
-.theme-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.theme-card-name{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
-.theme-card-total{font-size:18px;font-weight:700;color:#1D9E75;line-height:1}
-.theme-card-channels{display:flex;flex-wrap:wrap;gap:3px}
+/* ── Canal chips (used in tema strip) ── */
 .theme-ch-chip{font-size:10px;padding:2px 6px;border-radius:10px;white-space:nowrap;font-weight:500}
 .theme-ch-chip.canal-apppush  {background:#f3e8ff;color:#7c3aed}
 .theme-ch-chip.canal-webpush  {background:#dbeafe;color:#1d4ed8}
@@ -261,6 +252,14 @@ input:focus,select:focus{border-color:#aaa}
 .theme-ch-chip.canal-whatsapp {background:#dcfce7;color:#15803d}
 .theme-ch-chip.canal-sms      {background:#f1f5f9;color:#475569}
 .theme-ch-chip.canal-other    {background:#f1f5f9;color:#6b7280}
+
+/* ── Tema strip ── */
+.op-tema-strip{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}
+.tema-chip{font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#555;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .1s}
+.tema-chip:hover{border-color:#bbb;background:#f5f5f3}
+.tema-chip.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.tema-chip-count{font-weight:700;font-size:12px}
+.tema-chip-all{font-weight:600}
 
 </style>
 </head>
@@ -1131,119 +1130,81 @@ function statusClass(s){
 /* RENDER TABLE */
 
 /* ── Theme Summary Panel ── */
-let _summaryOpen = true;
+let opFilterTema = '';
 
-function toggleSummary(){
-  _summaryOpen = !_summaryOpen;
-  document.getElementById('op-summary').style.display = _summaryOpen ? 'flex' : 'none';
-  document.getElementById('op-summary-arrow').textContent = _summaryOpen ? '▾' : '▸';
-}
+function renderTemaStrip(){
+  const strip = document.getElementById('op-tema-strip');
+  if(!strip) return;
 
-function canalClass(canal){
-  const c = (canal||'').toLowerCase().replace(/\s+/g,'');
-  if(c.includes('apppush')||c.includes('app'))  return 'canal-apppush';
-  if(c.includes('webpush')||c.includes('web'))  return 'canal-webpush';
-  if(c.includes('firebase'))                    return 'canal-firebase';
-  if(c.includes('pushnews'))                    return 'canal-pushnews';
-  if(c.includes('email')||c.includes('e-mail')) return 'canal-email';
-  if(c.includes('whatsapp'))                    return 'canal-whatsapp';
-  if(c.includes('sms'))                         return 'canal-sms';
-  return 'canal-other';
-}
-
-function renderSummary(){
-  const wrap = document.getElementById('op-summary');
-  if(!wrap) return;
-
-  // Group by TEMA first, then SUBTEMA inside
-  const temaMap = {};
-  (opRows||[]).forEach(r => {
-    const tema   = (r.tema||'').trim()    || '(sem tema)';
-    const subtema= (r.subtema||'').trim() || '(sem sub-tema)';
-    const canal  = (r.canal||'').trim()   || 'Outros';
-    if(!temaMap[tema]) temaMap[tema]={total:0, subtemas:{}};
-    temaMap[tema].total++;
-    if(!temaMap[tema].subtemas[subtema]) temaMap[tema].subtemas[subtema]={total:0,channels:{}};
-    temaMap[tema].subtemas[subtema].total++;
-    temaMap[tema].subtemas[subtema].channels[canal]=(temaMap[tema].subtemas[subtema].channels[canal]||0)+1;
+  // Count by tema
+  const temaCount = {};
+  (opRows||[]).forEach(r=>{
+    const t=(r.tema||'').trim()||'(sem tema)';
+    temaCount[t]=(temaCount[t]||0)+1;
   });
+  const sorted=Object.entries(temaCount).sort((a,b)=>b[1]-a[1]);
 
-  const sorted = Object.entries(temaMap).sort((a,b)=>b[1].total-a[1].total);
+  strip.innerHTML='';
 
-  if(!sorted.length){
-    wrap.innerHTML='<div style="font-size:12px;color:#aaa;padding:4px 0">Nenhum dado no mês.</div>';
-    wrap.style.display='none'; return;
-  }
+  // "Todos" chip
+  const all=document.createElement('div');
+  all.className='tema-chip tema-chip-all'+(opFilterTema===''?' active':'');
+  all.innerHTML='Todos <span class="tema-chip-count">'+(opRows||[]).length+'</span>';
+  all.addEventListener('click',()=>{opFilterTema='';renderTemaStrip();populateSubtemaSelect();renderOpTable();});
+  strip.appendChild(all);
 
-  wrap.innerHTML='';
-  sorted.forEach(([tema, tData])=>{
-    // One card per TEMA, containing sub-tema rows
-    const card=document.createElement('div');
-    card.className='theme-card';
-
-    // Card header: tema name + total
-    const header=document.createElement('div');
-    header.className='theme-card-header';
-    header.innerHTML=`<span class="theme-card-name" title="${esc(tema)}">${esc(tema)}</span><span class="theme-card-total">${tData.total}</span>`;
-    card.appendChild(header);
-
-    // Sub-tema rows (clickable to filter)
-    const subSorted=Object.entries(tData.subtemas).sort((a,b)=>b[1].total-a[1].total);
-    subSorted.forEach(([subtema, sData])=>{
-      const isActive = opFilterSubtema===subtema;
-      const row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:5px;margin:3px 0;cursor:pointer;padding:2px 4px;border-radius:4px;'+(isActive?'background:#E1F5EE;outline:1px solid #1D9E75':'');
-      row.title='Clique para filtrar por: '+subtema;
-
-      // Sub-tema label + count badge
-      const label=document.createElement('span');
-      label.style.cssText='font-size:11px;color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:'+(isActive?'700':'400');
-      label.textContent=subtema;
-
-      const badge=document.createElement('span');
-      badge.style.cssText='font-size:11px;font-weight:700;color:'+(isActive?'#1D9E75':'#888');
-      badge.textContent=sData.total;
-
-      // Canal chips
-      const chips=document.createElement('div');
-      chips.style.cssText='display:flex;flex-wrap:wrap;gap:2px;margin-left:4px';
-      Object.entries(sData.channels).sort((a,b)=>b[1]-a[1]).forEach(([canal,n])=>{
-        const chip=document.createElement('span');
-        chip.className='theme-ch-chip '+canalClass(canal);
-        chip.textContent=canal+' '+n;
-        chips.appendChild(chip);
-      });
-
-      row.appendChild(label);
-      row.appendChild(badge);
-      row.appendChild(chips);
-
-      // Click → toggle sub-tema filter
-      row.addEventListener('click',()=>{
-        opFilterSubtema = (opFilterSubtema===subtema)?'':subtema;
-        renderSummary();
-        renderOpTable();
-      });
-      card.appendChild(row);
+  sorted.forEach(([tema,count])=>{
+    const chip=document.createElement('div');
+    chip.className='tema-chip'+(opFilterTema===tema?' active':'');
+    chip.innerHTML=esc(tema)+' <span class="tema-chip-count">'+count+'</span>';
+    chip.addEventListener('click',()=>{
+      opFilterTema=(opFilterTema===tema)?'':tema;
+      opFilterSubtema='';
+      renderTemaStrip();
+      populateSubtemaSelect();
+      renderOpTable();
     });
-
-    wrap.appendChild(card);
+    strip.appendChild(chip);
   });
 
-  // Show "limpar filtro" badge if active
-  const existingClear=document.getElementById('summary-clear-btn');
-  if(existingClear) existingClear.remove();
-  if(opFilterSubtema){
-    const clear=document.createElement('div');
-    clear.id='summary-clear-btn';
-    clear.style.cssText='font-size:11px;color:#E24B4A;cursor:pointer;padding:4px 10px;border:1px solid #f5c0c0;border-radius:10px;background:#fff;align-self:center;white-space:nowrap';
-    clear.textContent='✕ Limpar filtro: '+opFilterSubtema;
-    clear.addEventListener('click',()=>{opFilterSubtema='';renderSummary();renderOpTable();});
-    wrap.appendChild(clear);
-  }
-
-  wrap.style.display = _summaryOpen ? 'flex' : 'none';
+  populateSubtemaSelect();
 }
+
+function populateSubtemaSelect(){
+  // Populate sub-tema dropdown based on active tema filter
+  const sel=document.getElementById('op-filter-subtema');
+  if(!sel) return;
+  const prev=sel.value;
+  sel.innerHTML='<option value="">Todos os sub-temas</option>';
+  const rows=(opFilterTema
+    ? (opRows||[]).filter(r=>(r.tema||'').trim()===opFilterTema)
+    : (opRows||[]));
+  const subs=new Set();
+  rows.forEach(r=>{const s=(r.subtema||'').trim();if(s)subs.add(s);});
+  [...subs].sort().forEach(s=>{
+    const o=document.createElement('option');
+    o.value=s;o.textContent=s;
+    if(s===prev)o.selected=true;
+    sel.appendChild(o);
+  });
+  if(opFilterSubtema&&![...subs].includes(opFilterSubtema)) opFilterSubtema='';
+}
+
+function populateTemaSelect(){
+  const sel=document.getElementById('op-filter-tema');
+  if(!sel) return;
+  const prev=sel.value;
+  sel.innerHTML='<option value="">Todos os temas</option>';
+  const temas=new Set();
+  (opRows||[]).forEach(r=>{const t=(r.tema||'').trim();if(t)temas.add(t);});
+  [...temas].sort().forEach(t=>{
+    const o=document.createElement('option');
+    o.value=t;o.textContent=t;
+    if(t===prev)o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
 
 
 /* ── Date formatter: "17/06" → "Ter 17/06" ── */
@@ -1356,11 +1317,13 @@ function renderOpTable(){
   const search=(document.getElementById('op-search')?.value||'').toLowerCase();
   const filterStatus=document.getElementById('op-filter-status')?.value||'';
   const filterCanal=document.getElementById('op-filter-canal')?.value||'';
+  const filterSubtemaDD=document.getElementById('op-filter-subtema')?.value||'';
 
   let rows=(opRows||[]).filter(r=>{
     if(filterStatus&&r.status!==filterStatus) return false;
     if(filterCanal&&r.canal!==filterCanal) return false;
-    if(opFilterSubtema&&(r.subtema||'').trim()!==opFilterSubtema) return false;
+    if(opFilterTema&&(r.tema||'').trim()!==opFilterTema) return false;
+    if(filterSubtemaDD&&(r.subtema||'').trim()!==filterSubtemaDD) return false;
     if(search){
       const hay=(r.campanha+r.tema+r.subtema+r.titulo+r.mensagem+r.segmentacao).toLowerCase();
       if(!hay.includes(search)) return false;
@@ -1701,6 +1664,12 @@ function opDownloadTemplate(){
         <option value="WhatsApp">WhatsApp</option>
         <option value="Email">Email</option>
       </select>
+      <select id="op-filter-tema" style="padding:6px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;max-width:160px">
+        <option value="">Todos os temas</option>
+      </select>
+      <select id="op-filter-subtema" style="padding:6px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;max-width:160px">
+        <option value="">Todos os sub-temas</option>
+      </select>
       <button class="op-btn primary" id="op-add-btn">+ Nova linha</button>
       <button class="op-btn" id="op-export-btn">↓ Exportar CSV</button>
       <button class="op-btn" id="op-import-btn">↑ Importar XLSX / CSV</button>
@@ -1711,12 +1680,7 @@ function opDownloadTemplate(){
         <span id="op-sync-label">—</span>
       </div>
     </div>
-    <div class="op-summary-wrap" id="op-summary-wrap">
-      <div class="op-summary-toggle" id="op-summary-toggle" onclick="toggleSummary()">
-        <span id="op-summary-arrow">▾</span> Resumo por tema / sub-tema
-      </div>
-      <div class="op-summary" id="op-summary"></div>
-    </div>
+    <div class="op-tema-strip" id="op-tema-strip"></div>
     <div class="op-count" id="op-count"></div>
     <div class="op-table-wrap">
       <table class="op-table" id="op-table">
@@ -1852,6 +1816,14 @@ document.getElementById('op-modal-bg').addEventListener('click',e=>{if(e.target=
 document.getElementById('op-search').addEventListener('input',renderOpTable);
 document.getElementById('op-filter-status').addEventListener('change',renderOpTable);
 document.getElementById('op-filter-canal').addEventListener('change',renderOpTable);
+document.getElementById('op-filter-tema').addEventListener('change',()=>{
+  opFilterTema=document.getElementById('op-filter-tema').value;
+  opFilterSubtema='';
+  populateSubtemaSelect();
+  renderTemaStrip();
+  renderOpTable();
+});
+document.getElementById('op-filter-subtema').addEventListener('change',renderOpTable);
 
 // Operacional month nav
 document.getElementById('op-prev').addEventListener('click',()=>{
