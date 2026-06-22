@@ -968,6 +968,7 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
 ═══════════════════════════════════════════════ */
 
 let opAllData={};       // all months cached
+let opFilterSubtema='';  // active sub-tema filter from summary card
 let opRows=[];          // rows for the current month
 let opEditId=null;
 let opIsSaving=false;
@@ -1011,6 +1012,7 @@ async function opLoad(){
    from ALL months in opAllData.
 ═══════════════════════════════════════════════════ */
 function syncOpToCalendar(){
+  let _configChangedBySync=false;
   // Remove only events generated from Operacional
   for(const key of Object.keys(events)){
     events[key]=(events[key]||[]).filter(e=>!e.fromOp);
@@ -1037,10 +1039,24 @@ function syncOpToCalendar(){
 
       const calKey=year+'-'+(mon+1)+'-'+day;
 
-      // Map canal → channelId
+      // Map canal → channelId (auto-create if not found)
       const canalLow=(r.canal||'').toLowerCase().trim();
-      const ch=channels.find(c=>c.name.toLowerCase().trim()===canalLow)
-               || channels.find(c=>canalLow.includes(c.name.toLowerCase().trim()));
+      let ch=channels.find(c=>c.name.toLowerCase().trim()===canalLow)
+             || channels.find(c=>canalLow.includes(c.name.toLowerCase().trim()));
+      if(!ch && r.canal && r.canal.trim()){
+        // Auto-assign color by canal type
+        let autoColor='gray';
+        if(canalLow.includes('sms'))                        autoColor='sky';
+        else if(canalLow.includes('whatsapp'))              autoColor='green';
+        else if(canalLow.includes('email')||canalLow.includes('e-mail')) autoColor='teal';
+        else if(canalLow.includes('app')||canalLow.includes('push'))     autoColor='purple';
+        else if(canalLow.includes('web'))                   autoColor='blue';
+        else if(canalLow.includes('firebase'))              autoColor='amber';
+        const safeId='ch_'+r.canal.trim().toLowerCase().replace(/[^a-z0-9]/g,'_');
+        ch={id:safeId, name:r.canal.trim(), color:autoColor};
+        channels.push(ch);
+        _configChangedBySync=true;
+      }
       const channelId=ch?ch.id:null;
       const color=ch?ch.color:'gray';
 
@@ -1064,6 +1080,8 @@ function syncOpToCalendar(){
   for(const key of Object.keys(events)){
     events[key].sort((a,b)=>a.time.localeCompare(b.time));
   }
+  // If new channels were auto-created, persist config
+  if(_configChangedBySync) saveConfig();
 }
 
 async function opSave(){
@@ -1137,38 +1155,92 @@ function renderSummary(){
   const wrap = document.getElementById('op-summary');
   if(!wrap) return;
 
-  // Build map: tema → { total, channels: { canal: count } }
-  const map = {};
+  // Group by TEMA first, then SUBTEMA inside
+  const temaMap = {};
   (opRows||[]).forEach(r => {
-    const tema = (r.tema||'').trim() || '(sem tema)';
-    if(!map[tema]) map[tema] = { total:0, channels:{} };
-    map[tema].total++;
-    const canal = (r.canal||'').trim() || 'Outros';
-    map[tema].channels[canal] = (map[tema].channels[canal]||0) + 1;
+    const tema   = (r.tema||'').trim()    || '(sem tema)';
+    const subtema= (r.subtema||'').trim() || '(sem sub-tema)';
+    const canal  = (r.canal||'').trim()   || 'Outros';
+    if(!temaMap[tema]) temaMap[tema]={total:0, subtemas:{}};
+    temaMap[tema].total++;
+    if(!temaMap[tema].subtemas[subtema]) temaMap[tema].subtemas[subtema]={total:0,channels:{}};
+    temaMap[tema].subtemas[subtema].total++;
+    temaMap[tema].subtemas[subtema].channels[canal]=(temaMap[tema].subtemas[subtema].channels[canal]||0)+1;
   });
 
-  // Sort by total desc
-  const sorted = Object.entries(map).sort((a,b) => b[1].total - a[1].total);
+  const sorted = Object.entries(temaMap).sort((a,b)=>b[1].total-a[1].total);
 
   if(!sorted.length){
-    wrap.innerHTML = '<div style="font-size:12px;color:#aaa;padding:4px 0">Nenhum dado no mês.</div>';
-    return;
+    wrap.innerHTML='<div style="font-size:12px;color:#aaa;padding:4px 0">Nenhum dado no mês.</div>';
+    wrap.style.display='none'; return;
   }
 
-  wrap.innerHTML = sorted.map(([tema, data]) => {
-    const channelChips = Object.entries(data.channels)
-      .sort((a,b) => b[1]-a[1])
-      .map(([canal, n]) =>
-        `<span class="theme-ch-chip ${canalClass(canal)}">${esc(canal)} ${n}</span>`
-      ).join('');
-    return `<div class="theme-card">
-      <div class="theme-card-header">
-        <span class="theme-card-name" title="${esc(tema)}">${esc(tema)}</span>
-        <span class="theme-card-total">${data.total}</span>
-      </div>
-      <div class="theme-card-channels">${channelChips}</div>
-    </div>`;
-  }).join('');
+  wrap.innerHTML='';
+  sorted.forEach(([tema, tData])=>{
+    // One card per TEMA, containing sub-tema rows
+    const card=document.createElement('div');
+    card.className='theme-card';
+
+    // Card header: tema name + total
+    const header=document.createElement('div');
+    header.className='theme-card-header';
+    header.innerHTML=`<span class="theme-card-name" title="${esc(tema)}">${esc(tema)}</span><span class="theme-card-total">${tData.total}</span>`;
+    card.appendChild(header);
+
+    // Sub-tema rows (clickable to filter)
+    const subSorted=Object.entries(tData.subtemas).sort((a,b)=>b[1].total-a[1].total);
+    subSorted.forEach(([subtema, sData])=>{
+      const isActive = opFilterSubtema===subtema;
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:5px;margin:3px 0;cursor:pointer;padding:2px 4px;border-radius:4px;'+(isActive?'background:#E1F5EE;outline:1px solid #1D9E75':'');
+      row.title='Clique para filtrar por: '+subtema;
+
+      // Sub-tema label + count badge
+      const label=document.createElement('span');
+      label.style.cssText='font-size:11px;color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:'+(isActive?'700':'400');
+      label.textContent=subtema;
+
+      const badge=document.createElement('span');
+      badge.style.cssText='font-size:11px;font-weight:700;color:'+(isActive?'#1D9E75':'#888');
+      badge.textContent=sData.total;
+
+      // Canal chips
+      const chips=document.createElement('div');
+      chips.style.cssText='display:flex;flex-wrap:wrap;gap:2px;margin-left:4px';
+      Object.entries(sData.channels).sort((a,b)=>b[1]-a[1]).forEach(([canal,n])=>{
+        const chip=document.createElement('span');
+        chip.className='theme-ch-chip '+canalClass(canal);
+        chip.textContent=canal+' '+n;
+        chips.appendChild(chip);
+      });
+
+      row.appendChild(label);
+      row.appendChild(badge);
+      row.appendChild(chips);
+
+      // Click → toggle sub-tema filter
+      row.addEventListener('click',()=>{
+        opFilterSubtema = (opFilterSubtema===subtema)?'':subtema;
+        renderSummary();
+        renderOpTable();
+      });
+      card.appendChild(row);
+    });
+
+    wrap.appendChild(card);
+  });
+
+  // Show "limpar filtro" badge if active
+  const existingClear=document.getElementById('summary-clear-btn');
+  if(existingClear) existingClear.remove();
+  if(opFilterSubtema){
+    const clear=document.createElement('div');
+    clear.id='summary-clear-btn';
+    clear.style.cssText='font-size:11px;color:#E24B4A;cursor:pointer;padding:4px 10px;border:1px solid #f5c0c0;border-radius:10px;background:#fff;align-self:center;white-space:nowrap';
+    clear.textContent='✕ Limpar filtro: '+opFilterSubtema;
+    clear.addEventListener('click',()=>{opFilterSubtema='';renderSummary();renderOpTable();});
+    wrap.appendChild(clear);
+  }
 
   wrap.style.display = _summaryOpen ? 'flex' : 'none';
 }
@@ -1288,6 +1360,7 @@ function renderOpTable(){
   let rows=(opRows||[]).filter(r=>{
     if(filterStatus&&r.status!==filterStatus) return false;
     if(filterCanal&&r.canal!==filterCanal) return false;
+    if(opFilterSubtema&&(r.subtema||'').trim()!==opFilterSubtema) return false;
     if(search){
       const hay=(r.campanha+r.tema+r.subtema+r.titulo+r.mensagem+r.segmentacao).toLowerCase();
       if(!hay.includes(search)) return false;
@@ -1640,7 +1713,7 @@ function opDownloadTemplate(){
     </div>
     <div class="op-summary-wrap" id="op-summary-wrap">
       <div class="op-summary-toggle" id="op-summary-toggle" onclick="toggleSummary()">
-        <span id="op-summary-arrow">▾</span> Resumo por tema
+        <span id="op-summary-arrow">▾</span> Resumo por tema / sub-tema
       </div>
       <div class="op-summary" id="op-summary"></div>
     </div>
