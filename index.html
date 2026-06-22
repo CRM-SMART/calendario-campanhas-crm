@@ -444,7 +444,7 @@ const PALETTE=[
   {id:'indigo',bg:'#EEF0FF',text:'#2D3A9A',dot:'#6674E5'},
   {id:'brown',bg:'#F5EDE6',text:'#6B3A20',dot:'#B06A3A'},
 ];
-const DEFAULT_CHANNELS=[{id:'ch_apppush',name:'App Push',color:'purple'},{id:'ch_webpush',name:'Web Push',color:'blue'},{id:'ch_firebase',name:'Firebase',color:'amber'},{id:'ch_pushnews',name:'Pushnews',color:'coral'},{id:'ch_email',name:'E-mail',color:'teal'},{id:'ch_whatsapp',name:'WhatsApp',color:'green'}];
+const DEFAULT_CHANNELS=[{id:'ch_apppush',name:'App Push',color:'purple'},{id:'ch_webpush',name:'Web Push',color:'blue'},{id:'ch_firebase',name:'Firebase',color:'amber'},{id:'ch_pushnews',name:'Pushnews',color:'coral'},{id:'ch_email',name:'E-mail',color:'teal'},{id:'ch_whatsapp',name:'WhatsApp',color:'green'},{id:'ch_sms',name:'SMS',color:'sky'}];
 const DEFAULT_AUDIENCES=[{id:'aud_todos',name:'Todos',color:'gray'},{id:'aud_ativos',name:'Ativos',color:'teal'},{id:'aud_queda',name:'Em queda',color:'amber'},{id:'aud_frios',name:'Frios',color:'blue'}];
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -1132,6 +1132,34 @@ function statusClass(s){
 /* ── Theme Summary Panel ── */
 let opFilterTema = '';
 
+function opClearAllFilters(){
+  opFilterTema=''; opFilterSubtema='';
+  ['op-filter-status','op-filter-canal','op-filter-tema','op-filter-subtema'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  const sr=document.getElementById('op-search'); if(sr) sr.value='';
+  renderTemaStrip(); renderOpTable();
+}
+
+function updateResetBar(){
+  const bar=document.getElementById('op-filter-reset'); if(!bar) return;
+  const lbl=document.getElementById('op-filter-reset-label');
+  const parts=[];
+  if(opFilterTema) parts.push('Tema: '+opFilterTema);
+  const sb=document.getElementById('op-filter-subtema')?.value||'';
+  if(sb) parts.push('Sub-tema: '+sb);
+  const st=document.getElementById('op-filter-status')?.value||'';
+  if(st) parts.push('Status: '+st);
+  const cn=document.getElementById('op-filter-canal')?.value||'';
+  if(cn) parts.push('Canal: '+cn);
+  const sr=document.getElementById('op-search')?.value||'';
+  if(sr) parts.push('Busca: "'+sr+'"');
+  if(parts.length){ bar.className='op-filter-reset visible'; if(lbl) lbl.textContent='🔍 '+parts.join(' · '); }
+  else { bar.className='op-filter-reset'; }
+}
+
+
+
 function renderTemaStrip(){
   const strip = document.getElementById('op-tema-strip');
   if(!strip) return;
@@ -1168,6 +1196,7 @@ function renderTemaStrip(){
   });
 
   populateSubtemaSelect();
+  populateTemaSelect();
 }
 
 function populateSubtemaSelect(){
@@ -1681,6 +1710,7 @@ function opDownloadTemplate(){
       </div>
     </div>
     <div class="op-tema-strip" id="op-tema-strip"></div>
+    <div class="op-filter-reset" id="op-filter-reset"><span id="op-filter-reset-label"></span><button onclick="opClearAllFilters()">✕ Limpar todos os filtros</button></div>
     <div class="op-count" id="op-count"></div>
     <div class="op-table-wrap">
       <table class="op-table" id="op-table">
