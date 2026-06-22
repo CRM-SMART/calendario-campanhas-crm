@@ -154,50 +154,14 @@ input:focus,select:focus{border-color:#aaa}
 .op-sync-dot.syncing{background:#f59e0b;animation:pulse 1s infinite}
 .op-sync-dot.error{background:#E24B4A}
 
-.op-table-wrap{overflow-x:auto;border-radius:8px;border:1px solid #d0d0cc;background:#fff;max-height:calc(100vh - 280px)}
-.op-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1200px;table-layout:fixed}
-/* Sticky header */
-.op-table thead{position:sticky;top:0;z-index:10}
-.op-table th{
-  background:#f0f0ec;
-  font-size:11px;font-weight:700;color:#555;
-  text-transform:uppercase;letter-spacing:.04em;
-  padding:6px 8px;text-align:left;
-  border:1px solid #d0d0cc;
-  white-space:nowrap;overflow:hidden;
-  position:relative;user-select:none;
-}
-.op-table th .th-inner{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
-/* Resize handle on each th */
-.op-table th .resize-handle{
-  position:absolute;right:0;top:0;bottom:0;width:5px;
-  cursor:col-resize;background:transparent;z-index:1;
-}
-.op-table th .resize-handle:hover,.op-table th.resizing .resize-handle{background:#aaa}
-.op-table td{
-  padding:4px 8px;
-  border:1px solid #e8e8e4;
-  vertical-align:middle;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  cursor:pointer;
-  line-height:1.4;
-  font-size:12px;
-}
-.op-table tr:nth-child(even) td{background:#fafaf8}
-.op-table tr:hover td{background:#f0f8f5 !important}
-.op-table td.cell-copied{background:#d4edda !important;transition:background .2s}
-/* Expanded row (click to toggle) */
-.op-table td.expanded{white-space:pre-wrap;word-break:break-word;overflow:visible}
-/* Copy tooltip */
-.copy-toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  background:#1a1a1a;color:#fff;font-size:12px;padding:6px 14px;
-  border-radius:20px;pointer-events:none;opacity:0;
-  transition:opacity .2s;z-index:9999;white-space:nowrap;
-}
-.copy-toast.show{opacity:1}
+.op-table-wrap{overflow-x:auto;border-radius:10px;border:1px solid #e8e8e5;background:#fff}
+.op-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1100px}
+.op-table th{background:#f5f5f3;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;text-align:left;border-bottom:1px solid #e8e8e5;white-space:nowrap;position:sticky;top:0;z-index:2}
+.op-table td{padding:7px 10px;border-bottom:1px solid #f0f0ee;vertical-align:top;max-width:260px}
+.op-table tr:last-child td{border-bottom:none}
+.op-table tr:hover td{background:#fafaf8}
+.op-table td.td-msg{max-width:320px;white-space:pre-wrap;word-break:break-word}
+.op-table td.td-title{max-width:180px;white-space:pre-wrap;word-break:break-word}
 
 /* Status badge */
 .status-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
@@ -211,11 +175,10 @@ input:focus,select:focus{border-color:#aaa}
 .s-aguardando{background:#E0F2FE;color:#0C5A87}
 
 /* Action buttons in rows */
-.row-actions{display:flex;gap:4px;align-items:center;justify-content:center;flex-wrap:nowrap}
-.row-act-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:12px;padding:3px 6px;border-radius:5px;color:#aaa;line-height:1;flex-shrink:0}
-.row-act-btn:hover{background:#f0f0ee;border-color:#ddd;color:#1a1a1a}
-.row-act-btn.del-btn{color:#E24B4A}
-.row-act-btn.del-btn:hover{background:#FCEBEB;border-color:#f5c0c0}
+.row-actions{display:flex;gap:4px;opacity:0;transition:opacity .1s}
+tr:hover .row-actions{opacity:1}
+.row-act-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;border-radius:4px;color:#999}
+.row-act-btn:hover{background:#f0f0ee;color:#1a1a1a}
 
 /* Operacional modal */
 .op-modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:300}
@@ -242,7 +205,16 @@ input:focus,select:focus{border-color:#aaa}
 
 
 
-/* ── Canal chips (used in tema strip) ── */
+/* ── Theme Summary Panel ── */
+.op-summary{margin:0 0 14px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.op-summary-toggle{font-size:12px;color:#888;cursor:pointer;user-select:none;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.op-summary-toggle:hover{color:#1D9E75}
+.op-summary-wrap{margin-bottom:8px}
+.theme-card{background:#fff;border:1px solid #e8e8e6;border-radius:8px;padding:8px 12px;min-width:160px;max-width:260px;flex:1}
+.theme-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.theme-card-name{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.theme-card-total{font-size:18px;font-weight:700;color:#1D9E75;line-height:1}
+.theme-card-channels{display:flex;flex-wrap:wrap;gap:3px}
 .theme-ch-chip{font-size:10px;padding:2px 6px;border-radius:10px;white-space:nowrap;font-weight:500}
 .theme-ch-chip.canal-apppush  {background:#f3e8ff;color:#7c3aed}
 .theme-ch-chip.canal-webpush  {background:#dbeafe;color:#1d4ed8}
@@ -252,14 +224,6 @@ input:focus,select:focus{border-color:#aaa}
 .theme-ch-chip.canal-whatsapp {background:#dcfce7;color:#15803d}
 .theme-ch-chip.canal-sms      {background:#f1f5f9;color:#475569}
 .theme-ch-chip.canal-other    {background:#f1f5f9;color:#6b7280}
-
-/* ── Tema strip ── */
-.op-tema-strip{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}
-.tema-chip{font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#555;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .1s}
-.tema-chip:hover{border-color:#bbb;background:#f5f5f3}
-.tema-chip.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-.tema-chip-count{font-weight:700;font-size:12px}
-.tema-chip-all{font-weight:600}
 
 </style>
 </head>
@@ -444,7 +408,7 @@ const PALETTE=[
   {id:'indigo',bg:'#EEF0FF',text:'#2D3A9A',dot:'#6674E5'},
   {id:'brown',bg:'#F5EDE6',text:'#6B3A20',dot:'#B06A3A'},
 ];
-const DEFAULT_CHANNELS=[{id:'ch_apppush',name:'App Push',color:'purple'},{id:'ch_webpush',name:'Web Push',color:'blue'},{id:'ch_firebase',name:'Firebase',color:'amber'},{id:'ch_pushnews',name:'Pushnews',color:'coral'},{id:'ch_email',name:'E-mail',color:'teal'},{id:'ch_whatsapp',name:'WhatsApp',color:'green'},{id:'ch_sms',name:'SMS',color:'sky'}];
+const DEFAULT_CHANNELS=[{id:'ch_apppush',name:'App Push',color:'purple'},{id:'ch_webpush',name:'Web Push',color:'blue'},{id:'ch_firebase',name:'Firebase',color:'amber'},{id:'ch_pushnews',name:'Pushnews',color:'coral'},{id:'ch_email',name:'E-mail',color:'teal'},{id:'ch_whatsapp',name:'WhatsApp',color:'green'}];
 const DEFAULT_AUDIENCES=[{id:'aud_todos',name:'Todos',color:'gray'},{id:'aud_ativos',name:'Ativos',color:'teal'},{id:'aud_queda',name:'Em queda',color:'amber'},{id:'aud_frios',name:'Frios',color:'blue'}];
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -487,6 +451,9 @@ function setSyncStatus(s){
 
 const LS_EVENTS='crm_events';
 const LS_CONFIG='crm_config';
+const LS_OP='crm_op';
+function opLsLoad(){try{const d=localStorage.getItem(LS_OP);if(d){opAllData=JSON.parse(d);return true;}}catch(e){}return false;}
+function opLsSave(){try{localStorage.setItem(LS_OP,JSON.stringify(opAllData));}catch(e){}}
 
 function lsLoad(){
   // Render from cache instantly — no network needed
@@ -949,6 +916,10 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
     if(target==='op'){
       if(!opInitialized){
         opInitialized=true;
+        opLsLoad();        // load instantly from cache
+        opRows=opAllData[opMonthKey()]||[];
+        opUpdateMonthLabel();
+        renderOpTable();
         opLoad();          // first visit: fetch data + start listener
         opStartListener();
       } else {
@@ -967,13 +938,12 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
 ═══════════════════════════════════════════════ */
 
 let opAllData={};       // all months cached
-let opFilterSubtema='';  // active sub-tema filter from summary card
 let opRows=[];          // rows for the current month
 let opEditId=null;
 let opIsSaving=false;
 let opListener=null;
 
-function opMonthKey(){return cur.y+'-'+cur.m;}  // e.g. "2026-5"
+function opMonthKey(){return cur.y+'-'+(cur.m+1);}  // e.g. "2026-5"
 
 function opSetSync(s){
   const dot=document.getElementById('op-sync-dot');
@@ -992,111 +962,23 @@ function opUpdateMonthLabel(){
 async function opLoad(){
   try{
     const data=await fbGet('operacional_data');
-    opAllData=data||{};
+    if(data){
+      opAllData=data;
+      opLsSave();
+    }
     opSetSync('ok');
   }catch(e){opSetSync('error');}
   opRows=opAllData[opMonthKey()]||[];
-  sortOpRows();
-  syncOpToCalendar();
-  lsSave();
-  renderCal();
   opUpdateMonthLabel();
   renderOpTable();
-}
-
-
-/* ═══════════════════════════════════════════════════
-   SYNC: Operacional → Calendário
-   Rebuilds calendar events tagged fromOp:true
-   from ALL months in opAllData.
-═══════════════════════════════════════════════════ */
-function syncOpToCalendar(){
-  let _configChangedBySync=false;
-  // Remove only events generated from Operacional
-  for(const key of Object.keys(events)){
-    events[key]=(events[key]||[]).filter(e=>!e.fromOp);
-    if(!events[key].length) delete events[key];
-  }
-
-  // Rebuild from every month in opAllData
-  for(const [monthKey, rows] of Object.entries(opAllData)){
-    const parts=monthKey.split('-');
-    const yr=parseInt(parts[0]);
-    // monthKey uses 0-indexed month (e.g. "2026-6" = July)
-    // But data field has DD/MM (1-indexed) — we'll use the MM from data itself
-
-    for(const r of (rows||[])){
-      if(!r.data||!r.tema) continue;
-
-      // Parse "DD/MM" or "DD/MM/YYYY" from the data field
-      const raw=String(r.data).trim().replace(/^[A-Za-záéíóúãõç]+\s+/,''); // strip day-of-week
-      const dm=raw.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-      if(!dm) continue;
-      const day=parseInt(dm[1]);
-      const mon=parseInt(dm[2])-1; // 0-indexed
-      const year=dm[3]?parseInt(dm[3].length===2?'20'+dm[3]:dm[3]):yr;
-
-      const calKey=year+'-'+(mon+1)+'-'+day;
-
-      // Map canal → channelId (auto-create if not found)
-      const canalLow=(r.canal||'').toLowerCase().trim();
-      let ch=channels.find(c=>c.name.toLowerCase().trim()===canalLow)
-             || channels.find(c=>canalLow.includes(c.name.toLowerCase().trim()));
-      if(!ch && r.canal && r.canal.trim()){
-        // Auto-assign color by canal type
-        let autoColor='gray';
-        if(canalLow.includes('sms'))                        autoColor='sky';
-        else if(canalLow.includes('whatsapp'))              autoColor='green';
-        else if(canalLow.includes('email')||canalLow.includes('e-mail')) autoColor='teal';
-        else if(canalLow.includes('app')||canalLow.includes('push'))     autoColor='purple';
-        else if(canalLow.includes('web'))                   autoColor='blue';
-        else if(canalLow.includes('firebase'))              autoColor='amber';
-        const safeId='ch_'+r.canal.trim().toLowerCase().replace(/[^a-z0-9]/g,'_');
-        ch={id:safeId, name:r.canal.trim(), color:autoColor};
-        channels.push(ch);
-        _configChangedBySync=true;
-      }
-      const channelId=ch?ch.id:null;
-      const color=ch?ch.color:'gray';
-
-      // Map segmentacao → audienceId (partial match)
-      const segLow=(r.segmentacao||'').toLowerCase().trim();
-      const aud=audiences.find(a=>a.name.toLowerCase().trim()===segLow)
-                || audiences.find(a=>segLow.includes(a.name.toLowerCase().trim())
-                                  || a.name.toLowerCase().trim().includes(segLow));
-      const audienceId=aud?aud.id:(audiences[0]?.id||null);
-
-      // Use tema as the event name (visible on calendar chip)
-      const name=(r.tema||r.subtema||r.campanha||'—').trim();
-      const time=fmtHora(r.hora)||'09:00';
-
-      if(!events[calKey]) events[calKey]=[];
-      events[calKey].push({name,time,color,channelId,audienceId,fromOp:true});
-    }
-  }
-
-  // Sort each day's events by time
-  for(const key of Object.keys(events)){
-    events[key].sort((a,b)=>a.time.localeCompare(b.time));
-  }
-  // If new channels were auto-created, persist config
-  if(_configChangedBySync) saveConfig();
 }
 
 async function opSave(){
   opIsSaving=true;opSetSync('syncing');
   opAllData[opMonthKey()]=opRows;
-  syncOpToCalendar();                          // mirror to calendar
-  try{
-    await Promise.all([
-      fbSet('operacional_data',opAllData),
-      fbSet('data',{events})                   // save updated calendar events
-    ]);
-    lsSave();
-    opSetSync('ok');
-    setSyncStatus('ok');
-    renderCal();                               // refresh calendar if open
-  }catch(e){opSetSync('error');}
+  opLsSave();
+  try{await fbSet('operacional_data',opAllData);opSetSync('ok');}
+  catch(e){opSetSync('error');}
   setTimeout(()=>{opIsSaving=false;},500);
 }
 
@@ -1130,231 +1012,82 @@ function statusClass(s){
 /* RENDER TABLE */
 
 /* ── Theme Summary Panel ── */
-let opFilterTema = '';
+let _summaryOpen = true;
 
-function opClearAllFilters(){
-  opFilterTema=''; opFilterSubtema='';
-  ['op-filter-status','op-filter-canal','op-filter-tema','op-filter-subtema'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  const sr=document.getElementById('op-search'); if(sr) sr.value='';
-  renderTemaStrip(); renderOpTable();
+function toggleSummary(){
+  _summaryOpen = !_summaryOpen;
+  document.getElementById('op-summary').style.display = _summaryOpen ? 'flex' : 'none';
+  document.getElementById('op-summary-arrow').textContent = _summaryOpen ? '▾' : '▸';
 }
 
-function updateResetBar(){
-  const bar=document.getElementById('op-filter-reset'); if(!bar) return;
-  const lbl=document.getElementById('op-filter-reset-label');
-  const parts=[];
-  if(opFilterTema) parts.push('Tema: '+opFilterTema);
-  const sb=document.getElementById('op-filter-subtema')?.value||'';
-  if(sb) parts.push('Sub-tema: '+sb);
-  const st=document.getElementById('op-filter-status')?.value||'';
-  if(st) parts.push('Status: '+st);
-  const cn=document.getElementById('op-filter-canal')?.value||'';
-  if(cn) parts.push('Canal: '+cn);
-  const sr=document.getElementById('op-search')?.value||'';
-  if(sr) parts.push('Busca: "'+sr+'"');
-  if(parts.length){ bar.className='op-filter-reset visible'; if(lbl) lbl.textContent='🔍 '+parts.join(' · '); }
-  else { bar.className='op-filter-reset'; }
+function canalClass(canal){
+  const c = (canal||'').toLowerCase().replace(/\s+/g,'');
+  if(c.includes('apppush')||c.includes('app'))  return 'canal-apppush';
+  if(c.includes('webpush')||c.includes('web'))  return 'canal-webpush';
+  if(c.includes('firebase'))                    return 'canal-firebase';
+  if(c.includes('pushnews'))                    return 'canal-pushnews';
+  if(c.includes('email')||c.includes('e-mail')) return 'canal-email';
+  if(c.includes('whatsapp'))                    return 'canal-whatsapp';
+  if(c.includes('sms'))                         return 'canal-sms';
+  return 'canal-other';
 }
 
+function renderSummary(){
+  const wrap = document.getElementById('op-summary');
+  if(!wrap) return;
 
-
-function renderTemaStrip(){
-  const strip = document.getElementById('op-tema-strip');
-  if(!strip) return;
-
-  // Count by tema
-  const temaCount = {};
-  (opRows||[]).forEach(r=>{
-    const t=(r.tema||'').trim()||'(sem tema)';
-    temaCount[t]=(temaCount[t]||0)+1;
-  });
-  const sorted=Object.entries(temaCount).sort((a,b)=>b[1]-a[1]);
-
-  strip.innerHTML='';
-
-  // "Todos" chip
-  const all=document.createElement('div');
-  all.className='tema-chip tema-chip-all'+(opFilterTema===''?' active':'');
-  all.innerHTML='Todos <span class="tema-chip-count">'+(opRows||[]).length+'</span>';
-  all.addEventListener('click',()=>{opFilterTema='';renderTemaStrip();populateSubtemaSelect();renderOpTable();});
-  strip.appendChild(all);
-
-  sorted.forEach(([tema,count])=>{
-    const chip=document.createElement('div');
-    chip.className='tema-chip'+(opFilterTema===tema?' active':'');
-    chip.innerHTML=esc(tema)+' <span class="tema-chip-count">'+count+'</span>';
-    chip.addEventListener('click',()=>{
-      opFilterTema=(opFilterTema===tema)?'':tema;
-      opFilterSubtema='';
-      renderTemaStrip();
-      populateSubtemaSelect();
-      renderOpTable();
-    });
-    strip.appendChild(chip);
+  // Build map: tema → { total, channels: { canal: count } }
+  const map = {};
+  (opRows||[]).forEach(r => {
+    if(!r) return;
+    const tema = String(r.tema||'').trim() || '(sem tema)';
+    if(!map[tema]) map[tema] = { total:0, channels:{} };
+    map[tema].total++;
+    const canal = String(r.canal||'').trim() || 'Outros';
+    map[tema].channels[canal] = (map[tema].channels[canal]||0) + 1;
   });
 
-  populateSubtemaSelect();
-  populateTemaSelect();
-}
+  // Sort by total desc
+  const sorted = Object.entries(map).sort((a,b) => b[1].total - a[1].total);
 
-function populateSubtemaSelect(){
-  // Populate sub-tema dropdown based on active tema filter
-  const sel=document.getElementById('op-filter-subtema');
-  if(!sel) return;
-  const prev=sel.value;
-  sel.innerHTML='<option value="">Todos os sub-temas</option>';
-  const rows=(opFilterTema
-    ? (opRows||[]).filter(r=>(r.tema||'').trim()===opFilterTema)
-    : (opRows||[]));
-  const subs=new Set();
-  rows.forEach(r=>{const s=(r.subtema||'').trim();if(s)subs.add(s);});
-  [...subs].sort().forEach(s=>{
-    const o=document.createElement('option');
-    o.value=s;o.textContent=s;
-    if(s===prev)o.selected=true;
-    sel.appendChild(o);
-  });
-  if(opFilterSubtema&&![...subs].includes(opFilterSubtema)) opFilterSubtema='';
-}
-
-function populateTemaSelect(){
-  const sel=document.getElementById('op-filter-tema');
-  if(!sel) return;
-  const prev=sel.value;
-  sel.innerHTML='<option value="">Todos os temas</option>';
-  const temas=new Set();
-  (opRows||[]).forEach(r=>{const t=(r.tema||'').trim();if(t)temas.add(t);});
-  [...temas].sort().forEach(t=>{
-    const o=document.createElement('option');
-    o.value=t;o.textContent=t;
-    if(t===prev)o.selected=true;
-    sel.appendChild(o);
-  });
-}
-
-
-
-/* ── Date formatter: "17/06" → "Ter 17/06" ── */
-const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-const MESES_ABREV = {
-  jan:1,fev:2,mar:3,abr:4,mai:5,jun:6,
-  jul:7,ago:8,set:9,out:10,nov:11,dez:12
-};
-
-function fmtDate(raw, y, m){
-  if(raw===null||raw===undefined||raw==='') return '—';
-  raw = String(raw).trim();
-  let day, month, year = y;
-
-  // Fallback: Excel serial number (e.g. 46190)
-  const serial = parseFloat(raw);
-  if(!isNaN(serial) && serial > 40000 && serial < 60000 && /^\d+(\.\d+)?$/.test(raw)){
-    const d = new Date(Math.round((serial-25569)*86400*1000));
-    const dow = DIAS_SEMANA[d.getUTCDay()];
-    const dd  = String(d.getUTCDate()).padStart(2,'0');
-    const mm  = String(d.getUTCMonth()+1).padStart(2,'0');
-    return `<span style="font-size:10px;color:#aaa;margin-right:2px">${dow}</span>${dd}/${mm}`;
+  if(!sorted.length){
+    wrap.innerHTML = '<div style="font-size:12px;color:#aaa;padding:4px 0">Nenhum dado no mês.</div>';
+    return;
   }
 
-  // Try DD/MM or DD/MM/YYYY
-  let match = raw.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?$/);
-  if(match){
-    day = parseInt(match[1]);
-    month = parseInt(match[2]) - 1;
-    if(match[3]) year = parseInt(match[3].length===2?'20'+match[3]:match[3]);
-  } else {
-    // Try "17/jun" or "17jun" style
-    match = raw.match(/^(\d{1,2})[\/\s\-]?([a-zA-Záãçõü]{3})/i);
-    if(match){
-      day = parseInt(match[1]);
-      const abr = match[2].toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'').slice(0,3);
-      month = (MESES_ABREV[abr]||1) - 1;
-    } else {
-      return raw;
-    }
-  }
+  wrap.innerHTML = sorted.map(([tema, data]) => {
+    const channelChips = Object.entries(data.channels)
+      .sort((a,b) => b[1]-a[1])
+      .map(([canal, n]) =>
+        `<span class="theme-ch-chip ${canalClass(canal)}">${esc(canal)} ${n}</span>`
+      ).join('');
+    return `<div class="theme-card">
+      <div class="theme-card-header">
+        <span class="theme-card-name" title="${esc(tema)}">${esc(tema)}</span>
+        <span class="theme-card-total">${data.total}</span>
+      </div>
+      <div class="theme-card-channels">${channelChips}</div>
+    </div>`;
+  }).join('');
 
-  const d = new Date(year, month, day);
-  if(isNaN(d)) return raw;
-  const dow = DIAS_SEMANA[d.getDay()];
-  const dd = String(day).padStart(2,'0');
-  const mm = String(month+1).padStart(2,'0');
-  return `<span style="font-size:10px;color:#aaa;margin-right:2px">${dow}</span>${dd}/${mm}`;
-}
-
-/* ── Copy toast ── */
-let _toastTimer;
-function showToast(msg){
-  const t = document.getElementById('copy-toast');
-  if(!t) return;
-  t.textContent = '📋 ' + msg;
-  t.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(()=>t.classList.remove('show'), 1600);
-}
-
-/* ── Resizable columns ── */
-function initColResize(){
-  const table = document.getElementById('op-table');
-  if(!table) return;
-  table.querySelectorAll('th .resize-handle').forEach(handle=>{
-    let startX, startW, th;
-    handle.addEventListener('mousedown', e=>{
-      e.preventDefault();
-      th = handle.parentElement;
-      startX = e.pageX;
-      startW = th.offsetWidth;
-      th.classList.add('resizing');
-      const onMove = e2=>{
-        const w = Math.max(40, startW + (e2.pageX - startX));
-        th.style.width = w+'px';
-      };
-      const onUp = ()=>{
-        th.classList.remove('resizing');
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-      };
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-    });
-  });
-}
-
-function fmtHora(raw){
-  if(raw===null||raw===undefined||raw==='') return '—';
-  raw = String(raw).trim();
-  // Already HH:MM
-  if(/^\d{1,2}:\d{2}$/.test(raw)) return raw;
-  // Excel time fraction e.g. 0.666... or 0.75
-  const n = parseFloat(raw);
-  if(!isNaN(n) && n>=0 && n<1){
-    const totalMin=Math.round(n*24*60);
-    const hh=String(Math.floor(totalMin/60)%24).padStart(2,'0');
-    const mn=String(totalMin%60).padStart(2,'0');
-    return hh+':'+mn;
-  }
-  return raw;
+  wrap.style.display = _summaryOpen ? 'flex' : 'none';
 }
 
 function renderOpTable(){
-  initColResize();
   opUpdateMonthLabel();
   renderSummary();
   const search=(document.getElementById('op-search')?.value||'').toLowerCase();
   const filterStatus=document.getElementById('op-filter-status')?.value||'';
   const filterCanal=document.getElementById('op-filter-canal')?.value||'';
-  const filterSubtemaDD=document.getElementById('op-filter-subtema')?.value||'';
 
   let rows=(opRows||[]).filter(r=>{
     if(filterStatus&&r.status!==filterStatus) return false;
     if(filterCanal&&r.canal!==filterCanal) return false;
-    if(opFilterTema&&(r.tema||'').trim()!==opFilterTema) return false;
-    if(filterSubtemaDD&&(r.subtema||'').trim()!==filterSubtemaDD) return false;
     if(search){
-      const hay=(r.campanha+r.tema+r.subtema+r.titulo+r.mensagem+r.segmentacao).toLowerCase();
+      const hay=[r.campanha,r.tema,r.subtema,r.titulo,r.mensagem,r.segmentacao]
+        .map(v=>String(v||''))
+        .join(' ')
+        .toLowerCase();
       if(!hay.includes(search)) return false;
     }
     return true;
@@ -1376,41 +1109,28 @@ function renderOpTable(){
 
   rows.forEach((r,i)=>{
     const tr=document.createElement('tr');
-    const dateDisplay = fmtDate(r.data, cur.y, cur.m);
+
     tr.innerHTML=`
-      <td style="color:#bbb;font-size:10px;text-align:center;width:30px">${i+1}</td>
+      <td style="color:#bbb;font-size:11px">${i+1}</td>
       <td><span class="status-badge ${statusClass(r.status)}">${r.status||'—'}</span></td>
-      <td title="${esc(r.campanha)}" style="font-weight:500;font-size:11px">${esc(r.campanha)}</td>
-      <td style="font-weight:600;color:#1a1a1a;white-space:nowrap">${dateDisplay}</td>
-      <td style="font-weight:600;color:#1D9E75">${fmtHora(r.hora)}</td>
+      <td style="font-weight:500">${esc(r.campanha)}</td>
+      <td>${esc(r.data)}</td>
+      <td>${esc(r.hora)}</td>
       <td>${esc(r.canal)}</td>
-      <td style="color:#888">${esc(r.plataforma)}</td>
-      <td title="${esc(r.segmentacao)}">${esc(r.segmentacao)}</td>
-      <td style="font-weight:500">${esc(r.tema)}</td>
-      <td style="color:#888">${esc(r.subtema)}</td>
-      <td title="${esc(r.titulo)}" style="font-weight:500">${esc(r.titulo)}</td>
-      <td title="${esc(r.mensagem)}" style="color:#555">${esc(r.mensagem)}</td>
-      <td style="text-align:center;overflow:visible;white-space:nowrap;width:82px;min-width:82px">
+      <td style="font-size:11px;color:#888">${esc(r.plataforma)}</td>
+      <td style="font-size:11px">${esc(r.segmentacao)}</td>
+      <td>${esc(r.tema)}</td>
+      <td style="font-size:11px;color:#888">${esc(r.subtema)}</td>
+      <td class="td-title">${esc(r.titulo)}</td>
+      <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
+      <td>
         <div class="row-actions">
           <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
           <button class="row-act-btn" title="Duplicar" data-dup="${r.id}">⧉</button>
-          <button class="row-act-btn del-btn" title="Excluir" data-del="${r.id}">✕</button>
+          <button class="row-act-btn" title="Excluir" data-del="${r.id}" style="color:#E24B4A">✕</button>
         </div>
       </td>
     `;
-    // Click any data cell → copy its text + flash green
-    tr.querySelectorAll('td:not(:first-child):not(:last-child)').forEach(td=>{
-      td.addEventListener('click', e=>{
-        if(e.target.closest('.row-actions')) return;
-        const text = td.getAttribute('title') || td.textContent.trim();
-        if(!text) return;
-        navigator.clipboard.writeText(text).then(()=>{
-          td.classList.add('cell-copied');
-          setTimeout(()=>td.classList.remove('cell-copied'), 600);
-          showToast(text.length>40 ? text.slice(0,40)+'…' : text);
-        });
-      });
-    });
     tbody.appendChild(tr);
   });
 
@@ -1434,7 +1154,6 @@ function renderOpTable(){
         const dup=Object.assign({},orig,{id:'row_'+Date.now()});
         const idx=opRows.indexOf(orig);
         opRows.splice(idx+1,0,dup);
-        sortOpRows();
         opSave();renderOpTable();
       }
     });
@@ -1472,39 +1191,6 @@ function opOpenEdit(id){
   setTimeout(()=>document.getElementById('op-f-campanha').focus(),50);
 }
 
-/* ── Sort opRows by data + hora ascending ── */
-function parseDateSort(data, hora){
-  // data: "DD/MM", "DD/MM/YYYY", or raw serial (handled by fmtDate already)
-  // hora: "HH:MM"
-  let day=0, month=0, year=cur.y;
-  if(data){
-    const s=String(data).trim();
-    // Strip day-of-week prefix like "Ter 17/06" if it leaked in
-    const clean=s.replace(/^[A-Za-záéíóúãõç]+\s+/,'');
-    const m=clean.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-    if(m){
-      day=parseInt(m[1]); month=parseInt(m[2])-1;
-      if(m[3]) year=parseInt(m[3].length===2?'20'+m[3]:m[3]);
-    }
-  }
-  let h=0, min=0;
-  if(hora){
-    const t=String(hora).trim().match(/^(\d{1,2}):(\d{2})/);
-    if(t){h=parseInt(t[1]);min=parseInt(t[2]);}
-  }
-  return new Date(year,month,day,h,min).getTime();
-}
-
-function sortOpRows(){
-  opRows.sort((a,b)=>{
-    const ta=parseDateSort(a.data,a.hora);
-    const tb=parseDateSort(b.data,b.hora);
-    if(ta!==tb) return ta-tb;
-    // Secondary: canal alphabetical
-    return (a.canal||'').localeCompare(b.canal||'');
-  });
-}
-
 function opSaveModal(){
   const fields=['status','campanha','data','hora','canal','plataforma','segmentacao','tema','subtema','titulo','mensagem'];
   const obj={};
@@ -1519,7 +1205,6 @@ function opSaveModal(){
     obj.id='row_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
     opRows.push(obj);
   }
-  sortOpRows();
   opSave();renderOpTable();
   document.getElementById('op-modal-bg').style.display='none';
 }
@@ -1560,15 +1245,14 @@ const CSV_COLS=[
   {header:'Mensagem',    field:'mensagem'},
 ];
 
-function parseLine(line, sep){
-  sep = sep || ',';
+function parseLine(line){
   const fields=[];let cur='';let inQ=false;
   for(let i=0;i<line.length;i++){
     const c=line[i];
     if(c==='"'){
       if(inQ&&line[i+1]==='"'){cur+='"';i++;}
       else inQ=!inQ;
-    }else if(c===sep&&!inQ){fields.push(cur);cur='';}
+    }else if(c===','&&!inQ){fields.push(cur);cur='';}
     else cur+=c;
   }
   fields.push(cur);
@@ -1582,13 +1266,8 @@ function normalizeH(h){
 }
 
 function parseCSV(text){
-  // Normalize line endings
-  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(!lines.length) return [];
-
-  // Auto-detect separator: count ; vs , in header line
-  const h0=lines[0];
-  const sep=(h0.split(';').length > h0.split(',').length) ? ';' : ',';
 
   // Build lookup: normalizedHeader → internal field
   const MAP={};
@@ -1597,7 +1276,7 @@ function parseCSV(text){
     MAP[c.field]=c.field; // also accept raw field name
   });
 
-  const rawHeaders=parseLine(lines[0], sep);
+  const rawHeaders=parseLine(lines[0]);
   const colMap=rawHeaders.map(h=>MAP[normalizeH(h)]||null);
   const matched=colMap.filter(Boolean).length;
 
@@ -1608,7 +1287,7 @@ function parseCSV(text){
 
   const rows=[];
   for(let i=1;i<lines.length;i++){
-    const vals=parseLine(lines[i], sep);
+    const vals=parseLine(lines[i]);
     if(vals.every(v=>!v.trim())) continue;
     const row={id:'row_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5)};
     colMap.forEach((field,idx)=>{
@@ -1693,12 +1372,6 @@ function opDownloadTemplate(){
         <option value="WhatsApp">WhatsApp</option>
         <option value="Email">Email</option>
       </select>
-      <select id="op-filter-tema" style="padding:6px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;max-width:160px">
-        <option value="">Todos os temas</option>
-      </select>
-      <select id="op-filter-subtema" style="padding:6px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;max-width:160px">
-        <option value="">Todos os sub-temas</option>
-      </select>
       <button class="op-btn primary" id="op-add-btn">+ Nova linha</button>
       <button class="op-btn" id="op-export-btn">↓ Exportar CSV</button>
       <button class="op-btn" id="op-import-btn">↑ Importar XLSX / CSV</button>
@@ -1709,26 +1382,30 @@ function opDownloadTemplate(){
         <span id="op-sync-label">—</span>
       </div>
     </div>
-    <div class="op-tema-strip" id="op-tema-strip"></div>
-    <div class="op-filter-reset" id="op-filter-reset"><span id="op-filter-reset-label"></span><button onclick="opClearAllFilters()">✕ Limpar todos os filtros</button></div>
+    <div class="op-summary-wrap" id="op-summary-wrap">
+      <div class="op-summary-toggle" id="op-summary-toggle" onclick="toggleSummary()">
+        <span id="op-summary-arrow">▾</span> Resumo por tema
+      </div>
+      <div class="op-summary" id="op-summary"></div>
+    </div>
     <div class="op-count" id="op-count"></div>
     <div class="op-table-wrap">
       <table class="op-table" id="op-table">
         <thead>
-          <tr id="op-thead-row">
-            <th style="width:30px" data-col="0"><span class="th-inner">#</span></th>
-            <th style="width:120px" data-col="1"><span class="th-inner">Status</span><div class="resize-handle"></div></th>
-            <th style="width:200px" data-col="2"><span class="th-inner">Campanha</span><div class="resize-handle"></div></th>
-            <th style="width:90px" data-col="3"><span class="th-inner">Data</span><div class="resize-handle"></div></th>
-            <th style="width:54px" data-col="4"><span class="th-inner">Hora</span><div class="resize-handle"></div></th>
-            <th style="width:90px" data-col="5"><span class="th-inner">Canal</span><div class="resize-handle"></div></th>
-            <th style="width:90px" data-col="6"><span class="th-inner">Plataforma</span><div class="resize-handle"></div></th>
-            <th style="width:130px" data-col="7"><span class="th-inner">Segmentação</span><div class="resize-handle"></div></th>
-            <th style="width:110px" data-col="8"><span class="th-inner">Tema</span><div class="resize-handle"></div></th>
-            <th style="width:110px" data-col="9"><span class="th-inner">Sub-tema</span><div class="resize-handle"></div></th>
-            <th style="width:200px" data-col="10"><span class="th-inner">Título</span><div class="resize-handle"></div></th>
-            <th style="width:320px" data-col="11"><span class="th-inner">Mensagem</span><div class="resize-handle"></div></th>
-            <th style="width:82px;text-align:center" data-col="12"><span class="th-inner">Ações</span></th>
+          <tr>
+            <th style="width:32px">#</th>
+            <th style="width:130px">Status</th>
+            <th style="width:160px">Campanha</th>
+            <th style="width:72px">Data</th>
+            <th style="width:58px">Hora</th>
+            <th style="width:90px">Canal</th>
+            <th style="width:110px">Plataforma</th>
+            <th style="width:140px">Segmentação</th>
+            <th style="width:110px">Tema</th>
+            <th style="width:110px">Sub-tema</th>
+            <th style="width:180px">Título</th>
+            <th>Mensagem</th>
+            <th style="width:56px"></th>
           </tr>
         </thead>
         <tbody id="op-tbody"></tbody>
@@ -1820,8 +1497,6 @@ function opDownloadTemplate(){
 </div>
 
 
-<div class="copy-toast" id="copy-toast">Copiado!</div>
-
 <!-- ── Import confirmation modal ── -->
 <div class="op-modal-bg" id="op-import-modal-bg" style="display:none">
   <div class="op-modal" style="max-width:440px">
@@ -1846,24 +1521,16 @@ document.getElementById('op-modal-bg').addEventListener('click',e=>{if(e.target=
 document.getElementById('op-search').addEventListener('input',renderOpTable);
 document.getElementById('op-filter-status').addEventListener('change',renderOpTable);
 document.getElementById('op-filter-canal').addEventListener('change',renderOpTable);
-document.getElementById('op-filter-tema').addEventListener('change',()=>{
-  opFilterTema=document.getElementById('op-filter-tema').value;
-  opFilterSubtema='';
-  populateSubtemaSelect();
-  renderTemaStrip();
-  renderOpTable();
-});
-document.getElementById('op-filter-subtema').addEventListener('change',renderOpTable);
 
 // Operacional month nav
 document.getElementById('op-prev').addEventListener('click',()=>{
   cur.m--;if(cur.m<0){cur.m=11;cur.y--;}
-  if(opLoaded) opLoad();
+  if(opInitialized) opLoad();
   else opUpdateMonthLabel();
 });
 document.getElementById('op-next').addEventListener('click',()=>{
   cur.m++;if(cur.m>11){cur.m=0;cur.y++;}
-  if(opLoaded) opLoad();
+  if(opInitialized) opLoad();
   else opUpdateMonthLabel();
 });
 
@@ -1881,79 +1548,11 @@ document.getElementById('op-import-input').addEventListener('change',function(){
       const reader=new FileReader();
       reader.onload=function(e){
         try{
-          // cellDates:true → JS Date/time objects instead of serial numbers
-          const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true,cellText:false});
-
-          // Auto-detect the correct sheet (find the one with our headers)
-          const EXPECTED=['status','campanha','data'];
-          let ws=null, sheetName='';
-          for(const name of wb.SheetNames){
-            const s=wb.Sheets[name];
-            const preview=XLSX.utils.sheet_to_json(s,{header:1,defval:'',raw:false});
-            if(!preview.length) continue;
-            const hdrs=(preview[0]||[]).map(h=>normalizeH(String(h)));
-            const matches=EXPECTED.filter(e=>hdrs.includes(e)).length;
-            if(matches>=2){ws=s;sheetName=name;break;}
-          }
-          if(!ws){
-            // fallback: use first non-empty sheet
-            for(const name of wb.SheetNames){
-              const s=wb.Sheets[name];
-              const preview=XLSX.utils.sheet_to_json(s,{header:1,defval:'',raw:false});
-              if(preview.length>1){ws=s;sheetName=name;break;}
-            }
-          }
-          if(!ws){alert('Nenhuma aba com dados reconhecidos foi encontrada.\nAbas disponíveis: '+wb.SheetNames.join(', '));return;}
-
-          // raw:true for custom conversion; cellDates already applied above
-          const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
-          if(!json.length){alert('Planilha "'+sheetName+'" está vazia.');return;}
-
-          // Identify date/time columns from header row
-          const headers=(json[0]||[]).map(h=>normalizeH(String(h)));
-          const dateIdx=new Set(), timeIdx=new Set();
-          headers.forEach((h,i)=>{
-            if(h==='data'||h==='date'||h==='dt') dateIdx.add(i);
-            if(h==='hora'||h==='horario'||h==='time'||h==='hour') timeIdx.add(i);
-          });
-
-          function cleanVal(v, ci){
-            // JS Date object (from cellDates:true)
-            if(v instanceof Date){
-              if(dateIdx.has(ci)){
-                const dd=String(v.getDate()).padStart(2,'0');
-                const mm=String(v.getMonth()+1).padStart(2,'0');
-                return dd+'/'+mm;
-              }
-              // Might be a time stored as date (Excel time = Jan 0 1900 + fraction)
-              const hh=String(v.getHours()).padStart(2,'0');
-              const mn=String(v.getMinutes()).padStart(2,'0');
-              return hh+':'+mn;
-            }
-            if(typeof v==='number'){
-              const looksLikeDate=v>40000&&v<60000;
-              const looksLikeTime=v>=0&&v<1;
-              if(dateIdx.has(ci)||(!timeIdx.has(ci)&&looksLikeDate)){
-                const d=new Date(Math.round((v-25569)*86400*1000));
-                return String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0');
-              }
-              if(timeIdx.has(ci)||(looksLikeTime&&!looksLikeDate)){
-                const t=Math.round(v*24*60);
-                return String(Math.floor(t/60)%24).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
-              }
-            }
-            // Strip leading apostrophe Excel adds to force text format
-            let s=String(v===null||v===undefined?'':v);
-            if(s.startsWith("'")) s=s.slice(1);
-            return s;
-          }
-
-          const converted=json.map((row,ri)=>{
-            if(ri===0) return row.map(h=>{let s=String(h||'');if(s.startsWith("'"))s=s.slice(1);return s;});
-            return row.map((v,ci)=>cleanVal(v,ci));
-          });
-
-          const csvLines=converted.map(row=>row.map(v=>{
+          const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+          const ws=wb.Sheets[wb.SheetNames[0]];
+          const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+          if(!json.length){alert('Planilha vazia.');return;}
+          const csvLines=json.map(row=>row.map(v=>{
             const s=String(v===null||v===undefined?'':v);
             return (s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;
           }).join(','));
@@ -1977,18 +1576,7 @@ document.getElementById('op-import-input').addEventListener('change',function(){
     // CSV path
     const reader=new FileReader();
     reader.onload=function(e){
-      let text=e.target.result;
-      // If UTF-8 produced replacement chars, re-read as latin-1
-      if(text.includes('\uFFFD')){
-        const r2=new FileReader();
-        r2.onload=function(e2){
-          opImportParsed=parseCSV(e2.target.result);
-          showImportModal(file.name);
-        };
-        r2.readAsText(file,'windows-1252');
-        return;
-      }
-      opImportParsed=parseCSV(text);
+      opImportParsed=parseCSV(e.target.result);
       showImportModal(file.name);
     };
     reader.readAsText(file,'UTF-8');
@@ -2010,12 +1598,12 @@ function showImportModal(filename){
 }
 document.getElementById('op-import-append').addEventListener('click',()=>{
   opRows=[...opRows,...opImportParsed];
-  sortOpRows(); opSave(); renderOpTable();
+  opSave(); renderOpTable();
   document.getElementById('op-import-modal-bg').style.display='none';
 });
 document.getElementById('op-import-replace').addEventListener('click',()=>{
   opRows=[...opImportParsed];
-  sortOpRows(); opSave(); renderOpTable();
+  opSave(); renderOpTable();
   document.getElementById('op-import-modal-bg').style.display='none';
 });
 document.getElementById('op-import-cancel').addEventListener('click',()=>{
