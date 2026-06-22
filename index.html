@@ -160,8 +160,33 @@ input:focus,select:focus{border-color:#aaa}
 .op-table td{padding:7px 10px;border-bottom:1px solid #f0f0ee;vertical-align:top;max-width:260px}
 .op-table tr:last-child td{border-bottom:none}
 .op-table tr:hover td{background:#fafaf8}
-.op-table td.td-msg{max-width:320px;white-space:pre-wrap;word-break:break-word}
+.op-table td.td-msg{max-width:320px;padding:7px 10px;}
 .op-table td.td-title{max-width:180px;white-space:pre-wrap;word-break:break-word}
+.td-msg-inner{
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.4;
+}
+tr.expanded .td-msg-inner{
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+.op-table tr {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.op-table tr:hover td {
+  background: #f8fafc !important;
+}
+.op-table tr.expanded td {
+  background: #fdfdfb !important;
+}
 
 /* Status badge */
 .status-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
@@ -555,7 +580,16 @@ function refreshAudPills(){
   });
 }
 
-function allThemes(){const s=new Set();Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)s.add(e.name)}));return[...s].sort();}
+function allThemes(){
+  const s=new Set();
+  Object.values(events).forEach(arr=>arr.forEach(e=>{if(e.name)s.add(e.name)}));
+  Object.values(opAllData).forEach(rows=>{
+    (rows||[]).forEach(r=>{
+      if(r.tema && r.tema.trim()) s.add(r.tema.trim());
+    });
+  });
+  return[...s].sort();
+}
 function isActive(ev){
   const co=filterCh.size===0||(ev.channelId&&filterCh.has(ev.channelId));
   const to=filterTh.size===0||filterTh.has(ev.name);
@@ -701,6 +735,150 @@ function campsForDay(k){
   return campaigns.filter(cp=>{const s=parseDate(cp.start),e=parseDate(cp.end);return d>=s&&d<=e;});
 }
 
+function normalizeStr(s) {
+  if (!s) return '';
+  return String(s).trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function parseRowDate(dateStr) {
+  if (!dateStr) return null;
+  const str = String(dateStr).trim();
+  if (!str) return null;
+
+  // 5-digit number (Excel serial date)
+  if (/^\d{5}$/.test(str)) {
+    const serial = parseInt(str, 10);
+    const date = new Date((serial - 25569) * 86400 * 1000);
+    if (!isNaN(date.getTime())) {
+      return {
+        day: date.getUTCDate(),
+        month: date.getUTCMonth(),
+        year: date.getUTCFullYear()
+      };
+    }
+  }
+
+  // Format: YYYY-MM-DD
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(str)) {
+    const parts = str.split('-').map(Number);
+    return { day: parts[2], month: parts[1] - 1, year: parts[0] };
+  }
+
+  // Format: DD-MM-YYYY
+  if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(str)) {
+    const parts = str.split('-').map(Number);
+    return { day: parts[0], month: parts[1] - 1, year: parts[2] };
+  }
+
+  // Format: DD-MM-YY
+  if (/^\d{1,2}-\d{1,2}-\d{2}$/.test(str)) {
+    const parts = str.split('-').map(Number);
+    return { day: parts[0], month: parts[1] - 1, year: 2000 + parts[2] };
+  }
+
+  // Format: DD-MM
+  if (/^\d{1,2}-\d{1,2}$/.test(str)) {
+    const parts = str.split('-').map(Number);
+    return { day: parts[0], month: parts[1] - 1, year: null };
+  }
+
+  // Format: DD/MM/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+    const parts = str.split('/').map(Number);
+    return { day: parts[0], month: parts[1] - 1, year: parts[2] };
+  }
+
+  // Format: DD/MM/YY
+  if (/^\d{1,2}\/\d{1,2}\/\d{2}$/.test(str)) {
+    const parts = str.split('/').map(Number);
+    return { day: parts[0], month: parts[1] - 1, year: 2000 + parts[2] };
+  }
+
+  // Format: DD/MM
+  if (/^\d{1,2}\/\d{1,2}$/.test(str)) {
+    const parts = str.split('/').map(Number);
+    return { day: parts[0], month: parts[1] - 1, year: null };
+  }
+
+  // Fallback simple parsing
+  const parts = str.split(/[\/\-\s]+/).map(Number);
+  if (parts.length >= 2 && !parts.some(isNaN)) {
+    if (parts[0] > 1000) {
+      return { day: parts[2] || 1, month: parts[1] - 1, year: parts[0] };
+    } else {
+      return { day: parts[0], month: parts[1] - 1, year: parts[2] || null };
+    }
+  }
+
+  return null;
+}
+
+function getEventsForDate(k) {
+  const cellDate = dateFromKey(k);
+  const list = [];
+  
+  // 1. Manual events
+  if (events[k]) {
+    events[k].forEach((ev, idx) => {
+      list.push({
+        type: 'manual',
+        originalIdx: idx,
+        dateKey: k,
+        time: ev.time || '00:00',
+        name: ev.name || '',
+        color: ev.color || 'purple',
+        channelId: ev.channelId,
+        audienceId: ev.audienceId
+      });
+    });
+  }
+  
+  // 2. Operational campaigns
+  Object.entries(opAllData).forEach(([monthKey, rows]) => {
+    (rows || []).forEach(r => {
+      if (!r.data) return;
+      
+      const parsed = parseRowDate(r.data);
+      if (parsed) {
+        const matchYear = parsed.year === null || parsed.year === cellDate.getFullYear();
+        if (parsed.day === cellDate.getDate() && parsed.month === cellDate.getMonth() && matchYear) {
+          const normalizedCanal = normalizeStr(r.canal);
+          const ch = channels.find(c => {
+            const normName = normalizeStr(c.name);
+            const normId = normalizeStr(c.id).replace(/^ch/, '');
+            return normName === normalizedCanal || normId === normalizedCanal;
+          });
+          
+          const normalizedSeg = normalizeStr(r.segmentacao);
+          const aud = audiences.find(a => {
+            const normName = normalizeStr(a.name);
+            const normId = normalizeStr(a.id).replace(/^aud/, '');
+            return normName === normalizedSeg || normId === normalizedSeg;
+          });
+          
+          list.push({
+            type: 'operational',
+            rowId: r.id,
+            time: r.hora || '00:00',
+            name: (r.tema || '') + (r.subtema && r.subtema !== r.tema ? ' - ' + r.subtema : ''),
+            tema: r.tema || '',
+            subtema: r.subtema || '',
+            color: ch ? ch.color : 'gray',
+            channelId: ch ? ch.id : null,
+            audienceId: aud ? aud.id : null,
+            status: r.status
+          });
+        }
+      }
+    });
+  });
+  
+  list.sort((a, b) => a.time.localeCompare(b.time));
+  return list;
+}
+
 let _renderCalTimer=null;
 function renderCal(){
   if(_renderCalTimer) return;          // already scheduled
@@ -749,21 +927,75 @@ function _renderCalImmediate(){
 
       const numEl=document.createElement('div');numEl.className='day-num';numEl.textContent=d;cell.appendChild(numEl);
 
-      // events
+      // events (merged from manual events + operational campaigns)
       const evArea=document.createElement('div');evArea.className='events-area';
-      if(isCur&&events[k]){
-        events[k].forEach((ev,i)=>{
+      if(isCur){
+        const dayEvents = getEventsForDate(k);
+        dayEvents.forEach(ev=>{
           const c=gc(ev.color);
           const ch=channels.find(x=>x.id===ev.channelId);
           const aud=audiences.find(x=>x.id===ev.audienceId);
-          const dimmed=(filterCh.size>0||filterTh.size>0||filterAud.size>0)&&!isActive(ev);
+          
+          // Filtering logic
+          const co=filterCh.size===0||(ev.channelId&&filterCh.has(ev.channelId));
+          const to=filterTh.size===0||filterTh.has(ev.tema || ev.name);
+          const ao=filterAud.size===0||(ev.audienceId&&filterAud.has(ev.audienceId));
+          const isFilterActive = co&&to&&ao;
+          const dimmed=!isFilterActive;
+          
           const chip=document.createElement('div');chip.className='event-chip'+(dimmed?' dimmed':'');
           chip.style.background=c.bg;chip.style.color=c.text;
           const audDot=aud?`<span class="chip-aud-dot" style="background:${gc(aud.color).dot}" title="${aud.name}"></span>`:'';
           const chName=ch?`<span>${ch.name}</span>`:'';
-          chip.innerHTML=`<span class="chip-text">${ev.time}·${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del" title="Remover">✕</span>`;
-          chip.addEventListener('click',e=>{if(e.target.classList.contains('chip-del'))return;e.stopPropagation();openEditEvent(k,i);});
-          chip.querySelector('.chip-del').addEventListener('click',e=>{e.stopPropagation();events[k].splice(i,1);if(!events[k].length)delete events[k];saveEvents();renderCal();renderFilterBar();});
+          
+          // Prefix with clipboard icon if it comes from the Operational table
+          const typeIcon = ev.type === 'operational' ? '📋 ' : '';
+          
+          chip.innerHTML=`<span class="chip-text">${ev.time}·${typeIcon}${ev.name}</span><span class="chip-meta">${audDot}${chName}</span><span class="chip-del" title="Remover">✕</span>`;
+          
+          if(ev.type === 'manual'){
+            chip.addEventListener('click',e=>{if(e.target.classList.contains('chip-del'))return;e.stopPropagation();openEditEvent(ev.dateKey, ev.originalIdx);});
+            chip.querySelector('.chip-del').addEventListener('click',e=>{
+              e.stopPropagation();
+              events[ev.dateKey].splice(ev.originalIdx,1);
+              if(!events[ev.dateKey].length)delete events[ev.dateKey];
+              saveEvents();renderCal();renderFilterBar();
+            });
+          } else {
+            // For operational campaigns, click redirects to operational page and opens the edit modal
+            chip.addEventListener('click',e=>{
+              if(e.target.classList.contains('chip-del'))return;
+              e.stopPropagation();
+              
+              // Navigate to operational tab
+              document.querySelectorAll('.page-nav-btn').forEach(b=>b.classList.remove('active'));
+              document.querySelector('[data-page="op"]').classList.add('active');
+              document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+              document.getElementById('page-op').classList.add('active');
+              
+              if(!opInitialized){
+                opInitialized=true;
+                opLsLoad();
+                opRows=opAllData[opMonthKey()]||[];
+                opUpdateMonthLabel();
+                renderOpTable();
+                opLoad().then(() => opOpenEdit(ev.rowId));
+                opStartListener();
+              } else {
+                opRows=opAllData[opMonthKey()]||[];
+                opUpdateMonthLabel();
+                renderOpTable();
+                opOpenEdit(ev.rowId);
+              }
+            });
+            chip.querySelector('.chip-del').addEventListener('click',e=>{
+              e.stopPropagation();
+              if(confirm('Excluir esta linha operacional?')){
+                opRows=opRows.filter(r=>r.id!==ev.rowId);
+                opSave();renderOpTable();renderCal();
+              }
+            });
+          }
           evArea.appendChild(chip);
         });
       }
@@ -876,11 +1108,13 @@ document.getElementById('camp-name').addEventListener('keydown',e=>{if(e.key==='
 document.getElementById('prev').addEventListener('click',()=>{
   cur.m--;if(cur.m<0){cur.m=11;cur.y--;}renderCal();
   opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();
+  opUpdateFiltersDropdown();
   if(document.getElementById('page-op').classList.contains('active'))renderOpTable();
 });
 document.getElementById('next').addEventListener('click',()=>{
   cur.m++;if(cur.m>11){cur.m=0;cur.y++;}renderCal();
   opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();
+  opUpdateFiltersDropdown();
   if(document.getElementById('page-op').classList.contains('active'))renderOpTable();
 });
 
@@ -919,14 +1153,18 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
         opLsLoad();        // load instantly from cache
         opRows=opAllData[opMonthKey()]||[];
         opUpdateMonthLabel();
+        opUpdateFiltersDropdown();
         renderOpTable();
         opLoad();          // first visit: fetch data + start listener
         opStartListener();
       } else {
         opRows=opAllData[opMonthKey()]||[];
         opUpdateMonthLabel();
+        opUpdateFiltersDropdown();
         renderOpTable();
       }
+    } else if(target==='cal'){
+      renderCal();
     }
   });
 });
@@ -970,13 +1208,17 @@ async function opLoad(){
   }catch(e){opSetSync('error');}
   opRows=opAllData[opMonthKey()]||[];
   opUpdateMonthLabel();
+  opUpdateFiltersDropdown();
   renderOpTable();
+  renderCal();
 }
 
 async function opSave(){
   opIsSaving=true;opSetSync('syncing');
   opAllData[opMonthKey()]=opRows;
   opLsSave();
+  opUpdateFiltersDropdown();
+  renderCal();
   try{await fbSet('operacional_data',opAllData);opSetSync('ok');}
   catch(e){opSetSync('error');}
   setTimeout(()=>{opIsSaving=false;},500);
@@ -992,7 +1234,9 @@ function opStartListener(){
       if(s!==JSON.stringify(opRows)){
         opAllData=data;
         opRows=opAllData[opMonthKey()]||[];
+        opUpdateFiltersDropdown();
         renderOpTable();
+        renderCal();
         opSetSync('ok');
       }
     }
@@ -1073,16 +1317,58 @@ function renderSummary(){
   wrap.style.display = _summaryOpen ? 'flex' : 'none';
 }
 
+function opUpdateFiltersDropdown() {
+  const temas = new Set();
+  const subtemas = new Set();
+  (opRows || []).forEach(r => {
+    if (r.tema && r.tema.trim()) temas.add(r.tema.trim());
+    if (r.subtema && r.subtema.trim()) subtemas.add(r.subtema.trim());
+  });
+
+  const temaSel = document.getElementById('op-filter-tema');
+  const subtemaSel = document.getElementById('op-filter-subtema');
+  
+  if (temaSel) {
+    const prevVal = temaSel.value;
+    temaSel.innerHTML = '<option value="">Todos os temas</option>';
+    [...temas].sort().forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      temaSel.appendChild(opt);
+    });
+    temaSel.value = prevVal;
+    if (temaSel.value !== prevVal) temaSel.value = '';
+  }
+  
+  if (subtemaSel) {
+    const prevVal = subtemaSel.value;
+    subtemaSel.innerHTML = '<option value="">Todos os sub-temas</option>';
+    [...subtemas].sort().forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      subtemaSel.appendChild(opt);
+    });
+    subtemaSel.value = prevVal;
+    if (subtemaSel.value !== prevVal) subtemaSel.value = '';
+  }
+}
+
 function renderOpTable(){
   opUpdateMonthLabel();
   renderSummary();
   const search=(document.getElementById('op-search')?.value||'').toLowerCase();
   const filterStatus=document.getElementById('op-filter-status')?.value||'';
   const filterCanal=document.getElementById('op-filter-canal')?.value||'';
+  const filterTema=document.getElementById('op-filter-tema')?.value||'';
+  const filterSubtema=document.getElementById('op-filter-subtema')?.value||'';
 
   let rows=(opRows||[]).filter(r=>{
     if(filterStatus&&r.status!==filterStatus) return false;
     if(filterCanal&&r.canal!==filterCanal) return false;
+    if(filterTema&&r.tema!==filterTema) return false;
+    if(filterSubtema&&r.subtema!==filterSubtema) return false;
     if(search){
       const hay=[r.campanha,r.tema,r.subtema,r.titulo,r.mensagem,r.segmentacao]
         .map(v=>String(v||''))
@@ -1121,8 +1407,8 @@ function renderOpTable(){
       <td style="font-size:11px">${esc(r.segmentacao)}</td>
       <td>${esc(r.tema)}</td>
       <td style="font-size:11px;color:#888">${esc(r.subtema)}</td>
-      <td class="td-title">${esc(r.titulo)}</td>
-      <td class="td-msg" style="font-size:11px;color:#555">${esc(r.mensagem)}</td>
+      <td class="td-title"><div class="td-msg-inner">${esc(r.titulo)}</div></td>
+      <td class="td-msg" style="font-size:11px;color:#555"><div class="td-msg-inner">${esc(r.mensagem)}</div></td>
       <td>
         <div class="row-actions">
           <button class="row-act-btn" title="Editar" data-id="${r.id}">✏️</button>
@@ -1131,6 +1417,12 @@ function renderOpTable(){
         </div>
       </td>
     `;
+    
+    tr.addEventListener('click', e => {
+      if (e.target.closest('.row-actions') || e.target.closest('button')) return;
+      tr.classList.toggle('expanded');
+    });
+
     tbody.appendChild(tr);
   });
 
@@ -1372,6 +1664,12 @@ function opDownloadTemplate(){
         <option value="WhatsApp">WhatsApp</option>
         <option value="Email">Email</option>
       </select>
+      <select id="op-filter-tema">
+        <option value="">Todos os temas</option>
+      </select>
+      <select id="op-filter-subtema">
+        <option value="">Todos os sub-temas</option>
+      </select>
       <button class="op-btn primary" id="op-add-btn">+ Nova linha</button>
       <button class="op-btn" id="op-export-btn">↓ Exportar CSV</button>
       <button class="op-btn" id="op-import-btn">↑ Importar XLSX / CSV</button>
@@ -1521,6 +1819,8 @@ document.getElementById('op-modal-bg').addEventListener('click',e=>{if(e.target=
 document.getElementById('op-search').addEventListener('input',renderOpTable);
 document.getElementById('op-filter-status').addEventListener('change',renderOpTable);
 document.getElementById('op-filter-canal').addEventListener('change',renderOpTable);
+document.getElementById('op-filter-tema').addEventListener('change',renderOpTable);
+document.getElementById('op-filter-subtema').addEventListener('change',renderOpTable);
 
 // Operacional month nav
 document.getElementById('op-prev').addEventListener('click',()=>{
