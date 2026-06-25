@@ -124,9 +124,12 @@ input:focus,select:focus{border-color:#aaa}
 .aud-pill{font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .1s}
 .time-selects{display:flex;gap:6px}
 .time-selects select{flex:1}
-.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(249,249,247,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:12px}
-.loading-overlay p{font-size:14px;color:#888}
-.spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#1D9E75;border-radius:50%;animation:spin .7s linear infinite}
+.loading-overlay{display:none!important}  /* replaced by sync-dot indicator */
+.spinner{display:none}
+/* Thin progress bar at very top while connecting */
+.top-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#1D9E75,#7F77DD,#1D9E75);background-size:200%;z-index:500;animation:barslide 1.2s linear infinite;display:none}
+.top-bar.visible{display:block}
+@keyframes barslide{0%{background-position:0%}100%{background-position:200%}}
 .edit-badge{font-size:10px;color:#666;margin-bottom:8px;padding:4px 8px;background:#f5f5f3;border-radius:6px;display:inline-block}
 
 /* ═══════════════════════════════════════════════
@@ -293,6 +296,7 @@ input:focus,select:focus{border-color:#aaa}
 </style>
 </head>
 <body>
+<div class="top-bar" id="top-bar"></div>
 
 <!-- ═══ PAGE NAVIGATION ═══ -->
 <div class="page-nav">
@@ -506,10 +510,11 @@ function switchTab(t){
 
 function setSyncStatus(s){
   const dot=document.getElementById('sync-dot'),lbl=document.getElementById('sync-label');
-  if(s==='ok'){dot.className='sync-dot ok';lbl.textContent='Sincronizado';}
-  else if(s==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Salvando...';}
-  else if(s==='error'){dot.className='sync-dot error';lbl.textContent='Erro de conexão';}
-  else{dot.className='sync-dot';lbl.textContent='Conectando...';}
+  const bar=document.getElementById('top-bar');
+  if(s==='ok'){dot.className='sync-dot ok';lbl.textContent='Sincronizado';if(bar)bar.className='top-bar';}
+  else if(s==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Salvando...';if(bar)bar.className='top-bar visible';}
+  else if(s==='error'){dot.className='sync-dot error';lbl.textContent='Erro de conexão';if(bar)bar.className='top-bar';}
+  else{dot.className='sync-dot';lbl.textContent='Conectando...';if(bar)bar.className='top-bar visible';}
 }
 
 
@@ -533,9 +538,7 @@ function lsLoad(){
       audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
     }
     if(ce||cc){
-      document.getElementById('loading-overlay').style.display='none';
-      renderCal();
-      return true; // rendered from cache
+      return true; // had cache
     }
   }catch(e){}
   return false;
@@ -564,8 +567,7 @@ async function loadFromFirebase(){
     lsSave();
     setSyncStatus('ok');
   }catch(e){console.error(e);setSyncStatus('error');}
-  document.getElementById('loading-overlay').style.display='none';
-  renderCal();
+  renderCal();  // refresh with real data when it arrives
 }
 
 function startListener(){
@@ -1048,12 +1050,12 @@ const pad=n=>String(n).padStart(2,'0');
 document.getElementById('camp-start').value=`${cur.y}-${pad(cur.m+1)}-01`;
 document.getElementById('camp-end').value=`${cur.y}-${pad(cur.m+1)}-${new Date(cur.y,cur.m+1,0).getDate()}`;
 
-// Show cached data instantly, then sync with Firebase
-const _hadCache = lsLoad();
-if(!_hadCache){
-  // No cache yet — show spinner until Firebase responds
-}
-// Firebase sync in background (plain promise, no top-level await)
+// Always render immediately — don't wait for Firebase
+lsLoad();  // apply cache if available (sets events/channels/audiences)
+// Hide overlay and show calendar right away
+document.getElementById('loading-overlay').style.display='none';
+renderCal();
+// Then sync Firebase in background — UI updates silently when done
 loadFromFirebase().then(()=>startListener());
 
 
