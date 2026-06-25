@@ -68,13 +68,14 @@ input:focus,select:focus{border-color:#aaa}
 /* Events grow, push campaigns to bottom */
 .events-area{flex:1;display:flex;flex-direction:column;gap:2px}
 
-.event-chip{font-size:10px;padding:2px 5px;border-radius:4px;display:flex;align-items:center;gap:3px;overflow:hidden;transition:opacity .15s;cursor:pointer;flex-shrink:0}
+.event-chip{font-size:10px;padding:3px 5px;border-radius:5px;display:flex;flex-direction:column;gap:1px;overflow:hidden;transition:opacity .15s;cursor:pointer;flex-shrink:0;border-left:3px solid transparent}
 .event-chip:hover{filter:brightness(.96)}
 .event-chip.dimmed{opacity:.12}
-.chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;font-weight:500}
-.chip-meta{font-size:9px;opacity:.65;white-space:nowrap;flex-shrink:0;display:flex;gap:3px;align-items:center}
-.chip-aud-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
-.chip-del{display:none;flex-shrink:0;font-size:9px;cursor:pointer;opacity:.7;margin-left:2px;line-height:1}
+.chip-row1{display:flex;align-items:center;gap:3px;width:100%}
+.chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;font-weight:600;font-size:10px}
+.chip-row2{display:flex;align-items:center;gap:3px;width:100%;opacity:.75}
+.chip-tag{font-size:9px;padding:0 3px;border-radius:3px;background:rgba(0,0,0,.08);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+.chip-del{display:none;flex-shrink:0;font-size:9px;cursor:pointer;opacity:.7;line-height:1}
 .event-chip:hover .chip-del{display:inline}
 
 /* Campaigns always at the bottom of each cell */
@@ -579,6 +580,81 @@ function startListener(){
   },20000);
 }
 
+async 
+/* ── Calendar → Operacional sync ─────────────────────────────────
+   When a manual event is saved in the Calendar, create or update
+   the matching row in opAllData for that month.
+──────────────────────────────────────────────────────────────── */
+function calEventToOpRow(k, ev){
+  // k = "2026-6-1", ev = {name,time,color,channelId,audienceId,fromOp,opRowId?}
+  const parts = k.split('-');
+  const yr = parseInt(parts[0]);
+  const mo = parseInt(parts[1])-1;   // 0-indexed
+  const dy = parseInt(parts[2]);
+  const dd = String(dy).padStart(2,'0');
+  const mm = String(mo+1).padStart(2,'0');
+  const ch  = channels.find(c=>c.id===ev.channelId);
+  const aud = audiences.find(a=>a.id===ev.audienceId);
+  return {
+    id:       ev.opRowId || ('cal_'+k+'_'+ev.time+'_'+Math.random().toString(36).slice(2,5)),
+    status:   'Aguardando Agendamento',
+    campanha: '',
+    data:     dd+'/'+mm,
+    hora:     ev.time||'',
+    canal:    ch?ch.name:'',
+    plataforma:'',
+    segmentacao: aud?aud.name:'',
+    tema:     ev.name||'',
+    subtema:  '',
+    titulo:   '',
+    mensagem: '',
+    _fromCal: true
+  };
+}
+
+function syncCalToOp(k, ev, isDelete){
+  // k = calendar key, ev = event object
+  const parts = k.split('-');
+  const yr = parseInt(parts[0]);
+  const mo = parseInt(parts[1])-1;
+  const monthKey = yr+'-'+mo;
+
+  if(!opAllData[monthKey]) opAllData[monthKey]=[];
+
+  if(isDelete){
+    if(ev.opRowId){
+      opAllData[monthKey]=opAllData[monthKey].filter(r=>r.id!==ev.opRowId);
+    }
+  } else if(ev.opRowId){
+    // Update existing row
+    const idx=opAllData[monthKey].findIndex(r=>r.id===ev.opRowId);
+    if(idx>-1){
+      const existing=opAllData[monthKey][idx];
+      const ch=channels.find(c=>c.id===ev.channelId);
+      const aud=audiences.find(a=>a.id===ev.audienceId);
+      const dd=String(parseInt(parts[2])).padStart(2,'0');
+      const mm=String(mo+1).padStart(2,'0');
+      opAllData[monthKey][idx]={...existing,
+        data:dd+'/'+mm, hora:ev.time, canal:ch?ch.name:'',
+        segmentacao:aud?aud.name:'', tema:ev.name
+      };
+    }
+  } else {
+    // New row — tag with opRowId so we can update it later
+    const row=calEventToOpRow(k,ev);
+    ev.opRowId=row.id;
+    opAllData[monthKey].push(row);
+  }
+
+  // If viewing this month in Operacional, refresh
+  if(monthKey===opMonthKey()){
+    opRows=opAllData[monthKey]||[];
+    sortOpRows();
+    if(document.getElementById('page-op').classList.contains('active')) renderOpTable();
+  }
+  fbSet('operacional_data',opAllData);
+}
+
 async function saveEvents(){isSaving=true;setSyncStatus('syncing');try{await fbSet('data',{events});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
 async function saveConfig(){isSaving=true;setSyncStatus('syncing');try{await fbSet('config',{channels,campaigns,audiences});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
 
@@ -818,15 +894,23 @@ function _renderCalImmediate(){
           const ch=channels.find(x=>x.id===ev.channelId);
           const aud=audiences.find(x=>x.id===ev.audienceId);
           const dimmed=(filterCh.size>0||filterTh.size>0||filterAud.size>0)&&!isActive(ev);
-          // Color chip by CHANNEL (not event color)
           const chipColor = ch ? gc(ch.color) : c;
           const chip=document.createElement('div');chip.className='event-chip'+(dimmed?' dimmed':'');
           chip.style.background=chipColor.bg;chip.style.color=chipColor.text;
-          chip.style.borderLeft=`3px solid ${chipColor.dot}`;
+          chip.style.borderLeftColor=chipColor.dot;
           const chLabel=ch?ch.name:'';
-          chip.innerHTML=`<span class="chip-text"><b>${ev.time}</b> ${ev.name}</span><span class="chip-meta" style="font-size:9px;opacity:.7">${chLabel}</span><span class="chip-del" title="Remover">✕</span>`;
+          const audLabel=aud?aud.name:'';
+          chip.innerHTML=
+            `<div class="chip-row1"><span class="chip-text"><b>${ev.time}</b> ${ev.name}</span><span class="chip-del" title="Remover">✕</span></div>`+
+            `<div class="chip-row2">${chLabel?`<span class="chip-tag">${chLabel}</span>`:''} ${audLabel?`<span class="chip-tag">${audLabel}</span>`:''}</div>`;
           chip.addEventListener('click',e=>{if(e.target.classList.contains('chip-del'))return;e.stopPropagation();openEditEvent(k,i);});
-          chip.querySelector('.chip-del').addEventListener('click',e=>{e.stopPropagation();events[k].splice(i,1);if(!events[k].length)delete events[k];saveEvents();renderCal();renderFilterBar();});
+          chip.querySelector('.chip-del').addEventListener('click',e=>{
+  e.stopPropagation();
+  const delEv=events[k][i];
+  events[k].splice(i,1);if(!events[k].length)delete events[k];
+  saveEvents();renderCal();renderFilterBar();
+  if(delEv&&!delEv.fromOp) syncCalToOp(k,delEv,true);
+});
           evArea.appendChild(chip);
         });
       }
@@ -927,7 +1011,16 @@ document.getElementById('modal-save').addEventListener('click',()=>{
   if(!name)return;
   if(editEvKey!==null&&editEvIdx!==null){events[editEvKey][editEvIdx]={name,time,color:selColor,channelId,audienceId};events[editEvKey].sort((a,b)=>a.time.localeCompare(b.time));}
   else{if(!events[openCell])events[openCell]=[];events[openCell].push({name,time,color:selColor,channelId,audienceId});events[openCell].sort((a,b)=>a.time.localeCompare(b.time));}
-  saveEvents();renderCal();renderFilterBar();document.getElementById('modal-bg').style.display='none';
+  saveEvents();renderCal();renderFilterBar();
+  // Sync manual calendar event → Operacional (skip fromOp events)
+  if(!events[openCell]) {}
+  else {
+    const savedEv = editEvKey!==null
+      ? events[editEvKey]?.[editEvIdx]
+      : events[openCell]?.[events[openCell].length-1];
+    if(savedEv && !savedEv.fromOp) syncCalToOp(openCell||editEvKey, savedEv, false);
+  }
+  document.getElementById('modal-bg').style.display='none';
 });
 
 ['modal-cancel','camp-cancel','ch-cancel','aud-cancel'].forEach(id=>document.getElementById(id).addEventListener('click',()=>{document.getElementById('modal-bg').style.display='none';}));
@@ -937,13 +1030,17 @@ document.getElementById('new-ch-name').addEventListener('keydown',e=>{if(e.key==
 document.getElementById('new-aud-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('aud-add').click();});
 document.getElementById('camp-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('camp-add').click();});
 document.getElementById('prev').addEventListener('click',()=>{
-  cur.m--;if(cur.m<0){cur.m=11;cur.y--;}renderCal();
-  opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();
+  cur.m--;if(cur.m<0){cur.m=11;cur.y--;}
+  opRows=opAllData[opMonthKey()]||[];
+  opFilterTema='';opFilterSubtema='';
+  renderCal();opUpdateMonthLabel();
   if(document.getElementById('page-op').classList.contains('active'))renderOpTable();
 });
 document.getElementById('next').addEventListener('click',()=>{
-  cur.m++;if(cur.m>11){cur.m=0;cur.y++;}renderCal();
-  opRows=opAllData[opMonthKey()]||[];opUpdateMonthLabel();
+  cur.m++;if(cur.m>11){cur.m=0;cur.y++;}
+  opRows=opAllData[opMonthKey()]||[];
+  opFilterTema='';opFilterSubtema='';
+  renderCal();opUpdateMonthLabel();
   if(document.getElementById('page-op').classList.contains('active'))renderOpTable();
 });
 
@@ -1909,13 +2006,17 @@ document.getElementById('op-filter-subtema').addEventListener('change',renderOpT
 // Operacional month nav
 document.getElementById('op-prev').addEventListener('click',()=>{
   cur.m--;if(cur.m<0){cur.m=11;cur.y--;}
-  if(opLoaded) opLoad();
-  else opUpdateMonthLabel();
+  opRows=opAllData[opMonthKey()]||[];
+  opFilterTema='';opFilterSubtema='';
+  opUpdateMonthLabel();renderOpTable();
+  renderCal();
 });
 document.getElementById('op-next').addEventListener('click',()=>{
   cur.m++;if(cur.m>11){cur.m=0;cur.y++;}
-  if(opLoaded) opLoad();
-  else opUpdateMonthLabel();
+  opRows=opAllData[opMonthKey()]||[];
+  opFilterTema='';opFilterSubtema='';
+  opUpdateMonthLabel();renderOpTable();
+  renderCal();
 });
 
 
