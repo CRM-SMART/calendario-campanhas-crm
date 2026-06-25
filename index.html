@@ -124,9 +124,10 @@ input:focus,select:focus{border-color:#aaa}
 .aud-pill{font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .1s}
 .time-selects{display:flex;gap:6px}
 .time-selects select{flex:1}
-.loading-overlay{display:none!important}  /* replaced by sync-dot indicator */
-.spinner{display:none}
-/* Thin progress bar at very top while connecting */
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(249,249,247,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:12px}
+.loading-overlay p{font-size:14px;color:#888}
+.spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#1D9E75;border-radius:50%;animation:spin .7s linear infinite}
+/* Thin progress bar at very top */
 .top-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#1D9E75,#7F77DD,#1D9E75);background-size:200%;z-index:500;animation:barslide 1.2s linear infinite;display:none}
 .top-bar.visible{display:block}
 @keyframes barslide{0%{background-position:0%}100%{background-position:200%}}
@@ -538,7 +539,9 @@ function lsLoad(){
       audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
     }
     if(ce||cc){
-      return true; // had cache
+      document.getElementById('loading-overlay').style.display='none';
+      renderCal();
+      return true;
     }
   }catch(e){}
   return false;
@@ -567,7 +570,8 @@ async function loadFromFirebase(){
     lsSave();
     setSyncStatus('ok');
   }catch(e){console.error(e);setSyncStatus('error');}
-  renderCal();  // refresh with real data when it arrives
+  document.getElementById('loading-overlay').style.display='none';
+  renderCal();
 }
 
 function startListener(){
@@ -1050,12 +1054,15 @@ const pad=n=>String(n).padStart(2,'0');
 document.getElementById('camp-start').value=`${cur.y}-${pad(cur.m+1)}-01`;
 document.getElementById('camp-end').value=`${cur.y}-${pad(cur.m+1)}-${new Date(cur.y,cur.m+1,0).getDate()}`;
 
-// Always render immediately — don't wait for Firebase
-lsLoad();  // apply cache if available (sets events/channels/audiences)
-// Hide overlay and show calendar right away
-document.getElementById('loading-overlay').style.display='none';
-renderCal();
-// Then sync Firebase in background — UI updates silently when done
+// Show cached data instantly, then sync with Firebase
+const _hadCache = lsLoad();
+// Safety timeout: if Firebase takes >4s, show calendar anyway
+if(!_hadCache){
+  setTimeout(()=>{
+    document.getElementById('loading-overlay').style.display='none';
+    renderCal();
+  }, 4000);
+}
 loadFromFirebase().then(()=>startListener());
 
 
