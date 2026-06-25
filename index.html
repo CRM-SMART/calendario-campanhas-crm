@@ -556,7 +556,12 @@ function lsSave(){
 
 async function loadFromFirebase(){
   try{
-    const[calData,cfgData]=await Promise.all([fbGet('data'),fbGet('config')]);
+    // Race Firebase against a 5s timeout
+    const withTimeout = (p, ms) => Promise.race([p, new Promise(r=>setTimeout(()=>r(null),ms))]);
+    const[calData,cfgData]=await Promise.all([
+      withTimeout(fbGet('data'),5000),
+      withTimeout(fbGet('config'),5000)
+    ]);
     if(calData) events=calData.events||{};
     if(cfgData){
       channels=cfgData.channels||JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
@@ -565,11 +570,17 @@ async function loadFromFirebase(){
     }else{
       channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
       audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
-      campaigns=[];await saveConfig();
+      campaigns=[];
+      saveConfig(); // fire and forget — don't await
     }
     lsSave();
     setSyncStatus('ok');
-  }catch(e){console.error(e);setSyncStatus('error');}
+  }catch(e){
+    setSyncStatus('error');
+    // Use defaults so calendar renders even without Firebase
+    if(!channels.length) channels=JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+    if(!audiences.length) audiences=JSON.parse(JSON.stringify(DEFAULT_AUDIENCES));
+  }
   document.getElementById('loading-overlay').style.display='none';
   renderCal();
 }
@@ -586,7 +597,6 @@ function startListener(){
   },20000);
 }
 
-async 
 /* ── Calendar → Operacional sync ─────────────────────────────────
    When a manual event is saved in the Calendar, create or update
    the matching row in opAllData for that month.
@@ -1061,7 +1071,7 @@ if(!_hadCache){
   setTimeout(()=>{
     document.getElementById('loading-overlay').style.display='none';
     renderCal();
-  }, 4000);
+  }, 2000);
 }
 loadFromFirebase().then(()=>startListener());
 
