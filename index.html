@@ -629,7 +629,10 @@ function calEventToOpRow(k, ev){
 }
 
 function syncCalToOp(k, ev, isDelete){
-  // k = calendar key, ev = event object
+  // Safety: never write if opAllData hasn't been loaded from Firebase
+  // (would wipe existing data with empty object)
+  if(!opInitialized) return;
+
   const parts = k.split('-');
   const yr = parseInt(parts[0]);
   const mo = parseInt(parts[1])-1;
@@ -668,7 +671,10 @@ function syncCalToOp(k, ev, isDelete){
     sortOpRows();
     if(document.getElementById('page-op').classList.contains('active')) renderOpTable();
   }
-  fbSet('operacional_data',opAllData);
+  // Only save if we have real data (guard against empty overwrites)
+  if(Object.keys(opAllData).length > 0){
+    fbSet('operacional_data',opAllData);
+  }
 }
 
 async function saveEvents(){isSaving=true;setSyncStatus('syncing');try{await fbSet('data',{events});lsSave();setSyncStatus('ok');}catch(e){setSyncStatus('error');}setTimeout(()=>{isSaving=false;},500);}
@@ -1205,11 +1211,27 @@ function syncOpToCalendar(){
       const channelId=ch?ch.id:null;
       const color=ch?ch.color:'gray';
 
-      // Map segmentacao → audienceId (partial match)
+      // Map segmentacao → audienceId (auto-create if not found)
       const segLow=(r.segmentacao||'').toLowerCase().trim();
-      const aud=audiences.find(a=>a.name.toLowerCase().trim()===segLow)
-                || audiences.find(a=>segLow.includes(a.name.toLowerCase().trim())
-                                  || a.name.toLowerCase().trim().includes(segLow));
+      let aud=audiences.find(a=>a.name.toLowerCase().trim()===segLow)
+              || audiences.find(a=>segLow.includes(a.name.toLowerCase().trim())
+                                || a.name.toLowerCase().trim().includes(segLow));
+      if(!aud && r.segmentacao && r.segmentacao.trim()){
+        // Auto-assign color by segmentacao type
+        let autoColor='gray';
+        if(segLow.includes('ativo'))                           autoColor='teal';
+        else if(segLow.includes('queda')||segLow.includes('risco')) autoColor='amber';
+        else if(segLow.includes('frio')||segLow.includes('inativ')) autoColor='blue';
+        else if(segLow.includes('lead'))                       autoColor='violet';
+        else if(segLow.includes('vip')||segLow.includes('premium')) autoColor='gold';
+        else if(segLow.includes('geral')||segLow.includes('todos')) autoColor='gray';
+        else if(segLow.includes('web'))                        autoColor='sky';
+        else if(segLow.includes('mobile')||segLow.includes('app'))  autoColor='purple';
+        const safeId='aud_'+r.segmentacao.trim().toLowerCase().replace(/[^a-z0-9]/g,'_');
+        aud={id:safeId, name:r.segmentacao.trim(), color:autoColor};
+        audiences.push(aud);
+        _configChangedBySync=true;
+      }
       const audienceId=aud?aud.id:(audiences[0]?.id||null);
 
       // Use tema as the event name (visible on calendar chip)
@@ -1230,6 +1252,8 @@ function syncOpToCalendar(){
 }
 
 async function opSave(){
+  // Guard: don't save if Operacional was never loaded (would wipe Firebase data)
+  if(!opInitialized) return;
   opIsSaving=true;opSetSync('syncing');
   opAllData[opMonthKey()]=opRows;
   syncOpToCalendar();                          // mirror to calendar
